@@ -236,20 +236,9 @@
   <ItemGroup>
     <None Include="button_cancel.png" />
     <None Include="icon_cancel.gif" />
-    <Content Include="Latest changes.txt" />
     <Content Include="sr1.ico" />
-    <Content Include="Todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PublishFile Include="Todo.txt">
-      <Visible>False</Visible>
-      <PublishState>Exclude</PublishState>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <FileType>File</FileType>
-    </PublishFile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
