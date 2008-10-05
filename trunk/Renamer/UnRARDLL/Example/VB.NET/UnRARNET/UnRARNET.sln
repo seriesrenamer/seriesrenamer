@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "UnRARNET", "UnRARNET.vbproj", "{7B86181F-5232-473D-BAFE-477F0DA1DD52}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TestRAR", "..\TestRAR\TestRAR.vbproj", "{C50ED4D3-58A8-4B70-ACF1-A2DFA0AB0FE7}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{7B86181F-5232-473D-BAFE-477F0DA1DD52}.Debug.ActiveCfg = Debug|.NET
+		{7B86181F-5232-473D-BAFE-477F0DA1DD52}.Debug.Build.0 = Debug|.NET
+		{7B86181F-5232-473D-BAFE-477F0DA1DD52}.Release.ActiveCfg = Release|.NET
+		{7B86181F-5232-473D-BAFE-477F0DA1DD52}.Release.Build.0 = Release|.NET
+		{C50ED4D3-58A8-4B70-ACF1-A2DFA0AB0FE7}.Debug.ActiveCfg = Debug|.NET
+		{C50ED4D3-58A8-4B70-ACF1-A2DFA0AB0FE7}.Debug.Build.0 = Debug|.NET
+		{C50ED4D3-58A8-4B70-ACF1-A2DFA0AB0FE7}.Release.ActiveCfg = Release|.NET
+		{C50ED4D3-58A8-4B70-ACF1-A2DFA0AB0FE7}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

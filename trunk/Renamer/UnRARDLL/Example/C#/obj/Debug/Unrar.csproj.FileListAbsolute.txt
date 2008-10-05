@@ -1,0 +1,8 @@
+C:\Projekte\C#\Renamer\Renamer\UnRARDLL\Example\C#\bin\Debug\Unrar.exe
+C:\Projekte\C#\Renamer\Renamer\UnRARDLL\Example\C#\bin\Debug\Unrar.pdb
+C:\Projekte\C#\Renamer\Renamer\UnRARDLL\Example\C#\obj\Debug\ResolveAssemblyReference.cache
+C:\Projekte\C#\Renamer\Renamer\UnRARDLL\Example\C#\obj\Debug\Schematrix.TextInputDialog.resources
+C:\Projekte\C#\Renamer\Renamer\UnRARDLL\Example\C#\obj\Debug\Schematrix.UnrarTest.resources
+C:\Projekte\C#\Renamer\Renamer\UnRARDLL\Example\C#\obj\Debug\Unrar.csproj.GenerateResource.Cache
+C:\Projekte\C#\Renamer\Renamer\UnRARDLL\Example\C#\obj\Debug\Unrar.exe
+C:\Projekte\C#\Renamer\Renamer\UnRARDLL\Example\C#\obj\Debug\Unrar.pdb
