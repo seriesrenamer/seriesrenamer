@@ -15,7 +15,7 @@ namespace Renamer
         /// <summary>
         /// Type of log message
         /// </summary>
-        public enum LogType:int { Error, Info, Warning, Status };
+        public enum LogType:int { Error, Info, Warning, Status, Plain, Debug };
 
         /// <summary>
         /// where log message of specific type is to show up
@@ -78,14 +78,25 @@ namespace Renamer
                 if (ll == LogLevel.None) return;
                 message = "STATUS: ";
             }
-            
+            if(logtype == LogType.Plain)
+            {
+                ll=LogLevel.LogFile;
+                message = "LOG: ";
+            }
+            if (logtype == LogType.Debug)
+            {
+                ll = (Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelDebug)); ;
+                if (ll == LogLevel.None) return;
+                message = "DEBUG: ";
+            }
+
             //add actual message to message
             message+=line;
 
             //and some output
             if (ll != LogLevel.MessageBox)
             {
-                File.AppendAllText(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + Helper.ReadProperty(Config.LogName), message + Environment.NewLine);
+                File.AppendAllText(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "Renamer.log", message + Environment.NewLine);
                 if (LogDisplay != null)
                 {
                     LogDisplay.Text = message + Environment.NewLine + LogDisplay.Text;
@@ -131,6 +142,20 @@ namespace Renamer
                             rtbLog.SelectionFont = new Font(rtbLog.SelectionFont, FontStyle.Bold);
                             found = true;
                         }
+
+                        if (!found && rtbLog.Find("LOG:", start, end, RichTextBoxFinds.None) == start)
+                        {
+                            rtbLog.SelectionColor = Color.Black;
+                            rtbLog.SelectionFont = new Font(rtbLog.SelectionFont, FontStyle.Regular);
+                            found = true;
+                        }
+
+                        if (!found && rtbLog.Find("DEBUG:", start, end, RichTextBoxFinds.None) == start)
+                        {
+                            rtbLog.SelectionColor = Color.DarkGray;
+                            rtbLog.SelectionFont = new Font(rtbLog.SelectionFont, FontStyle.Bold);
+                            found = true;
+                        }
                         if (found)
                         {
                             rtbLog.SelectionStart = rtbLog.SelectionStart + rtbLog.SelectionLength;
@@ -143,7 +168,7 @@ namespace Renamer
                     }
                 }
             }
-            if (ll != LogLevel.LogFile)
+            if (ll == LogLevel.Log_and_Message || ll== LogLevel.MessageBox)
             {
                 MessageBox.Show(message);
             }
@@ -233,7 +258,7 @@ namespace Renamer
         public static string ReadProperty(string Identifier, string FilePath)
         {
             foreach(ConfigFile f in Settings.files){
-                if(f.FilePath==FilePath){
+                if(f.FilePath==FilePath){                    
                     if(f.variables.ContainsKey(Identifier)){
                         //note: if this is an array really but this function is called, return it in one string form
                         if (f.variables[Identifier] is List<string>)
@@ -269,6 +294,8 @@ namespace Renamer
                     }
                 }
             }
+            if(Settings.MonoCompatibilityMode)
+                Helper.Log(FilePath + " not loaded yet", Helper.LogType.Plain);
             //not found yet, lets load it
             ConfigFile file=new ConfigFile(FilePath);
             Settings.files.Add(file);
@@ -652,13 +679,20 @@ namespace Renamer
                         FileStream s = File.Open(filepath, FileMode.OpenOrCreate);
                         StreamReader r = new StreamReader(s);
                         string line = null;
-                        List<string> lines = new List<string>(r.ReadToEnd().Split(new string[] { System.Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
+                        string file = r.ReadToEnd();
+                        List<string> lines = new List<string>(file.Split(new string[] { System.Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
                         for (int i = 0; i < lines.Count; i++)
                         {
                             line = lines[i];
+                            if(Settings.MonoCompatibilityMode)
+                                Helper.Log(line, Helper.LogType.Plain);
+                            
                             //if delimiter and comment characters aren't known yet, try to find those first
                             if (Settings.Comment != null && Settings.Comment != "" && Settings.Delimiter != Convert.ToChar(0))
                             {
+                                if(Settings.MonoCompatibilityMode)
+                                    Helper.Log("comment and delimiter string known", Helper.LogType.Plain);
+                                
                                 if (line.IndexOf("=") > 0)
                                 {
                                     int index = line.IndexOf(Settings.Comment);
@@ -671,6 +705,9 @@ namespace Renamer
                                         index = 0;
                                     }
                                     string key = line.Substring(index, line.IndexOf("=") - index);
+                                    if (Settings.MonoCompatibilityMode)
+                                        Helper.Log("Found identifier " + key, Helper.LogType.Plain);
+                                   
                                     line = line.Replace(key + "=", "").Trim();
                                     List<string> split = new List<string>(line.Split(new char[] { Settings.Delimiter }, StringSplitOptions.RemoveEmptyEntries));
                                     //check so we don't add delimiter twice
@@ -701,8 +738,12 @@ namespace Renamer
                             }
                             else
                             {
+                                if (Settings.MonoCompatibilityMode)
+                                    Helper.Log("comment/delimiter not known yet", Helper.LogType.Plain);
                                 if ((Settings.Comment == null || Settings.Comment == "") && line.StartsWith("Comment="))
                                 {
+                                    if (Settings.MonoCompatibilityMode)
+                                        Helper.Log("Found comment identifier", Helper.LogType.Plain);
                                     Settings.Comment = line.Replace("Comment=", "").Trim();
                                     if (Settings.Comment != null && Settings.Comment != "")
                                     {
@@ -718,6 +759,8 @@ namespace Renamer
                                 }
                                 if (Settings.Delimiter == Convert.ToChar(0) && line.StartsWith("Delimiter="))
                                 {
+                                    if (Settings.MonoCompatibilityMode)
+                                        Helper.Log("Found delimiter identifier", Helper.LogType.Plain);
                                     string delim = line.Replace("Delimiter=", "").Trim();
                                     if (delim != null && delim != "")
                                     {

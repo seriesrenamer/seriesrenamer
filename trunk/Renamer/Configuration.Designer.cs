@@ -67,6 +67,8 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.chkUseSeasonSubdirs = new System.Windows.Forms.CheckBox();
+            this.label19 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
             this.chkDeleteAllEmptyFolders = new System.Windows.Forms.CheckBox();
             this.label17 = new System.Windows.Forms.Label();
@@ -75,8 +77,8 @@
             this.chkDeleteEmptyFolders = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.btnDefaults = new System.Windows.Forms.Button();
-            this.label19 = new System.Windows.Forms.Label();
-            this.chkUseSeasonSubdirs = new System.Windows.Forms.CheckBox();
+            this.label20 = new System.Windows.Forms.Label();
+            this.cbDebug = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.nudTimeout)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSearchDepth)).BeginInit();
             this.tabPage1.SuspendLayout();
@@ -482,6 +484,8 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.label20);
+            this.tabPage3.Controls.Add(this.cbDebug);
             this.tabPage3.Controls.Add(this.label7);
             this.tabPage3.Controls.Add(this.label8);
             this.tabPage3.Controls.Add(this.label9);
@@ -520,6 +524,26 @@
             this.tabPage4.Text = "Folder Structure";
             this.toolTip.SetToolTip(this.tabPage4, "Settings related to moving the files, deleting empty folders, ...");
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // chkUseSeasonSubdirs
+            // 
+            this.chkUseSeasonSubdirs.AutoSize = true;
+            this.chkUseSeasonSubdirs.Location = new System.Drawing.Point(539, 29);
+            this.chkUseSeasonSubdirs.Name = "chkUseSeasonSubdirs";
+            this.chkUseSeasonSubdirs.Size = new System.Drawing.Size(15, 14);
+            this.chkUseSeasonSubdirs.TabIndex = 38;
+            this.chkUseSeasonSubdirs.UseVisualStyleBackColor = true;
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(15, 29);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(125, 13);
+            this.label19.TabIndex = 37;
+            this.label19.Text = "Use Season subdirectory";
+            this.toolTip.SetToolTip(this.label19, "If checked, files are put into showname\\season x\\ directories, if unchecked, only" +
+                    " showname\\ directory is set");
             // 
             // label18
             // 
@@ -603,25 +627,30 @@
             this.btnDefaults.UseVisualStyleBackColor = true;
             this.btnDefaults.Click += new System.EventHandler(this.btnDefaults_Click);
             // 
-            // label19
+            // label20
             // 
-            this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(15, 29);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(125, 13);
-            this.label19.TabIndex = 37;
-            this.label19.Text = "Use Season subdirectory";
-            this.toolTip.SetToolTip(this.label19, "If checked, files are put into showname\\season x\\ directories, if unchecked, only" +
-                    " showname\\ directory is set");
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(12, 122);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(102, 13);
+            this.label20.TabIndex = 22;
+            this.label20.Text = "On Debug Message";
+            this.toolTip.SetToolTip(this.label20, "How debug messages are processed");
             // 
-            // chkUseSeasonSubdirs
+            // cbDebug
             // 
-            this.chkUseSeasonSubdirs.AutoSize = true;
-            this.chkUseSeasonSubdirs.Location = new System.Drawing.Point(539, 29);
-            this.chkUseSeasonSubdirs.Name = "chkUseSeasonSubdirs";
-            this.chkUseSeasonSubdirs.Size = new System.Drawing.Size(15, 14);
-            this.chkUseSeasonSubdirs.TabIndex = 38;
-            this.chkUseSeasonSubdirs.UseVisualStyleBackColor = true;
+            this.cbDebug.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbDebug.FormattingEnabled = true;
+            this.cbDebug.Items.AddRange(new object[] {
+            "Do Nothing",
+            "Show in Log File",
+            "Show Message Box",
+            "Show in Log File and Message Box"});
+            this.cbDebug.Location = new System.Drawing.Point(394, 119);
+            this.cbDebug.Name = "cbDebug";
+            this.cbDebug.Size = new System.Drawing.Size(163, 21);
+            this.cbDebug.TabIndex = 23;
+            this.toolTip.SetToolTip(this.cbDebug, "How debug messages are processed");
             // 
             // Configuration
             // 
@@ -705,5 +734,7 @@
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.CheckBox chkUseSeasonSubdirs;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.ComboBox cbDebug;
     }
 }

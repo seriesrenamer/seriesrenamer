@@ -61,6 +61,16 @@ namespace Renamer
         public static ConfigFile Defaults = new ConfigFile("");
 
         /// <summary>
+        /// Mono compatibility mode
+        /// </summary>
+        public static bool MonoCompatibilityMode = false;
+
+        /// <summary>
+        /// if main config file is loaded, used for avoiding some recursion at startup
+        /// </summary>
+        public static bool ConfigLoaded = false;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public Settings()
@@ -81,10 +91,11 @@ namespace Renamer
             Defaults.variables.Add(Config.LogLevelWarning, "LogFile");
             Defaults.variables.Add(Config.LogLevelError, "Log_and_Message");
             Defaults.variables.Add(Config.LogLevelStatus, "LogFile");
+            Defaults.variables.Add(Config.LogLevelDebug, "None");
             Defaults.variables.Add(Config.LogName, "Renamer.log");
             Defaults.variables.Add(Config.MaxDepth, "0");
             Defaults.variables.Add(Config.InvalidCharReplace, "-");
-            Defaults.variables.Add(Config.EpIdentifier, new List<string>(new string[] { "S%SE%E", "%Sx%E", "S%S.E%E", "- %S%E -", "-E%E-", "%S.%E", "%S%E" }));
+            Defaults.variables.Add(Config.EpIdentifier, new List<string>(new string[] { "S%SE%E", "%Sx%E", "S%S.E%E", "- %S%E -", "-E%E-", ".%S%E.", "%S.%E", "%S%E" }));
             Defaults.variables.Add(Config.TargetPattern, "S%sE%E - %N");
             Defaults.variables.Add(Config.LastTitles, new List<string>(new string[]{"The Simpsons", "Heroes", "Scrubs", "Supernatural", "Eureka", "Chuck", "Stargate", "Stargate Atlantis", "Dexter", "Doctor Who", "24", "Firefly", "Kyle XY", "Prison Break", "Moonlight", "Monk", "House M.D.", "Gilmore Girls", "Friends", "Sex and the City"}));
             Defaults.variables.Add(Config.LastProvider, "");
@@ -151,6 +162,11 @@ namespace Renamer
         /// How status messages are displayed
         /// </summary>
         public static string LogLevelStatus = "LogLevelStatus";
+
+        /// <summary>
+        /// How debug messages are displayed
+        /// </summary>
+        public static string LogLevelDebug = "LogLevelDebug";
 
         /// <summary>
         /// Logfile name
