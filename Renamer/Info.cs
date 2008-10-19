@@ -50,6 +50,8 @@ namespace Renamer
             string status = "Providers found:";
             foreach (string str in providers)
             {
+                if(Settings.MonoCompatibilityMode)
+                Helper.Log("Provider: " + str, Helper.LogType.Status);
                 RelationProvider rel = new RelationProvider();
                 rel.Name = Helper.ReadProperty(ProviderConfig.Name, str);
                 rel.RelationsPage = Helper.ReadProperty(ProviderConfig.RelationsPage, str);
@@ -81,6 +83,11 @@ namespace Renamer
                 else
                 {
                     rel.SearchRightToLeft = false;
+                }
+                if (rel.Name == null||rel.Name=="")
+                {
+                    Helper.Log("Invalid provider file: " + str, Helper.LogType.Error);
+                    continue;
                 }
                 Providers.Add(rel);
                 status += " " + rel.Name+",";

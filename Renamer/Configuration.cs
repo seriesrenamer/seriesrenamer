@@ -68,6 +68,7 @@ namespace Renamer
             cbWarning.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelWarning));
             cbStatus.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelStatus));
             cbInfo.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelInfo));
+            cbDebug.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelDebug));
             txtExtract.Text = Helper.ReadProperty(Config.Extract);
             chkCreateDirectoryStructure.Checked = Helper.StringToBool(Helper.ReadProperty(Config.CreateDirectoryStructure));
             chkDeleteEmptyFolders.Checked = Helper.StringToBool(Helper.ReadProperty(Config.DeleteEmptyFolders));
@@ -116,6 +117,7 @@ namespace Renamer
             Helper.WriteProperty(Config.LogLevelInfo, ((Helper.LogLevel)cbInfo.SelectedIndex).ToString());
             Helper.WriteProperty(Config.LogLevelStatus, ((Helper.LogLevel)cbStatus.SelectedIndex).ToString());
             Helper.WriteProperty(Config.LogLevelWarning, ((Helper.LogLevel)cbWarning.SelectedIndex).ToString());
+            Helper.WriteProperty(Config.LogLevelDebug, ((Helper.LogLevel)cbDebug.SelectedIndex).ToString());
             Helper.WriteProperty(Config.Umlaute,Enum.GetName(typeof(Helper.UmlautAction), cbUmlaut.SelectedIndex));
             Helper.WriteProperty(Config.Case,Enum.GetName(typeof(Helper.Case), cbCase.SelectedIndex));
             Helper.WriteProperty(Config.InvalidFilenameAction, ((Helper.InvalidFilenameAction)cbReplace.SelectedIndex).ToString());

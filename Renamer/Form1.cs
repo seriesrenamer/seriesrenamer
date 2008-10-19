@@ -86,6 +86,7 @@ namespace Renamer
                     return;
                 }
                 string url = provider.SearchURL;
+                Helper.Log("Search URL: " + url, Helper.LogType.Debug);
                 if (url == null || url == "")
                 {
                     Helper.Log("Can't search because no search URL is specified for this provider", Helper.LogType.Error);
@@ -94,6 +95,7 @@ namespace Renamer
                 string[] LastTitles = Helper.ReadProperties(Config.LastTitles);
                 url = url.Replace("%T", LastTitles[0]);
                 url = System.Web.HttpUtility.UrlPathEncode(url);
+                Helper.Log("Encoded Search URL: " + url, Helper.LogType.Debug);
                 HttpWebRequest requestHtml = null;
                 try
                 {
@@ -123,15 +125,18 @@ namespace Renamer
                         requestHtml.Abort();
                     break;
                 }
+                Helper.Log("Search Results URL: " + responseHtml.ResponseUri.AbsoluteUri, Helper.LogType.Debug);
                 //if search engine directs us straight to the result page, skip parsing search results
                 string seriesURL = provider.SeriesURL;
                 if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL))
                 {
+                    Helper.Log("Search Results URL contains Series URL: " + seriesURL, Helper.LogType.Debug);
                     Helper.Log("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesURL.Replace(" ", "%20"), Helper.LogType.Status);
                     GetRelations(responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesURL);
                 }
                 else
                 {
+                    Helper.Log("Search Results URL doesn't contain Series URL: " + seriesURL+", this is a proper search results page", Helper.LogType.Debug);
                     // and download
                     StreamReader r = null;
                     try
@@ -178,6 +183,7 @@ namespace Renamer
         /// </summary>
         private void SetupRelations()
         {
+            Helper.Log("Setting up relations", Helper.LogType.Debug);
             for (int i = 0; i < info.Episodes.Count; i++)
             {
                 SetupRelation(i);
@@ -237,6 +243,9 @@ namespace Renamer
                 return;
             }
             string pattern = provider.SearchRegExp;
+            
+            Helper.Log("Trying to match source at "+SourceURL+" with "+pattern, Helper.LogType.Debug);
+
             RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Singleline;
             if (provider.SearchRightToLeft) ro |= RegexOptions.RightToLeft;
             MatchCollection mc = Regex.Matches(source, pattern, ro);
@@ -246,10 +255,11 @@ namespace Renamer
                 Helper.Log("No results found", Helper.LogType.Info);
             }
             else if (mc.Count == 1)
-            {                
+            {
                 string url = provider.RelationsPage;
+                Helper.Log("One result found on search page, going to " + url.Replace(" ", "%20") + " with %L=" + mc[0].Groups["link"].Value, Helper.LogType.Debug);
                 url = url.Replace("%L", mc[0].Groups["link"].Value);
-                Helper.Log("Search engine forwarded directly to single result: " + url.Replace(" ", "%20"), Helper.LogType.Status);
+                Helper.Log("Search engine found one result: " + url.Replace(" ", "%20"), Helper.LogType.Status);
                 GetRelations(url);
             }
             else
@@ -258,6 +268,7 @@ namespace Renamer
                 SelectResult sr = new SelectResult(mc, provider, false);
                 if (sr.ShowDialog() == DialogResult.Cancel || sr.url == "") return;
                 string url = provider.RelationsPage;
+                Helper.Log("User selected " + provider.RelationsPage + "with %L=" + sr.url, Helper.LogType.Debug);
                 url = url.Replace("%L", sr.url);
                 GetRelations(url);
             }
@@ -270,6 +281,7 @@ namespace Renamer
         /// <param name="url">URL of the page to parse</param>
         private void GetRelations(string url)
         {
+            Helper.Log("Trying to get relations from " + url, Helper.LogType.Debug);
             //if episode infos are stored on a new page for each season, this should be marked with %S in url, so we can iterate through all those pages
             int season = 1;
             string url2 = url;
@@ -279,9 +291,11 @@ namespace Renamer
                 {
                     url = url2.Replace("%S", season.ToString());
                 }
+                
                 if (url == null || url == "") return;
                 // request
                 url = System.Web.HttpUtility.UrlPathEncode(url);
+                Helper.Log("Trying to get relations for season " + season + " from " + url, Helper.LogType.Debug);
                 HttpWebRequest requestHtml = null;
                 try
                 {
@@ -308,9 +322,12 @@ namespace Renamer
                     }
                     return;
                 }
+
+                Helper.Log("Response URL: "+responseHtml.ResponseUri.AbsoluteUri, Helper.LogType.Debug);
                 //if we get redirected, lets assume this page does not exist
                 if (responseHtml.ResponseUri.AbsoluteUri != url)
                 {
+                    Helper.Log("Response URL doesn't match request URL, page doesn't seem to exist", Helper.LogType.Debug);
                     responseHtml.Close();
                     requestHtml.Abort();
                     break;
@@ -335,6 +352,7 @@ namespace Renamer
                 source = source.Substring(0, Math.Max(source.LastIndexOf(provider.RelationsEnd),0));
 
                 string pattern = provider.RelationsRegExp;
+                Helper.Log("Trying to match source from " + responseHtml.ResponseUri.AbsoluteUri + " with " + pattern, Helper.LogType.Debug);
                 RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Singleline;
                 if (provider.RelationsRightToLeft) ro |= RegexOptions.RightToLeft;
                 MatchCollection mc = Regex.Matches(source, pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
@@ -345,18 +363,20 @@ namespace Renamer
                     if (url != url2)
                     {
                         info.Relations.Add(new Relation(season.ToString(), m.Groups["Episode"].Value, System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                        //Helper.Log("Found Relation: " + "S" + season.ToString() + "E" + m.Groups["Episode"].Value + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Status);
+                        Helper.Log("Found Relation: " + "S" + season.ToString() + "E" + m.Groups["Episode"].Value + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Debug);
                     }
                     else
                     {
                         info.Relations.Add(new Relation(m.Groups["Season"].Value, m.Groups["Episode"].Value, System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                        //Helper.Log("Found Relation: " + "S" + m.Groups["Season"].Value + "E" + m.Groups["Episode"].Value + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Status);
+                        Helper.Log("Found Relation: " + "S" + m.Groups["Season"].Value + "E" + m.Groups["Episode"].Value + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Debug);
                     }
                 }
+                
                 // THOU SHALL NOT FORGET THE BREAK
                 if (!url2.Contains("%S")) break;
                 season++;
             }
+            Helper.Log("" + (season-1) + " Seasons, " + info.Relations.Count + " relations found", Helper.LogType.Debug);
         }
         #endregion
         #region Name Creation
@@ -1002,7 +1022,7 @@ namespace Renamer
         /// </summary>
         private void GetSubtitles()
         {
-            if (Type.GetType("Mono.Runtime") != null)
+            if (Settings.MonoCompatibilityMode)
             {
                 Helper.Log("Subtitle downloading is not supported in Mono, since additional dlls for unpacking are required which won't work here :(", Helper.LogType.Warning);
                 return;
@@ -1526,7 +1546,7 @@ namespace Renamer
         {
             if (e.SubItem != 0 && e.SubItem != 1)
             {
-                if (Type.GetType("Mono.Runtime") != null)
+                if (Settings.MonoCompatibilityMode)
                 {
                     Helper.Log("Editing Entries dynamically is not supported in Mono unfortunately :(", Helper.LogType.Warning);
                     return;
@@ -1659,7 +1679,19 @@ namespace Renamer
         //Main Initialization
         private void Form1_Load(object sender, EventArgs e)
         {
-            Helper.LogDisplay = rtbLog;
+            //mono compatibility fixes
+            if (Type.GetType("Mono.Runtime") != null)
+            {
+                Helper.LogDisplay = txtLog;
+                rtbLog.Visible = false;
+                txtLog.Visible = true;
+                Helper.Log("Running on Mono", Helper.LogType.Info);
+                Settings.MonoCompatibilityMode = true;
+            }
+            else
+            {
+                Helper.LogDisplay = rtbLog;
+            }
             settings = new Settings();
             //create config file if not existant from defaults
             if (!File.Exists(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + Settings.ConfigName))
@@ -1669,6 +1701,10 @@ namespace Renamer
                 f.FilePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + Settings.ConfigName;
                 f.Flush();
             }
+            //and read a value to make sure it is loaded into memory
+            Helper.ReadProperty(Config.Case);
+            Settings.ConfigLoaded = true;
+
             Helper.ClearLog();
             info = new Info();
             lstFiles.ListViewItemSorter = lvwColumnSorter;
@@ -1706,7 +1742,7 @@ namespace Renamer
             {
                 cbTitle.Items.Add(LastTitles[i]);
             }
-            cbTitle.SelectedIndex = 0;
+            cbTitle.SelectedIndex = -1;
 
             //Last directory
             string lastdir = Helper.ReadProperty(Config.LastDirectory);
@@ -1728,12 +1764,7 @@ namespace Renamer
                 UpdateList(true, false);
             }
 
-            //weird mono stuff which isn't doing anything anyway
-            if (Type.GetType("Mono.Runtime") != null)
-            {
-                Helper.Log("Running on Mono", Helper.LogType.Info);
-                return;
-            }
+            
             string[] ColumnWidths=Helper.ReadProperties(Config.ColumnWidths);
             string[] ColumnOrder=Helper.ReadProperties(Config.ColumnOrder);
             for (int i = 0; i < lstFiles.Columns.Count; i++)
@@ -1929,12 +1960,12 @@ namespace Renamer
         private void btnPath_Click(object sender, EventArgs e)
         {
             //weird mono hackfix
-            if (Type.GetType("Mono.Runtime") != null)
+            if (Settings.MonoCompatibilityMode)
             {
                 fbdPath.SelectedPath = Environment.CurrentDirectory;
             }
             string lastdir = Helper.ReadProperty(Config.LastDirectory);
-            if (Type.GetType("Mono.Runtime") == null)
+            if (!Settings.MonoCompatibilityMode)
             {
                 if (lastdir != null && lastdir != "" && Directory.Exists(lastdir))
                 {
@@ -2327,8 +2358,9 @@ namespace Renamer
         /// <param name="Showname">user entered showname</param>
         public void DecideWhatShouldBeProcessed(string Basepath, string Showname)
         {
-            string basefolder=Basepath.Substring(Math.Max(Basepath.LastIndexOfAny(new char[]{Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar})+1,0));
+            string basefolder=Basepath.Substring(Math.Max(Basepath.LastIndexOfAny(new char[]{Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar})+1,0));
             string pattern = Helper.ReadProperty(Config.Extract);
+            bool UseSeasonDirs = Helper.ReadProperty(Config.UseSeasonSubDir) == "1";
             if (pattern.Contains("%T"))
             {
                 pattern = pattern.Replace("%T", "(?<Title>*.?)");
@@ -2375,7 +2407,7 @@ namespace Renamer
                 else
                 {
                     //if season dirs are used, include base dir, show dir and season dir files
-                    if (Helper.ReadProperty(Config.UseSeasonSubDir) == "1")
+                    if (UseSeasonDirs)
                     {
                         //figure out if this is a showdir by checking if there are season subdirectories
                         string DirBelowPossibleSeasonDirs = ie.Path;
@@ -2413,6 +2445,7 @@ namespace Renamer
                     }
                 }
             }
+
             foreach (InfoEntry ie in info.Episodes)
             {
                 //If nothing was recognized, this is probably a movie and we don't want to move it
@@ -2425,7 +2458,7 @@ namespace Renamer
                 //if this is in basepath, include it if filename contains showname
                 if (ie.Path == Basepath)
                 {
-                    if (Showname != Path.GetFileName(Basepath))
+                    if (!UseSeasonDirs && Showname != Path.GetFileName(Basepath))
                     {
                         if (!ie.Filename.ToLower().Replace(".", " ").Contains(Showname.ToLower()))
                         {
