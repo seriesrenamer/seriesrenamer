@@ -591,7 +591,7 @@ namespace Renamer
     class SubtitleProvider:Provider
     {
         /// <summary>
-        /// Is the download link directly on the search results page?
+        /// Is the download link directly on the search results page? (Instead of a page related to that show in between)
         /// </summary>
         public bool DirectLink = false;
 
