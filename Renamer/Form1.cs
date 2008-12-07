@@ -1114,18 +1114,16 @@ namespace Renamer
         }
 
         /// <summary>
-        /// Subtitle Search Result Parsing function, for now only pages where search links directly to subtitles work
+        /// Subtitle Search Result Parsing function.
+        /// Extracts search results (i.e. Show names) and gets links to them.
+        /// If more than one show is found, user gets to select one, otherwise he will be directly forwarded
+        /// For now only pages where search links directly to subtitles work
         /// </summary>
         /// <param name="source">HTML Source of the search results page</param>
         private void ParseSubtitleSearch(ref string source)
         {
             if (source == "") return;
             SubtitleProvider subprovider = info.GetCurrentSubtitleProvider();
-            if (subprovider == null)
-            {
-                Helper.Log("No subtitle provider found/selected", Helper.LogType.Error);
-                return;
-            }
             string pattern = subprovider.SearchRegExp;
             RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Singleline;
             if (subprovider.SearchRightToLeft) ro |= RegexOptions.RightToLeft;
