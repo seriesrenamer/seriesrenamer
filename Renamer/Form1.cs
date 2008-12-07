@@ -1077,7 +1077,7 @@ namespace Renamer
             }
             else
             {
-                Helper.Log("Search engine found multiple results at " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20"), Helper.LogType.Info);
+                
                 // and download
                 StreamReader r = null;
                 try
@@ -1099,7 +1099,7 @@ namespace Renamer
                 source = source.Substring(Math.Max(source.IndexOf(subprovider.SearchStart),0));
                 source = source.Substring(0, Math.Max(source.LastIndexOf(subprovider.SearchEnd),0));
                 
-                ParseSubtitleSearch(ref source);
+                ParseSubtitleSearch(ref source, responseHtml.ResponseUri.AbsoluteUri);
             }
             int i;
             if (info.SubtitleLinks.Count > 0)
@@ -1120,7 +1120,8 @@ namespace Renamer
         /// For now only pages where search links directly to subtitles work
         /// </summary>
         /// <param name="source">HTML Source of the search results page</param>
-        private void ParseSubtitleSearch(ref string source)
+        /// <param name="SourceURL">URL of the source</param>
+        private void ParseSubtitleSearch(ref string source, string SourceURL)
         {
             if (source == "") return;
             SubtitleProvider subprovider = info.GetCurrentSubtitleProvider();
@@ -1139,10 +1140,18 @@ namespace Renamer
             {
                 string url = subprovider.SubtitlesPage;
                 url = url.Replace("%L", mc[0].Groups["link"].Value);
-                GetSubtitleFromSeriesPage(url);
+                if (subprovider.ConstructLink != "")
+                {
+                    ConstructLinks(mc[0].Groups["link"].Value);
+                }
+                else
+                {
+                    GetSubtitleFromSeriesPage(url);
+                }
             }
             else
             {
+                Helper.Log("Search engine found multiple results at " + SourceURL.Replace(" ", "%20"), Helper.LogType.Info);
                 SelectResult sr = new SelectResult(mc,subprovider, true);
                 if(sr.ShowDialog()==DialogResult.Cancel) return;
                 if (sr.urls.Count == 0) return;
@@ -1150,9 +1159,9 @@ namespace Renamer
                 {
                     string url = subprovider.SubtitlesPage;
                     url = url.Replace("%L", str);
-                    if (subprovider.DirectLink)
+                    if (subprovider.ConstructLink != "")
                     {
-                        info.SubtitleLinks.Add(url);
+                        ConstructLinks(str);
                     }
                     else
                     {
@@ -1162,6 +1171,60 @@ namespace Renamer
             }
         }
         
+        /// <summary>
+        /// Used if the download link(s) can be constructed directly from the search results page
+        /// %L gets replaced with the value aquired from Search results page "link" property, 
+        /// %P will allow to iterate over pages/seasons etc
+        /// </summary>
+        /// <param name="extracted">Extracted value from search results which is inserted into "ConstructLink" url</param>
+        private void ConstructLinks(string extracted)
+        {
+            SubtitleProvider subprovider = info.GetCurrentSubtitleProvider();
+            string link = subprovider.ConstructLink;
+            link=link.Replace("%L", extracted);
+            int loop = 1;
+            if (link.Contains("%P"))
+            {
+                loop = 20;
+            }
+            //TODO: Make 20 setable somewhere or find better cancel condition
+            for (int i = 1; i < loop+1; i++)
+            {
+                string anotherlink = link.Replace("%P", i.ToString());
+                anotherlink = System.Web.HttpUtility.UrlPathEncode(anotherlink);
+                HttpWebRequest requestHtml;
+                try
+                {
+                    requestHtml = (HttpWebRequest)(HttpWebRequest.Create(anotherlink));
+                }
+                catch (Exception ex)
+                {
+                    Helper.Log(ex.Message, Helper.LogType.Error);
+                    return;
+                }
+                requestHtml.Timeout = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
+                // get response
+                HttpWebResponse responseHtml = null;
+                try
+                {
+                    responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
+                }
+                catch (Exception ex)
+                {
+                    Helper.Log(ex.Message, Helper.LogType.Error);
+                    if (responseHtml != null)
+                        responseHtml.Close();
+                    return;
+                }
+
+                responseHtml.Close();
+                if (subprovider.NotFoundURL == "" || responseHtml.ResponseUri.ToString() != subprovider.NotFoundURL)
+                {
+                    info.SubtitleLinks.Add(responseHtml.ResponseUri.ToString());
+                }
+            }
+            
+        }
         /// <summary>
         /// This function is needed if Subtitle links are located on a series page, not implemented yet
         /// </summary>
@@ -1443,7 +1506,7 @@ namespace Renamer
                         info.SubtitleFiles.Add(sf);
                     }
                 }
-                
+                int MatchedSubtitles = 0;
                 //Move subtitle files to their video files
                 foreach (InfoEntry ie in info.Episodes)
                 {
@@ -1484,12 +1547,21 @@ namespace Renamer
                                     }
                                 }
                                 if(move){
-                                    File.Copy(source, target);
+                                    try
+                                    {
+                                        File.Copy(source, target);
+                                        MatchedSubtitles++;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Helper.Log(source+" --> "+target+": "+ex.Message, Helper.LogType.Error);
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                Helper.Log("Downloaded " + Files.Count + " subtitles and matched " + MatchedSubtitles + " of them.", Helper.LogType.Status);
                 //cleanup
                 info.SubtitleFiles.Clear();
                 Directory.Delete(folder, true);
@@ -2546,7 +2618,11 @@ namespace Renamer
         {
             string[] LastTitlesOld = Helper.ReadProperties(Config.LastTitles);
             //not updating title, return
-            if (LastTitlesOld.Length > 0 && LastTitlesOld[0] == name) return;
+            if (LastTitlesOld.Length > 0 && LastTitlesOld[0] == name)
+            {
+                cbTitle.SelectedIndex = 0;
+                return;
+            }
             //if new item is entered
             int Index = -1;
             for(int i=0;i<LastTitlesOld.Length;i++)
@@ -2707,7 +2783,7 @@ namespace Renamer
             }
             else if (!foundname && folders.GetLength(0) > 0)
             {
-                name = folders[folders.GetLength(0) - 1];
+                name = "";
             }
         }
 

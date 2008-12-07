@@ -567,12 +567,7 @@ namespace Renamer
             {
                 return null;
             }
-            if (dir.Name == ".svn")
-            {
-                Directory.CreateDirectory(dir.FullName + Path.DirectorySeparatorChar + "tmp");
-                File.Create(dir.FullName + Path.DirectorySeparatorChar + "tmp" + Path.DirectorySeparatorChar + "entries");
-            }
-            //remove directories? WTF
+            //remove directories? Why are they even there :(
             for (int i = 0; i < files.Count; i++)
             {
                 if (Directory.Exists(files[i].FullName))

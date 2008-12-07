@@ -368,6 +368,11 @@ namespace Renamer
         /// start regex for relations pages from end of file
         /// </summary>
         public static string RelationsRightToLeft = "RelationsRightToLeft";
+
+        /// <summary>
+        /// If some page forwards to this URL, it is assumed the link is invalid
+        /// </summary>
+        public static string NotFoundURL = "NotFoundURL";
     }
     /// <summary>
     /// Helper class containing property names used in subtitle provider files
@@ -455,5 +460,16 @@ namespace Renamer
         /// </summary>
         public static string SubtitlesEnd = "SubtitlesEnd";
 
+        /// <summary>
+        /// If the download link(s) can be constructed directly from the search results page, use this variable.
+        /// %L gets replaced with the value aquired from Search results page "link" property, 
+        /// %P will allow to iterate over pages/seasons etc
+        /// </summary>
+        public static string ConstructLink = "ConstructLink";
+
+        /// <summary>
+        /// If some page forwards to this URL, it is assumed the link is invalid
+        /// </summary>
+        public static string NotFoundURL = "NotFoundURL";
     }
 }

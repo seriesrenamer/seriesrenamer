@@ -66,6 +66,7 @@ namespace Renamer
                 rel.SearchEnd = Helper.ReadProperty(ProviderConfig.SearchEnd, str);
                 rel.RelationsStart = Helper.ReadProperty(ProviderConfig.RelationsStart, str);
                 rel.RelationsEnd = Helper.ReadProperty(ProviderConfig.RelationsEnd, str);
+                rel.NotFoundURL = Helper.ReadProperty(ProviderConfig.NotFoundURL, str);
                 string rrtl=Helper.ReadProperty(ProviderConfig.RelationsRightToLeft, str);
                 if (rrtl == "1")
                 {
@@ -113,6 +114,8 @@ namespace Renamer
                 sub.SearchEnd = Helper.ReadProperty(SubProviderConfig.SearchEnd, str);
                 sub.SubtitlesStart = Helper.ReadProperty(SubProviderConfig.SubtitlesStart, str);
                 sub.SubtitlesEnd = Helper.ReadProperty (SubProviderConfig.SubtitlesEnd, str);
+                sub.ConstructLink = Helper.ReadProperty(SubProviderConfig.ConstructLink, str);
+                sub.NotFoundURL = Helper.ReadProperty(SubProviderConfig.NotFoundURL, str);
                 string srtl = Helper.ReadProperty(SubProviderConfig.SearchRightToLeft, str);
                 if (srtl == "1")
                 {
@@ -549,6 +552,11 @@ namespace Renamer
 
         public string SearchStart = "";
         public string SearchEnd = "";
+
+        /// <summary>
+        /// If some page forwards to this URL, it is assumed the link is invalid
+        /// </summary>
+        public string NotFoundURL = "";
     }
 
     /// <summary>
@@ -618,6 +626,14 @@ namespace Renamer
 
         public string SubtitlesStart = "";
         public string SubtitlesEnd = "";
+
+
+        /// <summary>
+        /// If the download link(s) can be constructed directly from the search results page, use this variable.
+        /// %L gets replaced with the value aquired from Search results page "link" property, 
+        /// %P will allow to iterate over pages/seasons etc
+        /// </summary>
+        public string ConstructLink = "";
     }
 }
 
