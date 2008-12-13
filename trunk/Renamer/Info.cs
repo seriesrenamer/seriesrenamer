@@ -67,6 +67,8 @@ namespace Renamer
                 rel.RelationsStart = Helper.ReadProperty(ProviderConfig.RelationsStart, str);
                 rel.RelationsEnd = Helper.ReadProperty(ProviderConfig.RelationsEnd, str);
                 rel.NotFoundURL = Helper.ReadProperty(ProviderConfig.NotFoundURL, str);
+                rel.Encoding = Helper.ReadProperty(ProviderConfig.Encoding, str);
+
                 string rrtl=Helper.ReadProperty(ProviderConfig.RelationsRightToLeft, str);
                 if (rrtl == "1")
                 {
@@ -116,6 +118,7 @@ namespace Renamer
                 sub.SubtitlesEnd = Helper.ReadProperty (SubProviderConfig.SubtitlesEnd, str);
                 sub.ConstructLink = Helper.ReadProperty(SubProviderConfig.ConstructLink, str);
                 sub.NotFoundURL = Helper.ReadProperty(SubProviderConfig.NotFoundURL, str);
+                sub.Encoding = Helper.ReadProperty(SubProviderConfig.Encoding, str);
                 string srtl = Helper.ReadProperty(SubProviderConfig.SearchRightToLeft, str);
                 if (srtl == "1")
                 {
@@ -549,6 +552,10 @@ namespace Renamer
         /// </summary>
         public bool SearchRightToLeft = false;
 
+        /// <summary>
+        /// Page encoding, leave empty for automatic
+        /// </summary>
+        public string Encoding = "";
 
         public string SearchStart = "";
         public string SearchEnd = "";

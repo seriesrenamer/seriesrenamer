@@ -259,6 +259,7 @@ namespace Renamer
                 string url = provider.RelationsPage;
                 Helper.Log("One result found on search page, going to " + url.Replace(" ", "%20") + " with %L=" + mc[0].Groups["link"].Value, Helper.LogType.Debug);
                 url = url.Replace("%L", mc[0].Groups["link"].Value);
+                url = System.Web.HttpUtility.HtmlDecode(url);
                 Helper.Log("Search engine found one result: " + url.Replace(" ", "%20"), Helper.LogType.Status);
                 GetRelations(url);
             }
@@ -270,6 +271,7 @@ namespace Renamer
                 string url = provider.RelationsPage;
                 Helper.Log("User selected " + provider.RelationsPage + "with %L=" + sr.url, Helper.LogType.Debug);
                 url = url.Replace("%L", sr.url);
+                url = System.Web.HttpUtility.HtmlDecode(url);
                 GetRelations(url);
             }
         }
@@ -281,6 +283,12 @@ namespace Renamer
         /// <param name="url">URL of the page to parse</param>
         private void GetRelations(string url)
         {
+             RelationProvider provider = info.GetCurrentProvider();
+            if (provider == null)
+            {
+                Helper.Log("No relation provider found/selected", Helper.LogType.Error);
+                return;
+            }
             Helper.Log("Trying to get relations from " + url, Helper.LogType.Debug);
             //if episode infos are stored on a new page for each season, this should be marked with %S in url, so we can iterate through all those pages
             int season = 1;
@@ -334,17 +342,28 @@ namespace Renamer
                 }
                 // and download
                 //Helper.Log("charset=" + responseHtml.CharacterSet, Helper.LogType.Status);
-
-                StreamReader r = new StreamReader(responseHtml.GetResponseStream(), Encoding.GetEncoding(responseHtml.CharacterSet));
+                Encoding enc;
+                if (provider.Encoding != null && provider.Encoding != "")
+                {
+                    try
+                    {
+                        enc = Encoding.GetEncoding(provider.Encoding);
+                    }
+                    catch (Exception ex)
+                    {
+                        Helper.Log("Invalid encoding in config file: " + ex.Message, Helper.LogType.Error);
+                        enc = Encoding.GetEncoding(responseHtml.CharacterSet);
+                    }                    
+                }
+                else
+                {
+                    enc = Encoding.GetEncoding(responseHtml.CharacterSet);
+                }
+                StreamReader r = new StreamReader(responseHtml.GetResponseStream(), enc);
                 string source = r.ReadToEnd();
                 r.Close();
                 responseHtml.Close();
-                RelationProvider provider = info.GetCurrentProvider();
-                if (provider == null)
-                {
-                    Helper.Log("No relation provider found/selected", Helper.LogType.Error);
-                    return;
-                }
+               
 
 
                 //Source cropping
@@ -360,15 +379,19 @@ namespace Renamer
                 {
                     Match m=mc[i];
                     //if we are iterating through season pages, take season from page url directly
+                    //parse season and episode numbers
+                    int s,e;
+                    Int32.TryParse(m.Groups["Season"].Value, out s);
+                    Int32.TryParse(m.Groups["Episode"].Value, out e);
                     if (url != url2)
                     {
-                        info.Relations.Add(new Relation(season.ToString(), m.Groups["Episode"].Value, System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                        Helper.Log("Found Relation: " + "S" + season.ToString() + "E" + m.Groups["Episode"].Value + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Debug);
+                        info.Relations.Add(new Relation(season.ToString(), e.ToString(), System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
+                        Helper.Log("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Debug);
                     }
                     else
                     {
-                        info.Relations.Add(new Relation(m.Groups["Season"].Value, m.Groups["Episode"].Value, System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                        Helper.Log("Found Relation: " + "S" + m.Groups["Season"].Value + "E" + m.Groups["Episode"].Value + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Debug);
+                        info.Relations.Add(new Relation(s.ToString(), e.ToString(), System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
+                        Helper.Log("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Debug);
                     }
                 }
                 

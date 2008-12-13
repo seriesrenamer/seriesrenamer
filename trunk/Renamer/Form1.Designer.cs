@@ -81,13 +81,13 @@
             this.txtEdit = new System.Windows.Forms.TextBox();
             this.numEdit = new System.Windows.Forms.NumericUpDown();
             this.comEdit = new System.Windows.Forms.ComboBox();
+            this.txtLog = new System.Windows.Forms.TextBox();
             this.rtbLog = new System.Windows.Forms.RichTextBox();
             this.btnRename = new System.Windows.Forms.Button();
             this.txtTarget = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.fbdPath = new System.Windows.Forms.FolderBrowserDialog();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.txtLog = new System.Windows.Forms.TextBox();
             this.scContainer.Panel1.SuspendLayout();
             this.scContainer.Panel2.SuspendLayout();
             this.scContainer.SuspendLayout();
@@ -170,7 +170,7 @@
             this.cbSubs.FormattingEnabled = true;
             this.cbSubs.Location = new System.Drawing.Point(652, 6);
             this.cbSubs.Name = "cbSubs";
-            this.cbSubs.Size = new System.Drawing.Size(138, 21);
+            this.cbSubs.Size = new System.Drawing.Size(164, 21);
             this.cbSubs.TabIndex = 13;
             this.cbSubs.SelectedIndexChanged += new System.EventHandler(this.cbSubs_SelectedIndexChanged);
             // 
@@ -187,7 +187,7 @@
             // btnSubs
             // 
             this.btnSubs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSubs.Location = new System.Drawing.Point(796, 4);
+            this.btnSubs.Location = new System.Drawing.Point(822, 4);
             this.btnSubs.Name = "btnSubs";
             this.btnSubs.Size = new System.Drawing.Size(83, 23);
             this.btnSubs.TabIndex = 11;
@@ -198,9 +198,9 @@
             // btnAbout
             // 
             this.btnAbout.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAbout.Location = new System.Drawing.Point(885, 33);
+            this.btnAbout.Location = new System.Drawing.Point(911, 33);
             this.btnAbout.Name = "btnAbout";
-            this.btnAbout.Size = new System.Drawing.Size(115, 23);
+            this.btnAbout.Size = new System.Drawing.Size(89, 23);
             this.btnAbout.TabIndex = 10;
             this.btnAbout.Text = "About...";
             this.btnAbout.UseVisualStyleBackColor = true;
@@ -213,7 +213,7 @@
             this.cbProviders.FormattingEnabled = true;
             this.cbProviders.Location = new System.Drawing.Point(652, 35);
             this.cbProviders.Name = "cbProviders";
-            this.cbProviders.Size = new System.Drawing.Size(138, 21);
+            this.cbProviders.Size = new System.Drawing.Size(164, 21);
             this.cbProviders.TabIndex = 9;
             this.cbProviders.SelectedIndexChanged += new System.EventHandler(this.cbProviders_SelectedIndexChanged);
             // 
@@ -257,7 +257,7 @@
             // btnTitles
             // 
             this.btnTitles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnTitles.Location = new System.Drawing.Point(796, 33);
+            this.btnTitles.Location = new System.Drawing.Point(822, 33);
             this.btnTitles.Name = "btnTitles";
             this.btnTitles.Size = new System.Drawing.Size(83, 23);
             this.btnTitles.TabIndex = 5;
@@ -530,9 +530,9 @@
             // 
             this.btnConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnConfig.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnConfig.Location = new System.Drawing.Point(885, 4);
+            this.btnConfig.Location = new System.Drawing.Point(911, 4);
             this.btnConfig.Name = "btnConfig";
-            this.btnConfig.Size = new System.Drawing.Size(115, 23);
+            this.btnConfig.Size = new System.Drawing.Size(89, 23);
             this.btnConfig.TabIndex = 3;
             this.btnConfig.Text = "Configuration";
             this.btnConfig.UseVisualStyleBackColor = true;
@@ -606,6 +606,17 @@
             this.comEdit.Visible = false;
             this.comEdit.SelectedIndexChanged += new System.EventHandler(this.cbEdit_SelectedIndexChanged);
             // 
+            // txtLog
+            // 
+            this.txtLog.Location = new System.Drawing.Point(15, 3);
+            this.txtLog.Multiline = true;
+            this.txtLog.Name = "txtLog";
+            this.txtLog.ReadOnly = true;
+            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtLog.Size = new System.Drawing.Size(985, 87);
+            this.txtLog.TabIndex = 1;
+            this.txtLog.Visible = false;
+            // 
             // rtbLog
             // 
             this.rtbLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -662,17 +673,6 @@
             // 
             this.fbdPath.Description = "Browse for folder containing series.";
             this.fbdPath.ShowNewFolderButton = false;
-            // 
-            // txtLog
-            // 
-            this.txtLog.Location = new System.Drawing.Point(15, 3);
-            this.txtLog.Multiline = true;
-            this.txtLog.Name = "txtLog";
-            this.txtLog.ReadOnly = true;
-            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtLog.Size = new System.Drawing.Size(985, 87);
-            this.txtLog.TabIndex = 1;
-            this.txtLog.Visible = false;
             // 
             // Form1
             // 
