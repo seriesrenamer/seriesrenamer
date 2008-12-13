@@ -373,6 +373,12 @@ namespace Renamer
         /// If some page forwards to this URL, it is assumed the link is invalid
         /// </summary>
         public static string NotFoundURL = "NotFoundURL";
+
+        /// <summary>
+        /// Encoding of the page, leave empty for automatic
+        /// </summary>
+        public static string Encoding = "Encoding";
+
     }
     /// <summary>
     /// Helper class containing property names used in subtitle provider files
@@ -471,5 +477,10 @@ namespace Renamer
         /// If some page forwards to this URL, it is assumed the link is invalid
         /// </summary>
         public static string NotFoundURL = "NotFoundURL";
+
+        /// <summary>
+        /// Encoding of the page, leave empty for automatic
+        /// </summary>
+        public static string Encoding = "Encoding";
     }
 }
