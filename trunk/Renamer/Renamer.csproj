@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2D5EBC88-E3DE-481C-888D-6CC9B84CF4AB}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -69,41 +69,64 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutBox.cs">
+    <Compile Include="Classes\Configuration\Keywords\Config.cs" />
+    <Compile Include="Classes\Configuration\Keywords\ProviderConfig.cs" />
+    <Compile Include="Classes\Configuration\Keywords\SubProviderConfig.cs" />
+    <Compile Include="Classes\RelationCollection.cs" />
+    <Compile Include="Dialogs\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AboutBox.designer.cs">
+    <Compile Include="Dialogs\AboutBox.designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="Configuration.cs">
+    <Compile Include="Classes\Configuration\ConfigFile.cs" />
+    <Compile Include="Classes\InfoEntry.cs" />
+    <Compile Include="Classes\Configuration\Provider.cs" />
+    <Compile Include="Classes\Relation.cs" />
+    <Compile Include="Classes\Configuration\RelationProvider.cs" />
+    <Compile Include="Classes\SubtitleFile.cs" />
+    <Compile Include="Classes\Configuration\SubtitleProvider.cs" />
+    <Compile Include="Dialogs\Configuration.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Configuration.Designer.cs">
+    <Compile Include="Dialogs\Configuration.Designer.cs">
       <DependentUpon>Configuration.cs</DependentUpon>
     </Compile>
-    <Compile Include="EditSubtitles.cs">
+    <Compile Include="Dialogs\EditSubtitles.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EditSubtitles.Designer.cs">
+    <Compile Include="Dialogs\EditSubtitles.Designer.cs">
       <DependentUpon>EditSubtitles.cs</DependentUpon>
     </Compile>
-    <Compile Include="EnterSeason.cs">
+    <Compile Include="Dialogs\EnterSeason.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EnterSeason.Designer.cs">
+    <Compile Include="Dialogs\EnterSeason.Designer.cs">
       <DependentUpon>EnterSeason.cs</DependentUpon>
     </Compile>
-    <Compile Include="FileSelector.cs">
+    <Compile Include="Dialogs\FileSelector.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FileSelector.Designer.cs">
+    <Compile Include="Dialogs\FileSelector.Designer.cs">
       <DependentUpon>FileSelector.cs</DependentUpon>
     </Compile>
-    <Compile Include="Filter.cs">
+    <Compile Include="Dialogs\Filter.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Filter.Designer.cs">
+    <Compile Include="Dialogs\Filter.Designer.cs">
       <DependentUpon>Filter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\EnterShowname.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\EnterShowname.Designer.cs">
+      <DependentUpon>EnterShowname.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\RegexTester.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\RegexTester.Designer.cs">
+      <DependentUpon>RegexTester.cs</DependentUpon>
     </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -113,10 +136,10 @@
     </Compile>
     <Compile Include="Helper.cs" />
     <Compile Include="Info.cs" />
-    <Compile Include="InputBox.cs">
+    <Compile Include="Dialogs\InputBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="InputBox.Designer.cs">
+    <Compile Include="Dialogs\InputBox.Designer.cs">
       <DependentUpon>InputBox.cs</DependentUpon>
     </Compile>
     <Compile Include="ListViewColumnSorter.cs" />
@@ -124,43 +147,56 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Program.cs" />
-    <Compile Include="SetEpisodes.cs">
+    <Compile Include="Dialogs\ReplaceWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SetEpisodes.Designer.cs">
+    <Compile Include="Dialogs\ReplaceWindow.Designer.cs">
+      <DependentUpon>ReplaceWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\SetEpisodes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\SetEpisodes.Designer.cs">
       <DependentUpon>SetEpisodes.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AboutBox.resx">
+    <EmbeddedResource Include="Dialogs\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Configuration.resx">
+    <EmbeddedResource Include="Dialogs\Configuration.resx">
       <DependentUpon>Configuration.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="EditSubtitles.resx">
+    <EmbeddedResource Include="Dialogs\EditSubtitles.resx">
       <DependentUpon>EditSubtitles.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="EnterSeason.resx">
+    <EmbeddedResource Include="Dialogs\EnterSeason.resx">
       <DependentUpon>EnterSeason.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="FileSelector.resx">
+    <EmbeddedResource Include="Dialogs\FileSelector.resx">
       <DependentUpon>FileSelector.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Filter.resx">
+    <EmbeddedResource Include="Dialogs\Filter.resx">
       <DependentUpon>Filter.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\EnterShowname.resx">
+      <DependentUpon>EnterShowname.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\RegexTester.resx">
+      <DependentUpon>RegexTester.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="InputBox.resx">
+    <EmbeddedResource Include="Dialogs\InputBox.resx">
       <DependentUpon>InputBox.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -173,15 +209,19 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="SelectResult.resx">
+    <EmbeddedResource Include="Dialogs\ReplaceWindow.resx">
+      <DependentUpon>ReplaceWindow.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\SelectResult.resx">
       <DependentUpon>SelectResult.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="SetEpisodes.resx">
+    <EmbeddedResource Include="Dialogs\SetEpisodes.resx">
       <DependentUpon>SetEpisodes.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="InvalidFilename.resx">
+    <EmbeddedResource Include="Dialogs\InvalidFilename.resx">
       <DependentUpon>InvalidFilename.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -191,22 +231,28 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
+    <None Include="Databases\Subtitles\Subtitles.cfg" />
+    <None Include="Databases\Subtitles\TVSubtitles ger.cfg" />
+    <None Include="Databases\Subtitles\TVSubtitles.cfg" />
     <None Include="Databases\Titles\EpGuides.cfg" />
+    <None Include="Databases\Titles\Episodeworld en.cfg" />
+    <None Include="Databases\Titles\Episodeworld ger.cfg" />
     <None Include="Databases\Titles\IMDB.cfg" />
     <None Include="Databases\Titles\Serienjunkies.cfg" />
+    <None Include="Databases\Titles\TheTVDb.cfg" />
     <None Include="Properties\app.manifest" />
-    <Compile Include="SelectResult.cs">
+    <Compile Include="Dialogs\SelectResult.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SelectResult.Designer.cs">
+    <Compile Include="Dialogs\SelectResult.Designer.cs">
       <DependentUpon>SelectResult.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubtitleEdit\srtFile.cs" />
-    <Compile Include="SubtitleEdit\SubtitleEditFile.cs" />
-    <Compile Include="InvalidFilename.cs">
+    <Compile Include="Classes\SubtitleEdit\srtFile.cs" />
+    <Compile Include="Classes\SubtitleEdit\SubtitleEditFile.cs" />
+    <Compile Include="Dialogs\InvalidFilename.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="InvalidFilename.Designer.cs">
+    <Compile Include="Dialogs\InvalidFilename.Designer.cs">
       <DependentUpon>InvalidFilename.cs</DependentUpon>
     </Compile>
     <Compile Include="Unrar.cs" />
@@ -234,8 +280,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="button_cancel.png" />
-    <None Include="icon_cancel.gif" />
     <Content Include="sr1.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -249,6 +293,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy $(ProjectDir)Databases\Titles $(TargetDir)Databases\Titles</PostBuildEvent>
+    <PostBuildEvent>xcopy $(ProjectDir)Databases $(TargetDir)Databases /S /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

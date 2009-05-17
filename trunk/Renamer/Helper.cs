@@ -5,12 +5,16 @@ using System.Text;
 using System.IO;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Text.RegularExpressions;
+using Renamer.Classes;
+using Renamer.Classes.Configuration.Keywords;
+using Renamer.Classes.Configuration;
 namespace Renamer
 {
     /// <summary>
     /// Helper class offering all kinds of functions, config file caching, logging, helper functions ;)
     /// </summary>
-    class Helper
+    public class Helper
     {
         /// <summary>
         /// Type of log message
@@ -27,15 +31,8 @@ namespace Renamer
         /// </summary>
         public enum InvalidFilenameAction : int { Ask, Skip, Replace };
 
-        /// <summary>
-        /// what to do with Umlauts
-        /// </summary>
-        public enum UmlautAction:int{Ignore, Use, Dont_Use};
-
-        /// <summary>
-        /// what to do with casing of filenames
-        /// </summary>
-        public enum Case : int { Ignore, small, Large, CAPSLOCK };
+        public enum Languages: int { None, German, English, French, Italian };
+        
         /// <summary>
         /// Control to show log in
         /// </summary>
@@ -180,6 +177,8 @@ namespace Renamer
             File.Delete(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + Helper.ReadProperty(Config.LogName));
         }
 
+        
+
         /// <summary>
         /// returns true if str=="1" and catches exception
         /// </summary>
@@ -189,6 +188,36 @@ namespace Renamer
         {
             return str == "1" || str == "true";
         }
+
+        /// <summary>
+        /// Checks if a string contains a series of letters, like hlo in hello
+        /// </summary>
+        /// <param name="letters">string which contains the letters which will be checked for in the other string</param>
+        /// <param name="container">string in which the letters should be contained</param>
+        /// <returns>true if container contains those letters, false otherwise</returns>
+        public static bool ContainsLetters(string letters, string container)
+        {
+            int pos = 0;
+            foreach (char c in letters)
+            {
+                bool found = false;
+                for (int i = pos; i < container.Length; i++)
+                {
+                    if (char.ToLower(c) == char.ToLower(container[i]))
+                    {
+                        pos = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
 
         /// <summary>
         /// Capitalizes The String As In This Description
@@ -233,6 +262,101 @@ namespace Renamer
             return Double.TryParse(str, out x);
         }
 
+        /// <summary>
+        /// Figures out if this is a movie file by looking at the destination path. Right now this only works
+        /// if season subdirectories are used, as this check looks for the season directory folder in the destination
+        /// path. Future versions might also check for similarity between the name of the file and the destination folder,
+        /// since movie files are to be put in the same folder as their name (minus part identifiers, i.e. "CD1").
+        /// </summary>
+        /// <param name="ie">the file which is checked</param>
+        /// <returns>true if ie is a movie file, false otherwise</returns>
+        public static bool IsMovie(InfoEntry ie)
+        {
+            if (ie.Destination == "") return false;
+            string[] patterns = Helper.ReadProperties(Config.Extract);
+            for (int i = patterns.Length - 1; i >= 0; i--)
+            {
+                string seasondir = patterns[i].Replace("%E", "\\d*");
+                seasondir = seasondir.Replace("%S", "\\d*");
+                if (Regex.Match(ie.Destination, seasondir).Success)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Find similar files from subfolders
+        /// </summary>
+        /// <param name="source">source files</param>
+        /// <param name="Basepath">base path to look for</param>
+        /// <returns>a list of matches</returns>
+        public static List<InfoEntry> FindSimilarByPath(List<InfoEntry> source, string Basepath)
+        {
+            List<InfoEntry> matches = new List<InfoEntry>();
+            foreach (InfoEntry ie in source)
+            {
+                if (ie.Path.StartsWith(Basepath))
+                {
+                    matches.Add(ie);
+                }
+            }
+            return matches;
+        }
+        /// <summary>
+        /// Finds similar files by looking at the filename and comparing it to a showname
+        /// </summary>
+        /// <param name="Basepath">basepath of the show</param>
+        /// <param name="Showname">name of the show to filter</param>
+        /// <param name="source">source files</param>
+        /// <returns>a list of matches</returns>
+        public static List<InfoEntry> FindSimilarByName(List<InfoEntry> source, string Showname)
+        {
+            List<InfoEntry> matches = new List<InfoEntry>();
+            Showname = Showname.ToLower();
+            //whatever, just check path and filename if it contains the showname
+            foreach (InfoEntry ie in source)
+            {
+                string[] folders = ie.Path.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+                string processed = ie.Filename.ToLower();
+
+                //try to extract the name from a shortcut, i.e. sga for Stargate Atlantis
+                string pattern = "[^\\w]";
+                Match m = Regex.Match(processed, pattern, RegexOptions.IgnoreCase);
+                if (m != null && m.Success)
+                {
+                    string abbreviation = processed.Substring(0, m.Index);
+                    if (abbreviation.Length > 0 && Helper.ContainsLetters(abbreviation, Showname))
+                    {
+                        matches.Add(ie);
+                        continue;
+                    }
+                }
+
+                //now check if whole showname is in the filename
+                string CleanupRegex = Helper.ReadProperty(Config.CleanupRegex);
+                processed = Regex.Replace(processed, CleanupRegex, " ");
+                if (processed.Contains(Showname))
+                {
+                    matches.Add(ie);
+                    continue;
+                }
+
+                //or in some top folder
+                foreach (string str in folders)
+                {
+                    processed = str.ToLower();
+                    processed = Regex.Replace(processed, CleanupRegex, " ");
+                    if (processed.Contains(Showname))
+                    {
+                        matches.Add(ie);
+                        break;
+                    }
+                }
+            }
+            return matches;
+        }
         public static int ReadInt(string Identifier)
         {
             string result = ReadProperty(Identifier);
@@ -636,279 +760,5 @@ namespace Renamer
             Array.Reverse(result);
             return result;
         }
-    }
-
-    /// <summary>
-    /// Config file used as cache
-    /// </summary>
-    class ConfigFile
-    {
-        /// <summary>
-        /// Path of the file, is empty for internal defaults
-        /// </summary>
-        public string FilePath = "";
-
-        /// <summary>
-        /// Hashtable containing variables with Identifiers
-        /// </summary>
-        public Hashtable variables = new Hashtable();
-
-        /// <summary>
-        /// If set, cache has changed and file needs to be saved
-        /// </summary>
-        public bool NeedsFlush = false;
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="filepath">Path of the file, for manual file creation, leave empty here</param>
-        public ConfigFile(string filepath){
-            FilePath=filepath;
-            if (filepath != null && filepath != "")
-            {
-                bool loop = true;
-                while (loop)
-                {
-                    loop = false;
-                    try
-                    {
-                        FileStream s = File.Open(filepath, FileMode.OpenOrCreate);
-                        StreamReader r = new StreamReader(s);
-                        string line = null;
-                        string file = r.ReadToEnd();
-                        List<string> lines = new List<string>(file.Split(new string[] { System.Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
-                        for (int i = 0; i < lines.Count; i++)
-                        {
-                            line = lines[i];
-                            if(Settings.MonoCompatibilityMode)
-                                Helper.Log(line, Helper.LogType.Plain);
-                            
-                            //if delimiter and comment characters aren't known yet, try to find those first
-                            if (Settings.Comment != null && Settings.Comment != "" && Settings.Delimiter != Convert.ToChar(0))
-                            {
-                                if(Settings.MonoCompatibilityMode)
-                                    Helper.Log("comment and delimiter string known", Helper.LogType.Plain);
-                                
-                                if (line.IndexOf("=") > 0)
-                                {
-                                    int index = line.IndexOf(Settings.Comment);
-                                    if (index == 0)
-                                    {
-                                        index = Settings.Comment.Length;
-                                    }
-                                    else
-                                    {
-                                        index = 0;
-                                    }
-                                    string key = line.Substring(index, line.IndexOf("=") - index);
-                                    if (Settings.MonoCompatibilityMode)
-                                        Helper.Log("Found identifier " + key, Helper.LogType.Plain);
-                                   
-                                    line = line.Replace(key + "=", "").Trim();
-                                    List<string> split = new List<string>(line.Split(new char[] { Settings.Delimiter }, StringSplitOptions.RemoveEmptyEntries));
-                                    //check so we don't add delimiter twice
-                                    if (!variables.ContainsKey(key))
-                                    {
-                                        if (split.Count > 0 && split[0].StartsWith(Settings.Comment.ToString()))
-                                        {
-                                            variables.Add(key, null);
-                                        }
-                                        else
-                                        {
-                                            if (split.Count == 0)
-                                            {
-                                                variables.Add(key, "");
-                                            }
-                                            else if (split.Count == 1)
-                                            {
-                                                variables.Add(key, split[0]);
-                                            }
-                                            else
-                                            {
-                                                variables.Add(key, split);
-                                            }
-                                        }
-                                    }
-                                }
-                                //if no comment character set yet, look for that first
-                            }
-                            else
-                            {
-                                if (Settings.MonoCompatibilityMode)
-                                    Helper.Log("comment/delimiter not known yet", Helper.LogType.Plain);
-                                if ((Settings.Comment == null || Settings.Comment == "") && line.StartsWith("Comment="))
-                                {
-                                    if (Settings.MonoCompatibilityMode)
-                                        Helper.Log("Found comment identifier", Helper.LogType.Plain);
-                                    Settings.Comment = line.Replace("Comment=", "").Trim();
-                                    if (Settings.Comment != null && Settings.Comment != "")
-                                    {
-                                        variables.Add("Comment", Settings.Comment);
-                                        //restart!
-                                        i = -1;
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-                                }
-                                if (Settings.Delimiter == Convert.ToChar(0) && line.StartsWith("Delimiter="))
-                                {
-                                    if (Settings.MonoCompatibilityMode)
-                                        Helper.Log("Found delimiter identifier", Helper.LogType.Plain);
-                                    string delim = line.Replace("Delimiter=", "").Trim();
-                                    if (delim != null && delim != "")
-                                    {
-                                        Settings.Delimiter = delim[0];
-                                        variables.Add("Delimiter", delim[0].ToString());
-                                        //restart!
-                                        i = -1;
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        r.Close();
-                        //if no comment character is set by now, we couldn't have read anything from this file
-                        if (Settings.Comment == null || Settings.Comment == "")
-                        {
-                            variables.Clear();
-                            variables.Add(Config.Delimiter, Settings.Defaults.variables[Config.Delimiter]);
-                            variables.Add(Config.Comment, Settings.Defaults.variables[Config.Comment]);
-                            Settings.Comment = ((string)Settings.Defaults.variables[Config.Comment]);
-                            Settings.Delimiter = ((string)Settings.Defaults.variables[Config.Delimiter])[0];
-                            loop = true;
-                            continue;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        //possible recursion, fixed by creating config manually from defaults if not existant
-                        variables = ((Hashtable)Settings.Defaults.variables.Clone());
-                        Flush();
-                        Helper.Log("Couldn't process config file " + filepath + ":" + ex.Message + " ...Using default values", Helper.LogType.Error);
-                    }
-                }
-            }
-        }
-                
-        /// <summary>
-        /// Saves the file
-        /// </summary>
-        public void Flush()
-        {
-            if (NeedsFlush)
-            {
-                FileStream s = File.Open(FilePath, FileMode.OpenOrCreate, FileAccess.Read);
-                StreamReader r = new StreamReader(s);
-                List<string> lines = new List<string>(r.ReadToEnd().Split(new string[] { System.Environment.NewLine },StringSplitOptions.None));
-                string file = "";
-                bool NewVar = false;
-                foreach (object key in variables.Keys)
-                {
-                    bool found = false;
-                    string Identifier = key.ToString();
-                    for (int i = 0; i < lines.Count; i++)
-                    {
-                        string line = lines[i];
-                        if (line.StartsWith(Identifier + "=") || line.StartsWith(Settings.Comment + Identifier + "="))
-                        {
-                            found = true;
-                            //no Value set, comment the set Value out if it is not already
-                            if (variables[key] == null)
-                            {
-                                //stupid trim function not accepting strings :(
-                                foreach (char c in Settings.Comment)
-                                {
-                                    line = line.TrimStart(new char[] { c });
-                                }
-                                lines[i] = Settings.Comment + line;
-                                break;
-                            }
-                            line = Identifier + "=";
-                            if (variables[key] is string)
-                            {
-                                line += (string)variables[key];
-                            }
-                            else if (variables[key] is List<string>)
-                            {
-                                foreach (string str in (List<string>)variables[key])
-                                {
-                                    line += str + Settings.Delimiter;
-                                }
-                                line = line.TrimEnd(new char[] { Settings.Delimiter });
-                            }
-                            lines[i] = line;
-                            break;
-                        }
-                    }
-                    //if property is not found at all, create a new entry at the end of the file
-                    if (!found)
-                    {
-                        NewVar = true;
-                    }
-
-                    
-                }
-                //add new variables to end of file (extra loop so they don't get added in between)
-                if (NewVar)
-                {
-                    foreach (object key in variables.Keys)
-                    {
-                        bool found = false;
-                        string Identifier = key.ToString();
-                        for (int i = 0; i < lines.Count; i++)
-                        {
-                            string line = lines[i];
-                            if (line.StartsWith(Identifier + "=") || line.StartsWith(Settings.Comment + Identifier + "="))
-                            {
-                                found = true;
-                                break;
-                            }
-                        }
-                        //if property is not found at all, create a new entry at the end of the file
-                        if (!found)
-                        {
-                            file += Identifier + "=";
-                            if (variables[key] is string)
-                            {
-                                file += (string)variables[key] + Environment.NewLine;
-                            }
-                            else if (variables[key] is List<string>)
-                            {
-                                foreach (string str in (List<string>)variables[key])
-                                {
-                                    file += str + Settings.Delimiter;
-                                }
-                                file = file.TrimEnd(new char[] { Settings.Delimiter });
-                                file += Environment.NewLine;
-                            }
-                        }
-                    }
-                }
-                //create file from lines
-                foreach (string l in lines)
-                {
-                    file += l + Environment.NewLine;
-                }
-                for (int i = Environment.NewLine.Length - 1; i >= 0; i--)
-                {
-                    file = file.TrimEnd(new char[] { Environment.NewLine[i] });
-                }
-                
-                r.Close();
-                File.Delete(FilePath);
-                s = File.Open(FilePath, FileMode.Create, FileAccess.Write);
-                StreamWriter w = new StreamWriter(s);
-                w.Write(file);
-                w.Close();
-            }
-            NeedsFlush = false;
-        }
-    }
-    
+    }    
 }

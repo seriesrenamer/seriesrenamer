@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Collections;
 using System.IO;
+using Renamer.Classes;
+using Renamer.Classes.Configuration.Keywords;
+using Renamer.Classes.Configuration;
 namespace Renamer
 {
     /// <summary>
@@ -13,13 +16,13 @@ namespace Renamer
         /// <summary>
         /// List of files, their target destinations etc
         /// </summary>
-        public List<InfoEntry> Episodes = new List<InfoEntry>();
+        public static List<InfoEntry> Episodes = new List<InfoEntry>();
 
         /// <summary>
         /// List of season/episode<->name relations
         /// </summary>
-        public List<Relation> Relations = new List<Relation>();
-
+        public static List<RelationCollection> Relations = new List<RelationCollection>();
+                
         /// <summary>
         /// List of season/episode<->name relation providers
         /// </summary>
@@ -40,6 +43,13 @@ namespace Renamer
         /// </summary>
         public List<SubtitleFile> SubtitleFiles = new List<SubtitleFile>();
 
+        public static double timeloadfolder = 0;
+        public static double timegettitles = 0;
+        public static double timeextractname = 0;
+        public static double timesetpath = 0;
+        public static double timecreatenewname = 0;
+        public static double timesetuprelation = 0;
+        public static double timeextractnumbers = 0;
         /// <summary>
         /// Constructor, loads all providers
         /// </summary>
@@ -68,7 +78,7 @@ namespace Renamer
                 rel.RelationsEnd = Helper.ReadProperty(ProviderConfig.RelationsEnd, str);
                 rel.NotFoundURL = Helper.ReadProperty(ProviderConfig.NotFoundURL, str);
                 rel.Encoding = Helper.ReadProperty(ProviderConfig.Encoding, str);
-
+                rel.Language = (Helper.Languages)Enum.Parse(typeof(Helper.Languages), Helper.ReadProperty(ProviderConfig.Language,str));
                 string rrtl=Helper.ReadProperty(ProviderConfig.RelationsRightToLeft, str);
                 if (rrtl == "1")
                 {
@@ -119,6 +129,7 @@ namespace Renamer
                 sub.ConstructLink = Helper.ReadProperty(SubProviderConfig.ConstructLink, str);
                 sub.NotFoundURL = Helper.ReadProperty(SubProviderConfig.NotFoundURL, str);
                 sub.Encoding = Helper.ReadProperty(SubProviderConfig.Encoding, str);
+                sub.Language = (Helper.Languages)Enum.Parse(typeof(Helper.Languages), Helper.ReadProperty(SubProviderConfig.Language,str));
                 string srtl = Helper.ReadProperty(SubProviderConfig.SearchRightToLeft, str);
                 if (srtl == "1")
                 {
@@ -195,69 +206,7 @@ namespace Renamer
             return null;
         }
 
-        /// <summary>
-        /// Finds lowest season in relations
-        /// </summary>
-        /// <returns>index of the season, or 10000 ;)</returns>
-        public int FindMinSeason()
-        {
-            int min = 10000;
-            foreach (Relation rel in Relations)
-            {
-                if (Convert.ToInt32(rel.Season) < min) min = Convert.ToInt32(rel.Season);
-            }
-            return min;
-        }
-
-        /// <summary>
-        /// Finds highest season in relations
-        /// </summary>
-        /// <returns>index of the season, or -1 ;)</returns>
-        public int FindMaxSeason()
-        {
-            int max = -1;
-            foreach (Relation rel in Relations)
-            {
-                if (Convert.ToInt32(rel.Season) > max) max = Convert.ToInt32(rel.Season);
-            }
-            return max;
-        }
-
-        /// <summary>
-        /// Finds lowest episode of a season in relations
-        /// </summary>
-        /// <param name="season">season to find lowest episode relation in</param>
-        /// <returns>index of the episode, or 10000 ;)</returns>
-        public int FindMinEpisode(int season)
-        {
-            int min = 10000;
-            foreach (Relation rel in Relations)
-            {
-                if (Convert.ToInt32(rel.Season) == season)
-                {
-                    if (Convert.ToInt32(rel.Episode) < min) min = Convert.ToInt32(rel.Episode);
-                }
-            }
-            return min;
-        }
-
-        /// <summary>
-        /// Finds highest episode of a season in relations
-        /// </summary>
-        /// <param name="season">season to find highest episode relation in</param>
-        /// <returns>index of the episode, or -1 ;)</returns>
-        public int FindMaxEpisode(int season)
-        {
-            int max = -1;
-            foreach (Relation rel in Relations)
-            {
-                if (Convert.ToInt32(rel.Season) == season)
-                {
-                    if (Convert.ToInt32(rel.Episode) > max) max = Convert.ToInt32(rel.Episode);
-                }
-            }
-            return max;
-        }
+        
 
         /// <summary>
         /// Gets video files matching season and episode number
@@ -399,248 +348,47 @@ namespace Renamer
             }
             return count;
         }
-    }
-
-    /// <summary>
-    /// Contains all information about a single video or subtitle file, including scheduled renaming info
-    /// </summary>
-    public class InfoEntry
-    {
-        /// <summary>
-        /// Old filename with extension
-        /// </summary>
-        public string Filename = "";   
-     
-        /// <summary>
-        /// Extension of the file without dot, i.e. "avi" or "srt"
-        /// </summary>
-        public string Extension = "";
 
         /// <summary>
-        /// Path of the file
+        /// Returns a RelationCollection with a given Showname
         /// </summary>
-        public string Path = "";
-
-        /// <summary>
-        /// number of the season
-        /// </summary>
-        public string Season = "";
-
-        /// <summary>
-        /// number of the episode
-        /// </summary>
-        public string Episode = "";
-
-        /// <summary>
-        /// name of the episode
-        /// </summary>
-        public string Name = "";
-
-        /// <summary>
-        /// new filename with extension
-        /// </summary>
-        public string NewFileName = "";
-
-        /// <summary>
-        /// destination directory
-        /// </summary>
-        public string Destination = "";
-
-        /// <summary>
-        /// If file is to be processed
-        /// </summary>
-        public bool Process = true;
-    }
-
-    /// <summary>
-    /// A season/episode<->name relation
-    /// </summary>
-    class Relation
-    {
-        /// <summary>
-        /// Season
-        /// </summary>
-        public string Season = "";
-
-        /// <summary>
-        /// Episode
-        /// </summary>
-        public string Episode = "";
-
-        /// <summary>
-        /// Name
-        /// </summary>
-        public string Name = "";
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="season">Season</param>
-        /// <param name="episode">Episode</param>
-        /// <param name="name">Name</param>
-        public Relation(string season, string episode, string name)
+        /// <param name="Showname">The Showname</param>
+        /// <returns>The RelationCollection, or null if not found</returns>
+        public static RelationCollection GetRelationCollectionByName(string Showname)
         {
-            Season = season;
-            Episode = episode;
-            Name = name;
+            foreach (RelationCollection rc in Relations)
+            {
+                if (rc.Showname == Showname)
+                {
+                    return rc;
+                }
+            }
+            return null;
         }
 
-        public override string ToString()
+        public static void AddRelationCollection(RelationCollection rc)
         {
-            return "S" + Season + "E" + Episode + " - " + Name;
+            Relations.Add(rc);
+            foreach (InfoEntry ie in Info.Episodes)
+            {
+                if (ie.Showname == rc.Showname)
+                {
+                    ie.SetupRelation();
+                }
+            }
         }
     }
+
     
-    /// <summary>
-    /// A collection of subtitle files matching to one season+episode
-    /// </summary>
-    public class SubtitleFile
-    {
-        /// <summary>
-        /// List of subtitle files
-        /// </summary>
-        public List<string> Filenames = new List<string>();
 
-        /// <summary>
-        /// collective season value
-        /// </summary>
-        public string Season = "";
-
-        /// <summary>
-        /// Collective episode value
-        /// </summary>
-        public string Episode = "";
-    }
-
-    /// <summary>
-    /// An abstract provider
-    /// </summary>
-    public class Provider
-    {
-        /// <summary>
-        /// Name of the provider
-        /// </summary>
-        public string Name = "";
-
-        /// <summary>
-        /// Search URL, %T is a placeholder for the search title
-        /// </summary>
-        public string SearchURL = "";
-
-        /// <summary>
-        /// substring of the search results page URL
-        /// </summary>
-        public string SearchResultsURL = "";
-
-        /// <summary>
-        /// substring of the series page URL
-        /// </summary>
-        public string SeriesURL = "";
-
-        /// <summary>
-        /// Regular expression for parsing search results
-        /// </summary>
-        public string SearchRegExp = "";
-
-        /// <summary>
-        /// some regular expressions to remove from search results name
-        /// </summary>
-        public string[] SearchRemove;
-
-        /// <summary>
-        /// start regex for search pages from end of file
-        /// </summary>
-        public bool SearchRightToLeft = false;
-
-        /// <summary>
-        /// Page encoding, leave empty for automatic
-        /// </summary>
-        public string Encoding = "";
-
-        public string SearchStart = "";
-        public string SearchEnd = "";
-
-        /// <summary>
-        /// If some page forwards to this URL, it is assumed the link is invalid
-        /// </summary>
-        public string NotFoundURL = "";
-    }
-
-    /// <summary>
-    /// A season/episode<->name relations provider
-    /// </summary>
-    class RelationProvider:Provider
-    {
-        /// <summary>
-        /// Link to the page containing episode infos. %L is used as placeholder for the link corresponding to the show the user selected
-        /// </summary>
-        public string RelationsPage = "";
-
-        /// <summary>
-        /// Regular expression to extract season/number/episode name relationship from the page containing this info
-        /// This needs to contain:
-        /// (?&ltSeason&gtRegExpToExtractSeason) - to get the season number
-        /// (?&ltEpisode&gtRegExpToExtractEpisode) - to get the episode number
-        /// (?&ltTitle&gtRegExpToExtractTitle) - to get the title belonging to that season/episode
-        ///If Relationspage uses %S placeholder, there is no need to include (?<Season>RegExpToExtractSeason) here
-        /// </summary>
-        public string RelationsRegExp = "";
-
-        /// <summary>
-        /// start regex for relations pages from end of file
-        /// </summary>
-        public bool RelationsRightToLeft = false;
-
-        /// <summary>
-        /// Additionally, if the search engine redirects to the single result directly, we might need a string to attach to the results page to get to the episodes page
-        /// </summary>
-        public string EpisodesURL = "";
-
-        public string RelationsStart = "";
-        public string RelationsEnd = "";
-    }
     
-    /// <summary>
-    /// A subtitle file provider
-    /// </summary>
-    class SubtitleProvider:Provider
-    {
-        /// <summary>
-        /// Is the download link directly on the search results page? (Instead of a page related to that show in between)
-        /// </summary>
-        public bool DirectLink = false;
+    
+    
 
-        /// <summary>
-        /// Link to the page containing subtitle links. %L is used as placeholder for the link corresponding to the show the user selected
-        /// For multiple pages of subtitle downloads, use %P
-        /// </summary>
-        public string SubtitlesPage = "";
+    
 
-        /// <summary>
-        /// Regular expression to extract subtitle links (along with names) from downloads page
-        /// This needs to contain: 
-        /// (?&ltSeason&gtRegExpToExtractSeason) - to get the season number
-        /// (?&ltEpisode&gtRegExpToExtractEpisode) - to get the episode number
-        /// (?&ltLink&gtRegExpToExtractLink) - to get the download link for one episode
-        /// If Package is set to 1, only download link is required
-        /// </summary>
-        public string SubtitleRegExp = "";
-
-        /// <summary>
-        /// Additionally, if the search engine redirects to the single result directly, we might need a string to attach to the results page to get to the episodes page
-        /// </summary>
-        public string SubtitlesURL = "";
-
-        public string SubtitlesStart = "";
-        public string SubtitlesEnd = "";
-
-
-        /// <summary>
-        /// If the download link(s) can be constructed directly from the search results page, use this variable.
-        /// %L gets replaced with the value aquired from Search results page "link" property, 
-        /// %P will allow to iterate over pages/seasons etc
-        /// </summary>
-        public string ConstructLink = "";
-    }
+    
+    
+    
 }
 
