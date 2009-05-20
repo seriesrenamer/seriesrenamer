@@ -58,7 +58,7 @@
   <ItemGroup>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Release\ICSharpCode.SharpZipLib.dll</HintPath>
+      <HintPath>DLLs\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Web" />
@@ -293,6 +293,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>xcopy $(ProjectDir)Databases $(TargetDir)Databases /S /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(ProjectDir)Databases" "$(TargetDir)Databases" /S /Y
+xcopy "$(ProjectDir)DLLs" "$(TargetDir)" /S /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>
