@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace Renamer.SubtitleEdit
+namespace Renamer.Classes.SubtitleEdit
 {
     /// <summary>
     /// Abstract subtitle file
