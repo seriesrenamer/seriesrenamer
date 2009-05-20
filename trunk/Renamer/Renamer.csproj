@@ -293,7 +293,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(ProjectDir)Databases" "$(TargetDir)Databases" /S /Y
-xcopy "$(ProjectDir)DLLs" "$(TargetDir)" /S /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(ProjectDir)Databases" "$(TargetDir)Databases" /S /Y /I
+xcopy "$(ProjectDir)DLLs" "$(TargetDir)" /S /Y /I</PostBuildEvent>
   </PropertyGroup>
 </Project>
