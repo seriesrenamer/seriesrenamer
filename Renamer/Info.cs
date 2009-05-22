@@ -1,4 +1,18 @@
-﻿using System;
+﻿#region SVN Info
+/***************************************************************
+ * $Author$
+ * $Revision$
+ * $Date$
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $URL$
+ * 
+ * License: GPLv3
+ * 
+****************************************************************/
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
@@ -60,7 +74,7 @@ namespace Renamer
             string status = "Providers found:";
             foreach (string str in providers)
             {
-                if(Settings.MonoCompatibilityMode)
+                if(Settings.getInstance().IsMonoCompatibilityMode)
                 Helper.Log("Provider: " + str, Helper.LogType.Status);
                 RelationProvider rel = new RelationProvider();
                 rel.Name = Helper.ReadProperty(ProviderConfig.Name, str);

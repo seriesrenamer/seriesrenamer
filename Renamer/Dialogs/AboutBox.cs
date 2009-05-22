@@ -1,3 +1,17 @@
+#region SVN Info
+/***************************************************************
+ * $Author$
+ * $Revision$
+ * $Date$
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $URL$
+ * 
+ * License: GPLv3
+ * 
+****************************************************************/
+#endregion
+
 using System;
 using System.Collections.Specialized;
 using System.Collections.Generic;

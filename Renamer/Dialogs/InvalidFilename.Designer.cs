@@ -1,4 +1,18 @@
-﻿namespace Renamer.Dialogs
+﻿#region SVN Info
+/***************************************************************
+ * $Author$
+ * $Revision$
+ * $Date$
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $URL$
+ * 
+ * License: GPLv3
+ * 
+****************************************************************/
+#endregion
+
+namespace Renamer.Dialogs
 {
     partial class InvalidFilename
     {

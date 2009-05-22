@@ -1,4 +1,18 @@
-﻿using System;
+﻿#region SVN Info
+/***************************************************************
+ * $Author$
+ * $Revision$
+ * $Date$
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $URL$
+ * 
+ * License: GPLv3
+ * 
+****************************************************************/
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;

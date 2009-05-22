@@ -1,4 +1,18 @@
-﻿using System.Collections;
+﻿#region SVN Info
+/***************************************************************
+ * $Author$
+ * $Revision$
+ * $Date$
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $URL$
+ * 
+ * License: GPLv3
+ * 
+****************************************************************/
+#endregion
+
+using System.Collections;
 using System.Windows.Forms;
 using System;
 using Renamer;

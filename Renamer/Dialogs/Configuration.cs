@@ -1,4 +1,18 @@
-﻿using System;
+﻿#region SVN Info
+/***************************************************************
+ * $Author$
+ * $Revision$
+ * $Date$
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $URL$
+ * 
+ * License: GPLv3
+ * 
+****************************************************************/
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.ComponentModel;
@@ -20,8 +34,7 @@ namespace Renamer.Dialogs
         /// <summary>
         /// standard constructor
         /// </summary>
-        public Configuration()
-        {
+        public Configuration() {
             InitializeComponent();
         }
 
@@ -30,8 +43,7 @@ namespace Renamer.Dialogs
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Configuration_Load(object sender, EventArgs e)
-        {
+        private void Configuration_Load(object sender, EventArgs e) {
             //Get some strings            
             txtReplace.Text = Helper.ReadProperty(Config.InvalidCharReplace);
             nudSearchDepth.Text = Helper.ReadProperty(Config.MaxDepth);
@@ -39,46 +51,46 @@ namespace Renamer.Dialogs
 
             //Get multiline strings
             txtExtensions.Text = "";
-            foreach (string s in Helper.ReadProperties(Config.Extensions))
-            {
+            foreach (string s in Helper.ReadProperties(Config.Extensions)) {
                 txtExtensions.Text += s.ToLower() + Environment.NewLine;
             }
-            if (txtExtensions.Text.Length > 0) txtExtensions.Text = txtExtensions.Text.Substring(0, txtExtensions.Text.Length - Environment.NewLine.Length);
-            
+            if (txtExtensions.Text.Length > 0)
+                txtExtensions.Text = txtExtensions.Text.Substring(0, txtExtensions.Text.Length - Environment.NewLine.Length);
+
             txtSubs.Text = "";
-            foreach (string s in Helper.ReadProperties(Config.SubtitleExtensions))
-            {
+            foreach (string s in Helper.ReadProperties(Config.SubtitleExtensions)) {
                 txtSubs.Text += s.ToLower() + Environment.NewLine;
             }
-            if (txtSubs.Text.Length > 0) txtSubs.Text = txtSubs.Text.Substring(0, txtSubs.Text.Length - Environment.NewLine.Length);
+            if (txtSubs.Text.Length > 0)
+                txtSubs.Text = txtSubs.Text.Substring(0, txtSubs.Text.Length - Environment.NewLine.Length);
 
             txtPattern.Text = "";
-            foreach (string s in Helper.ReadProperties(Config.EpIdentifier))
-            {
+            foreach (string s in Helper.ReadProperties(Config.EpIdentifier)) {
                 txtPattern.Text += s + Environment.NewLine;
             }
-            if (txtPattern.Text.Length > 0) txtPattern.Text = txtPattern.Text.Substring(0, txtPattern.Text.Length - Environment.NewLine.Length);
+            if (txtPattern.Text.Length > 0)
+                txtPattern.Text = txtPattern.Text.Substring(0, txtPattern.Text.Length - Environment.NewLine.Length);
 
             txtStringReplace.Text = "";
-            foreach (string s in Helper.ReadProperties(Config.Replace))
-            {
+            foreach (string s in Helper.ReadProperties(Config.Replace)) {
                 txtStringReplace.Text += s + Environment.NewLine;
             }
-            if (txtStringReplace.Text.Length > 0) txtStringReplace.Text = txtStringReplace.Text.Substring(0, txtStringReplace.Text.Length - Environment.NewLine.Length);
+            if (txtStringReplace.Text.Length > 0)
+                txtStringReplace.Text = txtStringReplace.Text.Substring(0, txtStringReplace.Text.Length - Environment.NewLine.Length);
 
             txtTags.Text = "";
-            foreach (string s in Helper.ReadProperties(Config.Tags))
-            {
+            foreach (string s in Helper.ReadProperties(Config.Tags)) {
                 txtTags.Text += s + Environment.NewLine;
             }
-            if (txtTags.Text.Length > 0) txtTags.Text = txtTags.Text.Substring(0, txtTags.Text.Length - Environment.NewLine.Length);
+            if (txtTags.Text.Length > 0)
+                txtTags.Text = txtTags.Text.Substring(0, txtTags.Text.Length - Environment.NewLine.Length);
 
             txtExtract.Text = "";
-            foreach (string s in Helper.ReadProperties(Config.Extract))
-            {
+            foreach (string s in Helper.ReadProperties(Config.Extract)) {
                 txtExtract.Text += s + Environment.NewLine;
             }
-            if (txtExtract.Text.Length > 0) txtExtract.Text = txtExtract.Text.Substring(0, txtExtract.Text.Length - Environment.NewLine.Length);
+            if (txtExtract.Text.Length > 0)
+                txtExtract.Text = txtExtract.Text.Substring(0, txtExtract.Text.Length - Environment.NewLine.Length);
 
             //Get some enums
             cbError.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelError));
@@ -87,12 +99,12 @@ namespace Renamer.Dialogs
             cbInfo.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelInfo));
             cbDebug.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelDebug));
             cbReplace.SelectedIndex = (int)(Helper.InvalidFilenameAction)Enum.Parse(typeof(Helper.InvalidFilenameAction), Helper.ReadProperty(Config.InvalidFilenameAction));
-            cbUmlaut.SelectedIndex = (int)(InfoEntry.UmlautAction)Enum.Parse(typeof(InfoEntry.UmlautAction), Helper.ReadProperty(Config.Umlaute))-1;
-            cbCase.SelectedIndex = (int)(InfoEntry.Case)Enum.Parse(typeof(InfoEntry.Case), Helper.ReadProperty(Config.Case))-1;
-            
+            cbUmlaut.SelectedIndex = (int)(InfoEntry.UmlautAction)Enum.Parse(typeof(InfoEntry.UmlautAction), Helper.ReadProperty(Config.Umlaute)) - 1;
+            cbCase.SelectedIndex = (int)(InfoEntry.Case)Enum.Parse(typeof(InfoEntry.Case), Helper.ReadProperty(Config.Case)) - 1;
+
             //Get some ints
             nudTimeout.Value = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
-            
+
             //Get some bools
             chkCreateDirectoryStructure.Checked = Helper.StringToBool(Helper.ReadProperty(Config.CreateDirectoryStructure));
             chkDeleteEmptyFolders.Checked = Helper.StringToBool(Helper.ReadProperty(Config.DeleteEmptyFolders));
@@ -106,8 +118,7 @@ namespace Renamer.Dialogs
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
+        private void btnCancel_Click(object sender, EventArgs e) {
             Close();
         }
 
@@ -116,22 +127,19 @@ namespace Renamer.Dialogs
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnOK_Click(object sender, EventArgs e)
-        {
+        private void btnOK_Click(object sender, EventArgs e) {
             Helper.WriteProperty(Config.Timeout, nudTimeout.Value.ToString());
             Helper.WriteProperty(Config.MaxDepth, nudSearchDepth.Value.ToString());
             Helper.WriteProperty(Config.InvalidCharReplace, txtReplace.Text);
-            string[] extensions=txtExtensions.Text.Split(new string[]{Environment.NewLine},StringSplitOptions.RemoveEmptyEntries);
+            string[] extensions = txtExtensions.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             //Convert to lowercase
-            for (int i = 0; i < extensions.GetLength(0); i++)
-            {
+            for (int i = 0; i < extensions.GetLength(0); i++) {
                 extensions[i] = extensions[i].ToLower();
             }
             Helper.WriteProperties(Config.Extensions, extensions);
             string[] subextensions = txtSubs.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             //Convert to lowercase
-            for (int i = 0; i < subextensions.GetLength(0); i++)
-            {
+            for (int i = 0; i < subextensions.GetLength(0); i++) {
                 subextensions[i] = subextensions[i].ToLower();
             }
             Helper.WriteProperties(Config.SubtitleExtensions, subextensions);
@@ -145,51 +153,41 @@ namespace Renamer.Dialogs
             Helper.WriteProperty(Config.LogLevelStatus, ((Helper.LogLevel)cbStatus.SelectedIndex).ToString());
             Helper.WriteProperty(Config.LogLevelWarning, ((Helper.LogLevel)cbWarning.SelectedIndex).ToString());
             Helper.WriteProperty(Config.LogLevelDebug, ((Helper.LogLevel)cbDebug.SelectedIndex).ToString());
-            Helper.WriteProperty(Config.Umlaute, Enum.GetName(typeof(InfoEntry.UmlautAction), cbUmlaut.SelectedIndex+1));
-            Helper.WriteProperty(Config.Case, Enum.GetName(typeof(InfoEntry.Case), cbCase.SelectedIndex+1));
+            Helper.WriteProperty(Config.Umlaute, Enum.GetName(typeof(InfoEntry.UmlautAction), cbUmlaut.SelectedIndex + 1));
+            Helper.WriteProperty(Config.Case, Enum.GetName(typeof(InfoEntry.Case), cbCase.SelectedIndex + 1));
             Helper.WriteProperty(Config.InvalidFilenameAction, ((Helper.InvalidFilenameAction)cbReplace.SelectedIndex).ToString());
             string[] replace = txtStringReplace.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             Helper.WriteProperties(Config.Replace, replace);
             string[] tags = txtTags.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             Helper.WriteProperties(Config.Tags, tags);
-            if (chkCreateDirectoryStructure.Checked)
-            {
+            if (chkCreateDirectoryStructure.Checked) {
                 Helper.WriteProperty(Config.CreateDirectoryStructure, "1");
             }
-            else
-            {
+            else {
                 Helper.WriteProperty(Config.CreateDirectoryStructure, "0");
             }
-            if (chkDeleteEmptyFolders.Checked)
-            {
+            if (chkDeleteEmptyFolders.Checked) {
                 Helper.WriteProperty(Config.DeleteEmptyFolders, "1");
             }
-            else
-            {
+            else {
                 Helper.WriteProperty(Config.DeleteEmptyFolders, "0");
             }
-            if (chkDeleteAllEmptyFolders.Checked)
-            {
+            if (chkDeleteAllEmptyFolders.Checked) {
                 Helper.WriteProperty(Config.DeleteAllEmptyFolders, "1");
             }
-            else
-            {
+            else {
                 Helper.WriteProperty(Config.DeleteAllEmptyFolders, "0");
             }
-            if (chkUseSeasonSubdirs.Checked)
-            {
+            if (chkUseSeasonSubdirs.Checked) {
                 Helper.WriteProperty(Config.UseSeasonSubDir, "1");
             }
-            else
-            {
+            else {
                 Helper.WriteProperty(Config.UseSeasonSubDir, "0");
             }
-            if (chkResize.Checked)
-            {
+            if (chkResize.Checked) {
                 Helper.WriteProperty(Config.ResizeColumns, "1");
             }
-            else
-            {
+            else {
                 Helper.WriteProperty(Config.ResizeColumns, "0");
             }
             Helper.WriteProperties(Config.IgnoreFiles, txtIgnoreFiles.Text);
@@ -203,27 +201,19 @@ namespace Renamer.Dialogs
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnDefaults_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Reset to defaults?", "Reset", MessageBoxButtons.YesNo) == DialogResult.Yes)
-            {
+        private void btnDefaults_Click(object sender, EventArgs e) {
+            if (MessageBox.Show("Reset to defaults?", "Reset", MessageBoxButtons.YesNo) == DialogResult.Yes) {
+                Settings settings = Settings.getInstance();
                 //find config file, delete in memory, overwrite physical file and reload it. Then, refresh this dialog
-                for(int i=0;i<Settings.files.Count;i++){
-                    if (Settings.files[i].FilePath == Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + Settings.ConfigName)
-                    {
-                        Settings.files[i].variables = ((Hashtable)Settings.Defaults.variables.Clone());
-                        Settings.files[i].Flush();
-                        break;
-                    }
-                }           
+                settings[Helper.DefaultConfigFile()].LoadDefaults();
+                settings[Helper.DefaultConfigFile()].Flush();
 
                 //refresh the gui
-                Configuration_Load(null,null);
+                Configuration_Load(null, null);
             }
         }
 
-        private void chkDeleteEmptyFolders_CheckedChanged(object sender, EventArgs e)
-        {
+        private void chkDeleteEmptyFolders_CheckedChanged(object sender, EventArgs e) {
             label17.Enabled = chkDeleteEmptyFolders.Checked;
             label18.Enabled = chkDeleteEmptyFolders.Checked;
             chkDeleteAllEmptyFolders.Enabled = chkDeleteEmptyFolders.Checked;

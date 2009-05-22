@@ -1,3 +1,17 @@
+#region SVN Info
+/***************************************************************
+ * $Author$
+ * $Revision$
+ * $Date$
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $URL$
+ * 
+ * License: GPLv3
+ * 
+****************************************************************/
+#endregion
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -8,65 +22,6 @@ using System.Runtime.InteropServices;
 
 namespace ListViewEx
 {
-	/// <summary>
-	/// Event Handler for SubItem events
-	/// </summary>
-	public delegate void SubItemEventHandler(object sender, SubItemEventArgs e);
-	/// <summary>
-	/// Event Handler for SubItemEndEditing events
-	/// </summary>
-	public delegate void SubItemEndEditingEventHandler(object sender, SubItemEndEditingEventArgs e);
-
-	/// <summary>
-	/// Event Args for SubItemClicked event
-	/// </summary>
-	public class SubItemEventArgs : EventArgs
-	{
-		public SubItemEventArgs(ListViewItem item, int subItem)
-		{
-			_subItemIndex = subItem;
-			_item = item;
-		}
-		private int _subItemIndex = -1;
-		private ListViewItem _item = null;
-		public int SubItem
-		{
-			get { return _subItemIndex; }
-		}
-		public ListViewItem Item
-		{
-			get { return _item; }
-		}
-	}
-
-
-	/// <summary>
-	/// Event Args for SubItemEndEditingClicked event
-	/// </summary>
-	public class SubItemEndEditingEventArgs : SubItemEventArgs
-	{
-		private string _text = string.Empty;
-		private bool _cancel = true;
-
-		public SubItemEndEditingEventArgs(ListViewItem item, int subItem, string display, bool cancel) :
-			base(item, subItem)
-		{
-			_text = display;
-			_cancel = cancel;
-		}
-		public string DisplayText
-		{
-			get { return _text; }
-			set { _text = value; }
-		}
-		public bool Cancel
-		{
-			get { return _cancel; }
-			set { _cancel = value; }
-		}
-	}
-
-
 	///	<summary>
 	///	Inherited ListView to allow in-place editing of subitems
 	///	</summary>
@@ -455,4 +410,62 @@ namespace ListViewEx
 		}
 		#endregion
 	}
+
+    /// <summary>
+    /// Event Handler for SubItem events
+    /// </summary>
+    public delegate void SubItemEventHandler(object sender, SubItemEventArgs e);
+    /// <summary>
+    /// Event Handler for SubItemEndEditing events
+    /// </summary>
+    public delegate void SubItemEndEditingEventHandler(object sender, SubItemEndEditingEventArgs e);
+
+    /// <summary>
+    /// Event Args for SubItemClicked event
+    /// </summary>
+    public class SubItemEventArgs : EventArgs
+    {
+        public SubItemEventArgs(ListViewItem item, int subItem)
+        {
+            _subItemIndex = subItem;
+            _item = item;
+        }
+        private int _subItemIndex = -1;
+        private ListViewItem _item = null;
+        public int SubItem
+        {
+            get { return _subItemIndex; }
+        }
+        public ListViewItem Item
+        {
+            get { return _item; }
+        }
+    }
+
+
+    /// <summary>
+    /// Event Args for SubItemEndEditingClicked event
+    /// </summary>
+    public class SubItemEndEditingEventArgs : SubItemEventArgs
+    {
+        private string _text = string.Empty;
+        private bool _cancel = true;
+
+        public SubItemEndEditingEventArgs(ListViewItem item, int subItem, string display, bool cancel) :
+            base(item, subItem)
+        {
+            _text = display;
+            _cancel = cancel;
+        }
+        public string DisplayText
+        {
+            get { return _text; }
+            set { _text = value; }
+        }
+        public bool Cancel
+        {
+            get { return _cancel; }
+            set { _cancel = value; }
+        }
+    }
 }
