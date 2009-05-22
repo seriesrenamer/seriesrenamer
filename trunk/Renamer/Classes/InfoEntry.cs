@@ -1,4 +1,18 @@
-﻿using System;
+﻿#region SVN Info
+/***************************************************************
+ * $Author$
+ * $Revision$
+ * $Date$
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $URL$
+ * 
+ * License: GPLv3
+ * 
+****************************************************************/
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Renamer.Classes.Configuration.Keywords;
@@ -852,7 +866,7 @@ namespace Renamer.Classes
                 List<string> to = new List<string>();
                 foreach (string s in replace)
                 {
-                    if (!s.StartsWith(Settings.Comment))
+                    if (!s.StartsWith(Settings.getInstance().Comment))
                     {
                         int pos = s.IndexOf("->");
                         if (pos > 0 && pos < s.Length - 2)

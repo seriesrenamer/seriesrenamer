@@ -1,4 +1,18 @@
-﻿using System;
+﻿#region SVN Info
+/***************************************************************
+ * $Author$
+ * $Revision$
+ * $Date$
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $URL$
+ * 
+ * License: GPLv3
+ * 
+****************************************************************/
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,191 +26,191 @@ namespace Renamer.Classes.Configuration.Keywords
         /// <summary>
         /// comment string used in config file
         /// </summary>
-        public static string Comment = "Comment";
+        public const string Comment = "Comment";
 
         /// <summary>
         /// delimiter character used in config file
         /// </summary>
-        public static string Delimiter = "Delimiter";
+        public const string Delimiter = "Delimiter";
 
         /// <summary>
         /// video file extensions
         /// </summary>
-        public static string Extensions = "Extensions";
+        public const string Extensions = "Extensions";
 
         /// <summary>
         /// subtitle file extensions
         /// </summary>
-        public static string SubtitleExtensions = "SubtitleExtensions";
+        public const string SubtitleExtensions = "SubtitleExtensions";
 
         /// <summary>
         /// How info messages are displayed
         /// </summary>
-        public static string LogLevelInfo = "LogLevelInfo";
+        public const string LogLevelInfo = "LogLevelInfo";
 
         /// <summary>
         /// How warning messages are displayed
         /// </summary>
-        public static string LogLevelWarning = "LogLevelWarning";
+        public const string LogLevelWarning = "LogLevelWarning";
 
         /// <summary>
         /// How error messages are displayed
         /// </summary>
-        public static string LogLevelError = "LogLevelError";
+        public const string LogLevelError = "LogLevelError";
 
         /// <summary>
         /// How status messages are displayed
         /// </summary>
-        public static string LogLevelStatus = "LogLevelStatus";
+        public const string LogLevelStatus = "LogLevelStatus";
 
         /// <summary>
         /// How debug messages are displayed
         /// </summary>
-        public static string LogLevelDebug = "LogLevelDebug";
+        public const string LogLevelDebug = "LogLevelDebug";
 
         /// <summary>
         /// Logfile name
         /// </summary>
-        public static string LogName = "LogName";
+        public const string LogName = "LogName";
 
         /// <summary>
         /// Maximal subdirectory search depth
         /// </summary>
-        public static string MaxDepth = "MaxDepth";
+        public const string MaxDepth = "MaxDepth";
 
         /// <summary>
         /// Replace string for invalid filename characters
         /// </summary>
-        public static string InvalidCharReplace = "InvalidCharReplace";
+        public const string InvalidCharReplace = "InvalidCharReplace";
 
         /// <summary>
         /// Patterns used to extract season/episode information
         /// </summary>
-        public static string EpIdentifier = "EpIdentifier";
+        public const string EpIdentifier = "EpIdentifier";
 
         /// <summary>
         /// Target filename pattern
         /// </summary>
-        public static string TargetPattern = "TargetPattern";
+        public const string TargetPattern = "TargetPattern";
 
         /// <summary>
         /// Last entered series titles
         /// </summary>
-        public static string LastTitles = "LastTitles";
+        public const string LastTitles = "LastTitles";
 
         /// <summary>
         /// Last selected provider
         /// </summary>
-        public static string LastProvider = "LastProvider";
+        public const string LastProvider = "LastProvider";
 
         /// <summary>
         /// Last selected directory
         /// </summary>
-        public static string LastDirectory = "LastDirectory";
+        public const string LastDirectory = "LastDirectory";
 
         /// <summary>
         /// Last selected subtitle provider
         /// </summary>
-        public static string LastSubProvider = "LastSubProvider";
+        public const string LastSubProvider = "LastSubProvider";
 
         /// <summary>
         /// Timeout for network connections
         /// </summary>
-        public static string Timeout = "Timeout";
+        public const string Timeout = "Timeout";
 
         /// <summary>
         /// Action to tkae when invalid filenames are encountered
         /// </summary>
-        public static string InvalidFilenameAction = "InvalidFilenameAction";
+        public const string InvalidFilenameAction = "InvalidFilenameAction";
 
         /// <summary>
         /// How Umlauts are treated in target filenames
         /// </summary>
-        public static string Umlaute = "Umlaute";
+        public const string Umlaute = "Umlaute";
 
         /// <summary>
         /// How Umlauts are treated in target filenames
         /// </summary>
-        public static string Case = "Case";
+        public const string Case = "Case";
 
         /// <summary>
         /// Directory name for seasons, i.e. "Season %S"
         /// </summary>
-        public static string Extract = "Extract";
+        public const string Extract = "Extract";
 
         /// <summary>
         /// If files are to be moved in a sorted directory structure
         /// </summary>
-        public static string CreateDirectoryStructure = "CreateDirectoryStructure";
+        public const string CreateDirectoryStructure = "CreateDirectoryStructure";
 
         /// <summary>
         /// If empty folders resulting from file moving are to be deleted
         /// </summary>
-        public static string DeleteEmptyFolders = "DeleteEmptyFolders";
+        public const string DeleteEmptyFolders = "DeleteEmptyFolders";
 
         /// <summary>
         /// If other empty folders should be deleted too
         /// </summary>
-        public static string DeleteAllEmptyFolders = "DeleteAllEmptyFolders";
+        public const string DeleteAllEmptyFolders = "DeleteAllEmptyFolders";
 
         /// <summary>
         /// file types which should be ignored (=deleted) for above option
         /// </summary>
-        public static string IgnoreFiles = "IgnoreFiles";
+        public const string IgnoreFiles = "IgnoreFiles";
 
         /// <summary>
         /// Order in which the columns are displayed, positions in this array equal to absolute ordering of the columns, values are display order
         /// </summary>
-        public static string ColumnOrder = "ColumnOrder";
+        public const string ColumnOrder = "ColumnOrder";
 
         /// <summary>
         /// Widths of the columns
         /// </summary>
-        public static string ColumnWidths = "ColumnWidths";
+        public const string ColumnWidths = "ColumnWidths";
 
         /// <summary>
         /// Size of the main window
         /// </summary>
-        public static string WindowSize = "WindowSize";
+        public const string WindowSize = "WindowSize";
 
         /// <summary>
         /// Indicates if season subdirectory should be used, or if all files will be placed in show dir
         /// </summary>
-        public static string UseSeasonSubDir = "UseSeasonSubDir";
+        public const string UseSeasonSubDir = "UseSeasonSubDir";
 
         /// <summary>
         /// Size of the title history array
         /// </summary>
-        public static string TitleHistorySize = "TitleHistorySize";
+        public const string TitleHistorySize = "TitleHistorySize";
 
         /// <summary>
         /// Regex used to extract showname from filename/foldername
         /// </summary>
-        public static string ShownameExtractionRegex = "ShownameExtractionRegex";
+        public const string ShownameExtractionRegex = "ShownameExtractionRegex";
 
         /// <summary>
         /// strings used to determine if a recognized showname may be invalid
         /// </summary>
-        public static string ShownameBlacklist = "ShownameBlacklist";
+        public const string ShownameBlacklist = "ShownameBlacklist";
 
         /// <summary>
         /// Regex used to remove non-characters and other crap from names
         /// </summary>
-        public static string CleanupRegex = "CleanupRegex";
+        public const string CleanupRegex = "CleanupRegex";
 
         /// <summary>
         /// Replace strings in filenames
         /// </summary>
-        public static string Replace = "Replace";
+        public const string Replace = "Replace";
 
         /// <summary>
         /// Tags to remove from movies
         /// </summary>
-        public static string Tags = "Tags";
+        public const string Tags = "Tags";
 
         /// <summary>
         /// Automatically resize columns to fit window size
         /// </summary>
-        public static string ResizeColumns = "ResizeColumns";
+        public const string ResizeColumns = "ResizeColumns";
     }
 }

@@ -1,4 +1,18 @@
-﻿namespace Renamer
+﻿#region SVN Info
+/***************************************************************
+ * $Author$
+ * $Revision$
+ * $Date$
+ * $LastChangedBy$
+ * $LastChangedDate$
+ * $URL$
+ * 
+ * License: GPLv3
+ * 
+****************************************************************/
+#endregion
+
+namespace Renamer
 {
     partial class Form1
     {
@@ -31,6 +45,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.scContainer = new System.Windows.Forms.SplitContainer();
+            this.btnOpen = new System.Windows.Forms.Button();
             this.btnRename = new System.Windows.Forms.Button();
             this.txtTarget = new System.Windows.Forms.TextBox();
             this.cbSubs = new System.Windows.Forms.ComboBox();
@@ -41,6 +56,15 @@
             this.cbProviders = new System.Windows.Forms.ComboBox();
             this.lblFrom = new System.Windows.Forms.Label();
             this.btnTitles = new System.Windows.Forms.Button();
+            this.lstFiles = new ListViewEx.ListViewEx();
+            this.cOldName = new System.Windows.Forms.ColumnHeader();
+            this.cPath = new System.Windows.Forms.ColumnHeader();
+            this.cSeason = new System.Windows.Forms.ColumnHeader();
+            this.cEpID = new System.Windows.Forms.ColumnHeader();
+            this.cTitle = new System.Windows.Forms.ColumnHeader();
+            this.cNewName = new System.Windows.Forms.ColumnHeader();
+            this.cDestination = new System.Windows.Forms.ColumnHeader();
+            this.cShowname = new System.Windows.Forms.ColumnHeader();
             this.contextFiles = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editSubtitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -86,6 +110,7 @@
             this.operationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.regexTesterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnConfig = new System.Windows.Forms.Button();
             this.btnPath = new System.Windows.Forms.Button();
             this.txtPath = new System.Windows.Forms.TextBox();
@@ -96,18 +121,7 @@
             this.txtLog = new System.Windows.Forms.TextBox();
             this.rtbLog = new System.Windows.Forms.RichTextBox();
             this.fbdPath = new System.Windows.Forms.FolderBrowserDialog();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.btnOpen = new System.Windows.Forms.Button();
-            this.lstFiles = new ListViewEx.ListViewEx();
-            this.cOldName = new System.Windows.Forms.ColumnHeader();
-            this.cPath = new System.Windows.Forms.ColumnHeader();
-            this.cSeason = new System.Windows.Forms.ColumnHeader();
-            this.cEpID = new System.Windows.Forms.ColumnHeader();
-            this.cTitle = new System.Windows.Forms.ColumnHeader();
-            this.cNewName = new System.Windows.Forms.ColumnHeader();
-            this.cDestination = new System.Windows.Forms.ColumnHeader();
-            this.cShowname = new System.Windows.Forms.ColumnHeader();
-            this.regexTesterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.scContainer.Panel1.SuspendLayout();
             this.scContainer.Panel2.SuspendLayout();
             this.scContainer.SuspendLayout();
@@ -159,6 +173,17 @@
             this.scContainer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.scContainer_MouseDown);
             this.scContainer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.scContainer_MouseUp);
             // 
+            // btnOpen
+            // 
+            this.btnOpen.Image = global::Renamer.Properties.Resources.Browse;
+            this.btnOpen.Location = new System.Drawing.Point(524, 4);
+            this.btnOpen.Name = "btnOpen";
+            this.btnOpen.Size = new System.Drawing.Size(28, 23);
+            this.btnOpen.TabIndex = 15;
+            this.toolTip.SetToolTip(this.btnOpen, "Open Folder");
+            this.btnOpen.UseVisualStyleBackColor = true;
+            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
+            // 
             // btnRename
             // 
             this.btnRename.AutoSize = true;
@@ -178,7 +203,7 @@
             this.txtTarget.Size = new System.Drawing.Size(176, 20);
             this.txtTarget.TabIndex = 9;
             this.txtTarget.Text = "S%sE%E - %N";
-            this.toolTip1.SetToolTip(this.txtTarget, "Valid variables: %S - Season, %E - Episode, %T - Title, %N - Name, Small letter=1" +
+            this.toolTip.SetToolTip(this.txtTarget, "Valid variables: %S - Season, %E - Episode, %T - Title, %N - Name, Small letter=1" +
                     " digit");
             this.txtTarget.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtTarget_KeyDown);
             this.txtTarget.Leave += new System.EventHandler(this.txtTarget_Leave);
@@ -211,7 +236,7 @@
             this.label3.Size = new System.Drawing.Size(80, 13);
             this.label3.TabIndex = 8;
             this.label3.Text = "Target filename";
-            this.toolTip1.SetToolTip(this.label3, "Valid variables: %S - Season, %E - Episode, %T - Title, %N - Name, Small letter=1" +
+            this.toolTip.SetToolTip(this.label3, "Valid variables: %S - Season, %E - Episode, %T - Title, %N - Name, Small letter=1" +
                     " digit");
             // 
             // btnSubs
@@ -263,6 +288,90 @@
             this.btnTitles.UseVisualStyleBackColor = true;
             this.btnTitles.Click += new System.EventHandler(this.btnTitles_Click);
             // 
+            // lstFiles
+            // 
+            this.lstFiles.AllowColumnReorder = true;
+            this.lstFiles.AllowDrop = true;
+            this.lstFiles.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lstFiles.CheckBoxes = true;
+            this.lstFiles.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.cOldName,
+            this.cPath,
+            this.cSeason,
+            this.cEpID,
+            this.cTitle,
+            this.cNewName,
+            this.cDestination,
+            this.cShowname});
+            this.lstFiles.ContextMenuStrip = this.contextFiles;
+            this.lstFiles.DoubleClickActivation = true;
+            this.lstFiles.FullRowSelect = true;
+            this.lstFiles.Location = new System.Drawing.Point(15, 59);
+            this.lstFiles.Name = "lstFiles";
+            this.lstFiles.Size = new System.Drawing.Size(985, 396);
+            this.lstFiles.Sorting = System.Windows.Forms.SortOrder.Ascending;
+            this.lstFiles.TabIndex = 4;
+            this.toolTip.SetToolTip(this.lstFiles, "Double click on an entry in Season, Episode, Title or New File Name column to edi" +
+                    "t it");
+            this.lstFiles.UseCompatibleStateImageBehavior = false;
+            this.lstFiles.View = System.Windows.Forms.View.Details;
+            this.lstFiles.SubItemClicked += new ListViewEx.SubItemEventHandler(this.lstFiles_SubItemClicked);
+            this.lstFiles.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lstFiles_ItemChecked);
+            this.lstFiles.DoubleClick += new System.EventHandler(this.lstFiles_DoubleClick);
+            this.lstFiles.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstFiles_DragDrop);
+            this.lstFiles.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.lstFiles_ColumnClick);
+            this.lstFiles.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstFiles_DragEnter);
+            this.lstFiles.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstFiles_KeyDown);
+            this.lstFiles.SubItemEndEditing += new ListViewEx.SubItemEndEditingEventHandler(this.lstFiles_SubItemEndEditing);
+            // 
+            // cOldName
+            // 
+            this.cOldName.Text = "Old File Name";
+            this.cOldName.Width = 171;
+            // 
+            // cPath
+            // 
+            this.cPath.Text = "Path";
+            this.cPath.Width = 134;
+            // 
+            // cSeason
+            // 
+            this.cSeason.DisplayIndex = 3;
+            this.cSeason.Text = "Season";
+            this.cSeason.Width = 54;
+            // 
+            // cEpID
+            // 
+            this.cEpID.DisplayIndex = 4;
+            this.cEpID.Text = "Episode";
+            this.cEpID.Width = 56;
+            // 
+            // cTitle
+            // 
+            this.cTitle.DisplayIndex = 5;
+            this.cTitle.Text = "Title";
+            this.cTitle.Width = 140;
+            // 
+            // cNewName
+            // 
+            this.cNewName.DisplayIndex = 6;
+            this.cNewName.Text = "New File Name";
+            this.cNewName.Width = 181;
+            // 
+            // cDestination
+            // 
+            this.cDestination.DisplayIndex = 7;
+            this.cDestination.Text = "Destination";
+            this.cDestination.Width = 197;
+            // 
+            // cShowname
+            // 
+            this.cShowname.DisplayIndex = 2;
+            this.cShowname.Text = "Show Name";
+            this.cShowname.Width = 110;
+            // 
             // contextFiles
             // 
             this.contextFiles.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -285,7 +394,7 @@
             this.regexTesterToolStripMenuItem});
             this.contextFiles.Name = "contextFiles";
             this.contextFiles.ShowImageMargin = false;
-            this.contextFiles.Size = new System.Drawing.Size(241, 352);
+            this.contextFiles.Size = new System.Drawing.Size(241, 330);
             this.contextFiles.Opening += new System.ComponentModel.CancelEventHandler(this.contextFiles_Opening);
             // 
             // viewToolStripMenuItem
@@ -618,6 +727,16 @@
             this.deleteToolStripMenuItem.Text = "Delete";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
             // 
+            // regexTesterToolStripMenuItem
+            // 
+            this.regexTesterToolStripMenuItem.Name = "regexTesterToolStripMenuItem";
+            this.regexTesterToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+                        | System.Windows.Forms.Keys.R)));
+            this.regexTesterToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.regexTesterToolStripMenuItem.Text = "RegexTester";
+            this.regexTesterToolStripMenuItem.Visible = false;
+            this.regexTesterToolStripMenuItem.Click += new System.EventHandler(this.regexTesterToolStripMenuItem_Click);
+            // 
             // btnConfig
             // 
             this.btnConfig.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -637,7 +756,7 @@
             this.btnPath.Size = new System.Drawing.Size(28, 23);
             this.btnPath.TabIndex = 2;
             this.btnPath.Text = "...";
-            this.toolTip1.SetToolTip(this.btnPath, "Browse");
+            this.toolTip.SetToolTip(this.btnPath, "Browse");
             this.btnPath.UseVisualStyleBackColor = true;
             this.btnPath.Click += new System.EventHandler(this.btnPath_Click);
             // 
@@ -724,111 +843,6 @@
             this.fbdPath.Description = "Browse for folder containing series.";
             this.fbdPath.ShowNewFolderButton = false;
             // 
-            // btnOpen
-            // 
-            this.btnOpen.Image = global::Renamer.Properties.Resources.Browse;
-            this.btnOpen.Location = new System.Drawing.Point(524, 4);
-            this.btnOpen.Name = "btnOpen";
-            this.btnOpen.Size = new System.Drawing.Size(28, 23);
-            this.btnOpen.TabIndex = 15;
-            this.toolTip1.SetToolTip(this.btnOpen, "Open Folder");
-            this.btnOpen.UseVisualStyleBackColor = true;
-            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
-            // 
-            // lstFiles
-            // 
-            this.lstFiles.AllowColumnReorder = true;
-            this.lstFiles.AllowDrop = true;
-            this.lstFiles.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.lstFiles.CheckBoxes = true;
-            this.lstFiles.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.cOldName,
-            this.cPath,
-            this.cSeason,
-            this.cEpID,
-            this.cTitle,
-            this.cNewName,
-            this.cDestination,
-            this.cShowname});
-            this.lstFiles.ContextMenuStrip = this.contextFiles;
-            this.lstFiles.DoubleClickActivation = true;
-            this.lstFiles.FullRowSelect = true;
-            this.lstFiles.Location = new System.Drawing.Point(15, 59);
-            this.lstFiles.Name = "lstFiles";
-            this.lstFiles.Size = new System.Drawing.Size(985, 396);
-            this.lstFiles.Sorting = System.Windows.Forms.SortOrder.Ascending;
-            this.lstFiles.TabIndex = 4;
-            this.toolTip1.SetToolTip(this.lstFiles, "Double click on an entry in Season, Episode, Title or New File Name column to edi" +
-                    "t it");
-            this.lstFiles.UseCompatibleStateImageBehavior = false;
-            this.lstFiles.View = System.Windows.Forms.View.Details;
-            this.lstFiles.SubItemClicked += new ListViewEx.SubItemEventHandler(this.lstFiles_SubItemClicked);
-            this.lstFiles.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lstFiles_ItemChecked);
-            this.lstFiles.DoubleClick += new System.EventHandler(this.lstFiles_DoubleClick);
-            this.lstFiles.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstFiles_DragDrop);
-            this.lstFiles.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.lstFiles_ColumnClick);
-            this.lstFiles.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstFiles_DragEnter);
-            this.lstFiles.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstFiles_KeyDown);
-            this.lstFiles.SubItemEndEditing += new ListViewEx.SubItemEndEditingEventHandler(this.lstFiles_SubItemEndEditing);
-            // 
-            // cOldName
-            // 
-            this.cOldName.Text = "Old File Name";
-            this.cOldName.Width = 171;
-            // 
-            // cPath
-            // 
-            this.cPath.Text = "Path";
-            this.cPath.Width = 134;
-            // 
-            // cSeason
-            // 
-            this.cSeason.DisplayIndex = 3;
-            this.cSeason.Text = "Season";
-            this.cSeason.Width = 54;
-            // 
-            // cEpID
-            // 
-            this.cEpID.DisplayIndex = 4;
-            this.cEpID.Text = "Episode";
-            this.cEpID.Width = 56;
-            // 
-            // cTitle
-            // 
-            this.cTitle.DisplayIndex = 5;
-            this.cTitle.Text = "Title";
-            this.cTitle.Width = 140;
-            // 
-            // cNewName
-            // 
-            this.cNewName.DisplayIndex = 6;
-            this.cNewName.Text = "New File Name";
-            this.cNewName.Width = 181;
-            // 
-            // cDestination
-            // 
-            this.cDestination.DisplayIndex = 7;
-            this.cDestination.Text = "Destination";
-            this.cDestination.Width = 197;
-            // 
-            // cShowname
-            // 
-            this.cShowname.DisplayIndex = 2;
-            this.cShowname.Text = "Show Name";
-            this.cShowname.Width = 110;
-            // 
-            // regexTesterToolStripMenuItem
-            // 
-            this.regexTesterToolStripMenuItem.Name = "regexTesterToolStripMenuItem";
-            this.regexTesterToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.R)));
-            this.regexTesterToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
-            this.regexTesterToolStripMenuItem.Text = "RegexTester";
-            this.regexTesterToolStripMenuItem.Visible = false;
-            this.regexTesterToolStripMenuItem.Click += new System.EventHandler(this.regexTesterToolStripMenuItem_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -890,7 +904,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button btnSubs;
         private System.Windows.Forms.ComboBox cbSubs;
-        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.ToolStripMenuItem setEpisodesFromtoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editSubtitleToolStripMenuItem;
         private System.Windows.Forms.RichTextBox rtbLog;
