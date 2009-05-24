@@ -209,7 +209,12 @@ namespace Renamer
             }
             return value;
         }
-
+        /// <summary>
+        /// Read a enum value from the Configuration
+        /// </summary>
+        /// <typeparam name="T">Type of expected enum value</typeparam>
+        /// <param name="identifier">Identifier the enum value is stored</param>
+        /// <returns></returns>
         public static T ReadEnum<T>(string identifier) {
             string result = null;
             try {

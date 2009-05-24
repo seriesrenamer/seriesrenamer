@@ -7,19 +7,27 @@ using System.Drawing;
 
 namespace Renamer.Logging
 {
+    /// <summary>
+    /// Logger offers a nice colored logging to a Richtextbox
+    /// </summary>
     public class RichTextBoxLogger : ILogger
     {
         private RichTextBox richTextBox;
-        protected string logColorString;
+        private string logColorString;
 
         private List<Color> logColors;
-        protected Hashtable logColorIndex;
-        protected Hashtable logColor;
+        private Hashtable logColorIndex;
+        private Hashtable logColor;
         private LogLevel filter;
 
         string rtf;
         string rtfInserPosString;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="txtBox"></param>
+        /// <param name="filter">Log level the logger should listen to</param>
         public RichTextBoxLogger(RichTextBox txtBox, LogLevel filter) {
             this.filter = filter;
             richTextBox = txtBox;

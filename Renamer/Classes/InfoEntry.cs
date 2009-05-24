@@ -43,10 +43,10 @@ namespace Renamer.Classes
         /// </summary>
         public enum DirectoryStructure : int { Unset, CreateDirectoryStructure, NoDirectoryStructure };
 
+        private string _Filename = "";
         /// <summary>
         /// Old filename with extension
         /// </summary>
-        private string _Filename = "";
         public string Filename {
             get { return _Filename; }
             set {
@@ -58,10 +58,10 @@ namespace Renamer.Classes
                 }
             }
         }
+        private string _Extension = "";
         /// <summary>
         /// Extension of the file without dot, i.e. "avi" or "srt"
         /// </summary>
-        private string _Extension = "";
         public string Extension {
             get { return _Extension; }
             set {
@@ -73,10 +73,10 @@ namespace Renamer.Classes
                 }
             }
         }
+        private string _Path = "";
         /// <summary>
         /// Path of the file
         /// </summary>
-        private string _Path = "";
         public string Path {
             get { return _Path; }
             set {
@@ -105,10 +105,10 @@ namespace Renamer.Classes
             }
         }
 
+        private string _Episode = "";
         /// <summary>
         /// number of the episode
         /// </summary>
-        private string _Episode = "";
         public string Episode {
             get { return _Episode; }
             set {
@@ -118,10 +118,10 @@ namespace Renamer.Classes
                 }
             }
         }
+        public string _Name = "";
         /// <summary>
         /// name of the episode
         /// </summary>
-        public string _Name = "";
         public string Name {
             get { return _Name; }
             set {
@@ -149,10 +149,10 @@ namespace Renamer.Classes
         /// </summary>
         public bool Process = true;
 
+        private bool _Movie = false;
         /// <summary>
         /// If file is a movie.
         /// </summary>
-        private bool _Movie = false;
         public bool Movie {
             get { return _Movie; }
             set {
@@ -163,10 +163,10 @@ namespace Renamer.Classes
                 }
             }
         }
+        public string _Showname = "";
         /// <summary>
         /// Name of the show this file belongs to.
         /// </summary>
-        public string _Showname = "";
         public string Showname {
             get { return _Showname; }
             set {
@@ -182,6 +182,9 @@ namespace Renamer.Classes
         }
 
         private UmlautAction _UmlautUsage = UmlautAction.Unset;
+        /// <summary>
+        /// Option indicates the using of umlaute
+        /// </summary>
         public UmlautAction UmlautUsage {
             get { return _UmlautUsage; }
             set {
@@ -192,8 +195,10 @@ namespace Renamer.Classes
                 }
             }
         }
-
         private Case _Casing = Case.Unset;
+        /// <summary>
+        /// Option indicates the use of UPPER and lowercase
+        /// </summary>
         public Case Casing {
             get { return _Casing; }
             set {
@@ -234,8 +239,6 @@ namespace Renamer.Classes
         /// <summary>
         /// Extracts the name from a file and sets it as title
         /// </summary>
-        /// <param name="path">path to extract name from</param>
-        /// <param name="filename">filename to extract name from</param>
         /// <returns>extracted name or null</returns>
         private void ExtractName() {
             System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();

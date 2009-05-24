@@ -5,10 +5,18 @@ using System.Windows.Forms;
 
 namespace Renamer.Logging
 {
+    /// <summary>
+    /// Logger which can log to a ListBox
+    /// </summary>
     public class ListBoxLogger : ILogger
     {
         ListBox m_listBox;
         private LogLevel filter;
+        /// <summary>
+        /// Creates a new ListBoxLogger
+        /// </summary>
+        /// <param name="listBox">ListBox, log entries should e added</param>
+        /// <param name="filter">Log level the logger should listen to</param>
         public ListBoxLogger(ListBox listBox, LogLevel filter) {
             this.filter = filter;
             m_listBox = listBox;

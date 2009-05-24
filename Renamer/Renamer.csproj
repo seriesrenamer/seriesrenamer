@@ -46,6 +46,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\Series Renamer.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -299,8 +300,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Logging\DLLs\ICSharpCode.SharpZipLib.dll" />
-    <Content Include="Logging\DLLs\unrar.dll" />
+    <Content Include="DLLs\ICSharpCode.SharpZipLib.dll" />
+    <Content Include="DLLs\unrar.dll" />
     <Content Include="sr1.ico" />
   </ItemGroup>
   <ItemGroup>
