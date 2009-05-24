@@ -20,6 +20,7 @@ using Renamer.Classes;
 using Renamer.Classes.Configuration.Keywords;
 using Renamer.Classes.Configuration;
 using System.Collections;
+using Renamer.Logging;
 
 namespace Renamer
 {
@@ -68,6 +69,8 @@ namespace Renamer
         /// </summary>
         private bool monoCompatibilityMode;
 
+        private string currentlyReadingFile;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -79,16 +82,16 @@ namespace Renamer
                 monoCompatibilityMode = false;
             }
 
+            this.currentlyReadingFile = "";
             files = new Hashtable();
             SetupDefaults();
         }
-
         public ConfigFile this[string name] {
             get {
                 if (!this.fileLoaded(name)) {
                     // Load a file because it's not available yet
                     if (this.IsMonoCompatibilityMode) {
-                        Helper.Log(name + " not loaded yet", Helper.LogType.Plain);
+                        Logger.Instance.LogMessage(name + " not loaded yet", LogLevel.LOG);
                     }
                     return this.addConfigFile(name);
                 }
@@ -156,44 +159,42 @@ namespace Renamer
         /// </summary>
         private void SetupDefaults() {
             defaults = new ConfigFile("");
-            defaults.addVariable(Config.Comment, "//");
-            defaults.addVariable(Config.Delimiter, "^");
-            defaults.addVariable(Config.Extensions, new List<string>(new string[] { "avi", "mpg", "mpeg", "mp4", "divx", "mkv", "wmv" }));
-            defaults.addVariable(Config.SubtitleExtensions, new List<string>(new string[] { "srt", "sub" }));
-            defaults.addVariable(Config.LogLevelInfo, "LogFile");
-            defaults.addVariable(Config.LogLevelWarning, "LogFile");
-            defaults.addVariable(Config.LogLevelError, "Log_and_Message");
-            defaults.addVariable(Config.LogLevelStatus, "LogFile");
-            defaults.addVariable(Config.LogLevelDebug, "None");
-            defaults.addVariable(Config.LogName, "Renamer.log");
-            defaults.addVariable(Config.MaxDepth, "0");
-            defaults.addVariable(Config.InvalidCharReplace, "-");
-            defaults.addVariable(Config.EpIdentifier, new List<string>(new string[] { "S%SE%E", "%Sx%E", "S%S.E%E", "- %S%E -", "-E%E-", ".%S%E.", "%S.%E", "%S%E" }));
-            defaults.addVariable(Config.TargetPattern, "S%sE%E - %N");
-            defaults.addVariable(Config.LastTitles, new List<string>(new string[] { "The Simpsons", "Heroes", "Scrubs", "Supernatural", "Eureka", "Chuck", "Stargate", "Stargate Atlantis", "Dexter", "Doctor Who", "24", "Firefly", "Kyle XY", "Prison Break", "Moonlight", "Monk", "House M.D.", "Gilmore Girls", "Friends", "Sex and the City" }));
-            defaults.addVariable(Config.LastProvider, "");
-            defaults.addVariable(Config.LastDirectory, "");
-            defaults.addVariable(Config.LastSubProvider, "");
-            defaults.addVariable(Config.Timeout, "10000");
-            defaults.addVariable(Config.InvalidFilenameAction, "Ask");
-            defaults.addVariable(Config.Umlaute, "Dont_Use");
-            defaults.addVariable(Config.Case, "Large");
-            defaults.addVariable(Config.Extract, new List<string>(new string[] { "Season %S", "Season_%S", "Season%S", "Staffel %S", "Staffel_%S", "Staffel%S" }));
-            defaults.addVariable(Config.CreateDirectoryStructure, "1");
-            defaults.addVariable(Config.DeleteEmptyFolders, "1");
-            defaults.addVariable(Config.DeleteAllEmptyFolders, "1");
-            defaults.addVariable(Config.IgnoreFiles, new List<string>(new string[] { "nfo", "diz" }));
-            defaults.addVariable(Config.ColumnOrder, new List<string>(new string[] { "0", "1", "2", "3", "4", "6", "5" }));
-            defaults.addVariable(Config.ColumnWidths, new List<string>(new string[] { "209", "137", "55", "57", "144", "188", "188" }));
-            defaults.addVariable(Config.WindowSize, new List<string>(new string[] { "1024", "600" }));
-            defaults.addVariable(Config.UseSeasonSubDir, "1");
-            defaults.addVariable(Config.TitleHistorySize, "100");
-            defaults.addVariable(Config.ShownameExtractionRegex, "((?<pos>\\.S\\d+E\\d+\\.)|(?<pos>\\.\\d+\\.)|(?<pos>[^\\. _-]\\d{3,}))");
-            defaults.addVariable(Config.CleanupRegex, "[.-_;,!='+]");
-            defaults.addVariable(Config.Replace, new List<string>(new string[] { "//Comments are indicated by //", "//Format used here is \"From->To\",", "//where \"From\" is a c# regular expression, see", "//http://www.radsoftware.com.au/articles/regexlearnsyntax.aspx for details", "//example: \"\\s->.\" replaces whitespaces with dots", "cd->CD", " i\\.-> I.", " ii\\.-> II.", " iii\\.-> III.", " iv\\.-> IV.", " v\\.-> V.", " vi\\.-> VI.", " vii\\.-> VII.", " i -> I ", " ii -> II ", " iii -> III ", " iv -> IV ", " v -> V ", " vi -> VI ", " vii -> VII ", "\\[\\d+\\]->", " +-> " }));
-            defaults.addVariable(Config.Tags, new List<string>(new string[] { "Xvid", "DivX", "R5", "R3", "GERMAN", "DVD", "INTERNAL", "PROPER", "TELECINE", "LINE", "LD", "MD", "AC3", "SVCD", "XSVCD", "VCD", "Dubbed", "HD", "720P", "720", "SCREENER", "RSVCD", "\\d\\d\\d\\d", "TS", "GER" }));
-            defaults.addVariable(Config.ResizeColumns, "1");
-            defaults.addVariable(Config.ShownameBlacklist, "Season^Staffel");
+            defaults[Config.Comment] = "//";
+            defaults[Config.Delimiter] = "^";
+            defaults[Config.Extensions] = new List<string>(new string[] { "avi", "mpg", "mpeg", "mp4", "divx", "mkv", "wmv" });
+            defaults[Config.SubtitleExtensions] = new List<string>(new string[] { "srt", "sub" });
+            defaults[Config.LogFileLevel] = "DEBUG";
+            defaults[Config.LogTextBoxLevel] = "LOG";
+            defaults[Config.LogMessageBoxLevel] = "CRITICAL";
+            defaults[Config.LogName] = "Renamer.log";
+            defaults[Config.MaxDepth] = "0";
+            defaults[Config.InvalidCharReplace] = "-";
+            defaults[Config.EpIdentifier] = new List<string>(new string[] { "S%SE%E", "%Sx%E", "S%S.E%E", "- %S%E -", "-E%E-", ".%S%E.", "%S.%E", "%S%E" });
+            defaults[Config.TargetPattern] = "S%sE%E - %N";
+            defaults[Config.LastTitles] = new List<string>(new string[] { "The Simpsons", "Heroes", "Scrubs", "Supernatural", "Eureka", "Chuck", "Stargate", "Stargate Atlantis", "Dexter", "Doctor Who", "24", "Firefly", "Kyle XY", "Prison Break", "Moonlight", "Monk", "House M.D.", "Gilmore Girls", "Friends", "Sex and the City" });
+            defaults[Config.LastProvider] = "";
+            defaults[Config.LastDirectory] = "";
+            defaults[Config.LastSubProvider] = "";
+            defaults[Config.Timeout] = "10000";
+            defaults[Config.InvalidFilenameAction] = "Ask";
+            defaults[Config.Umlaute] = "Dont_Use";
+            defaults[Config.Case] = "Large";
+            defaults[Config.Extract] = new List<string>(new string[] { "Season %S", "Season_%S", "Season%S", "Staffel %S", "Staffel_%S", "Staffel%S" });
+            defaults[Config.CreateDirectoryStructure] = "1";
+            defaults[Config.DeleteEmptyFolders] = "1";
+            defaults[Config.DeleteAllEmptyFolders] = "1";
+            defaults[Config.IgnoreFiles] = new List<string>(new string[] { "nfo", "diz" });
+            defaults[Config.ColumnOrder] = new List<string>(new string[] { "0", "1", "2", "3", "4", "6", "5" });
+            defaults[Config.ColumnWidths] = new List<string>(new string[] { "209", "137", "55", "57", "144", "188", "188" });
+            defaults[Config.WindowSize] = new List<string>(new string[] { "1024", "600" });
+            defaults[Config.UseSeasonSubDir] = "1";
+            defaults[Config.TitleHistorySize] = "100";
+            defaults[Config.ShownameExtractionRegex] = "((?<pos>\\.S\\d+E\\d+\\.)|(?<pos>\\.\\d+\\.)|(?<pos>[^\\. _-]\\d{3,}))";
+            defaults[Config.CleanupRegex] = "[.-_;,!='+]";
+            defaults[Config.Replace] = new List<string>(new string[] { "//Comments are indicated by //", "//Format used here is \"From->To\",", "//where \"From\" is a c# regular expression, see", "//http://www.radsoftware.com.au/articles/regexlearnsyntax.aspx for details", "//example: \"\\s->.\" replaces whitespaces with dots", "cd->CD", " i\\.-> I.", " ii\\.-> II.", " iii\\.-> III.", " iv\\.-> IV.", " v\\.-> V.", " vi\\.-> VI.", " vii\\.-> VII.", " i -> I ", " ii -> II ", " iii -> III ", " iv -> IV ", " v -> V ", " vi -> VI ", " vii -> VII ", "\\[\\d+\\]->", " +-> " });
+            defaults[Config.Tags] = new List<string>(new string[] { "Xvid", "DivX", "R5", "R3", "GERMAN", "DVD", "INTERNAL", "PROPER", "TELECINE", "LINE", "LD", "MD", "AC3", "SVCD", "XSVCD", "VCD", "Dubbed", "HD", "720P", "720", "SCREENER", "RSVCD", "\\d\\d\\d\\d", "TS", "GER" });
+            defaults[Config.ResizeColumns] = "1";
+            defaults[Config.ShownameBlacklist] = "Season^Staffel";
         }
 
         public bool fileLoaded(string filePath) {
@@ -201,7 +202,12 @@ namespace Renamer
         }
 
         public ConfigFile addConfigFile(string filePath) {
+            if (filePath == currentlyReadingFile) {
+                return null;
+            }
+            currentlyReadingFile = filePath;
             this[filePath] = new ConfigFile(filePath);
+            currentlyReadingFile = "";
             return this[filePath];
         }
 

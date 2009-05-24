@@ -23,6 +23,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Renamer.Classes.SubtitleEdit;
 using System.Diagnostics;
+using Renamer.Logging;
 
 namespace Renamer.Dialogs
 {
@@ -71,14 +72,14 @@ namespace Renamer.Dialogs
                 subtitle = new srtEditFile(path);
                 //no subs found, error and close dialog
                 if(subtitle.subs.Count==0){
-                    Helper.Log("Subtitle file could not be processed properly",Helper.LogType.Error);
+                    Logger.Instance.LogMessage("Subtitle file could not be processed properly",LogLevel.ERROR);
                     Close();
                     return;
                 }
             }
             else
             {
-                Helper.Log("No support for this subtitle format yet, sorry.", Helper.LogType.Info);
+                Logger.Instance.LogMessage("No support for this subtitle format yet, sorry.", LogLevel.INFO);
                 Close();
                 return;
             }
@@ -284,7 +285,7 @@ namespace Renamer.Dialogs
             }
             catch (Exception ex)
             {
-                Helper.Log("Couldn't open " + videopath + ":" + ex.Message, Helper.LogType.Error);
+                Logger.Instance.LogMessage("Couldn't open " + videopath + ":" + ex.Message, LogLevel.ERROR);
             }
         }
         #endregion

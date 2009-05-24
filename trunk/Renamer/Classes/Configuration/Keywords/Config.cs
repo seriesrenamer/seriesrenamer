@@ -44,29 +44,18 @@ namespace Renamer.Classes.Configuration.Keywords
         public const string SubtitleExtensions = "SubtitleExtensions";
 
         /// <summary>
-        /// How info messages are displayed
+        /// Loglevel for logfile
         /// </summary>
-        public const string LogLevelInfo = "LogLevelInfo";
+        public const string LogFileLevel = "LogFileLevel";
+        /// <summary>
+        /// Loglevel for messageboxes
+        /// </summary>
+        public const string LogMessageBoxLevel = "LogMessageBoxLevel";
 
         /// <summary>
-        /// How warning messages are displayed
+        /// Loglevel for TextBox
         /// </summary>
-        public const string LogLevelWarning = "LogLevelWarning";
-
-        /// <summary>
-        /// How error messages are displayed
-        /// </summary>
-        public const string LogLevelError = "LogLevelError";
-
-        /// <summary>
-        /// How status messages are displayed
-        /// </summary>
-        public const string LogLevelStatus = "LogLevelStatus";
-
-        /// <summary>
-        /// How debug messages are displayed
-        /// </summary>
-        public const string LogLevelDebug = "LogLevelDebug";
+        public const string LogTextBoxLevel = "LogTextBoxLevel";
 
         /// <summary>
         /// Logfile name

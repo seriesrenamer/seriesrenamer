@@ -49,12 +49,12 @@ namespace Renamer
             this.btnRename = new System.Windows.Forms.Button();
             this.txtTarget = new System.Windows.Forms.TextBox();
             this.cbSubs = new System.Windows.Forms.ComboBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
+            this.lblSubFrom = new System.Windows.Forms.Label();
+            this.lblTargetFilename = new System.Windows.Forms.Label();
             this.btnSubs = new System.Windows.Forms.Button();
             this.btnAbout = new System.Windows.Forms.Button();
             this.cbProviders = new System.Windows.Forms.ComboBox();
-            this.lblFrom = new System.Windows.Forms.Label();
+            this.lblTitlesFrom = new System.Windows.Forms.Label();
             this.btnTitles = new System.Windows.Forms.Button();
             this.lstFiles = new ListViewEx.ListViewEx();
             this.cOldName = new System.Windows.Forms.ColumnHeader();
@@ -114,7 +114,7 @@ namespace Renamer
             this.btnConfig = new System.Windows.Forms.Button();
             this.btnPath = new System.Windows.Forms.Button();
             this.txtPath = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblFolder = new System.Windows.Forms.Label();
             this.txtEdit = new System.Windows.Forms.TextBox();
             this.numEdit = new System.Windows.Forms.NumericUpDown();
             this.comEdit = new System.Windows.Forms.ComboBox();
@@ -145,18 +145,18 @@ namespace Renamer
             this.scContainer.Panel1.Controls.Add(this.btnRename);
             this.scContainer.Panel1.Controls.Add(this.txtTarget);
             this.scContainer.Panel1.Controls.Add(this.cbSubs);
-            this.scContainer.Panel1.Controls.Add(this.label5);
-            this.scContainer.Panel1.Controls.Add(this.label3);
+            this.scContainer.Panel1.Controls.Add(this.lblSubFrom);
+            this.scContainer.Panel1.Controls.Add(this.lblTargetFilename);
             this.scContainer.Panel1.Controls.Add(this.btnSubs);
             this.scContainer.Panel1.Controls.Add(this.btnAbout);
             this.scContainer.Panel1.Controls.Add(this.cbProviders);
-            this.scContainer.Panel1.Controls.Add(this.lblFrom);
+            this.scContainer.Panel1.Controls.Add(this.lblTitlesFrom);
             this.scContainer.Panel1.Controls.Add(this.btnTitles);
             this.scContainer.Panel1.Controls.Add(this.lstFiles);
             this.scContainer.Panel1.Controls.Add(this.btnConfig);
             this.scContainer.Panel1.Controls.Add(this.btnPath);
             this.scContainer.Panel1.Controls.Add(this.txtPath);
-            this.scContainer.Panel1.Controls.Add(this.label1);
+            this.scContainer.Panel1.Controls.Add(this.lblFolder);
             this.scContainer.Panel1.Controls.Add(this.txtEdit);
             this.scContainer.Panel1.Controls.Add(this.numEdit);
             this.scContainer.Panel1.Controls.Add(this.comEdit);
@@ -168,7 +168,7 @@ namespace Renamer
             this.scContainer.Panel2.Controls.Add(this.rtbLog);
             this.scContainer.Panel2MinSize = 100;
             this.scContainer.Size = new System.Drawing.Size(1016, 561);
-            this.scContainer.SplitterDistance = 457;
+            this.scContainer.SplitterDistance = 453;
             this.scContainer.TabIndex = 0;
             this.scContainer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.scContainer_MouseDown);
             this.scContainer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.scContainer_MouseUp);
@@ -218,25 +218,24 @@ namespace Renamer
             this.cbSubs.TabIndex = 13;
             this.cbSubs.SelectedIndexChanged += new System.EventHandler(this.cbSubs_SelectedIndexChanged);
             // 
-            // label5
+            // lblSubFrom
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(353, 38);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(88, 13);
-            this.label5.TabIndex = 12;
-            this.label5.Text = "Get subtitles from";
+            this.lblSubFrom.AutoSize = true;
+            this.lblSubFrom.Location = new System.Drawing.Point(353, 38);
+            this.lblSubFrom.Name = "lblSubFrom";
+            this.lblSubFrom.Size = new System.Drawing.Size(88, 13);
+            this.lblSubFrom.TabIndex = 12;
+            this.lblSubFrom.Text = "Get subtitles from";
             // 
-            // label3
+            // lblTargetFilename
             // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(649, 9);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(80, 13);
-            this.label3.TabIndex = 8;
-            this.label3.Text = "Target filename";
-            this.toolTip.SetToolTip(this.label3, "Valid variables: %S - Season, %E - Episode, %T - Title, %N - Name, Small letter=1" +
+            this.lblTargetFilename.AutoSize = true;
+            this.lblTargetFilename.Location = new System.Drawing.Point(649, 9);
+            this.lblTargetFilename.Name = "lblTargetFilename";
+            this.lblTargetFilename.Size = new System.Drawing.Size(80, 13);
+            this.lblTargetFilename.TabIndex = 8;
+            this.lblTargetFilename.Text = "Target filename";
+            this.toolTip.SetToolTip(this.lblTargetFilename, "Valid variables: %S - Season, %E - Episode, %T - Title, %N - Name, Small letter=1" +
                     " digit");
             // 
             // btnSubs
@@ -269,14 +268,14 @@ namespace Renamer
             this.cbProviders.TabIndex = 9;
             this.cbProviders.SelectedIndexChanged += new System.EventHandler(this.cbProviders_SelectedIndexChanged);
             // 
-            // lblFrom
+            // lblTitlesFrom
             // 
-            this.lblFrom.AutoSize = true;
-            this.lblFrom.Location = new System.Drawing.Point(12, 38);
-            this.lblFrom.Name = "lblFrom";
-            this.lblFrom.Size = new System.Drawing.Size(71, 13);
-            this.lblFrom.TabIndex = 8;
-            this.lblFrom.Text = "Get titles from";
+            this.lblTitlesFrom.AutoSize = true;
+            this.lblTitlesFrom.Location = new System.Drawing.Point(12, 38);
+            this.lblTitlesFrom.Name = "lblTitlesFrom";
+            this.lblTitlesFrom.Size = new System.Drawing.Size(71, 13);
+            this.lblTitlesFrom.TabIndex = 8;
+            this.lblTitlesFrom.Text = "Get titles from";
             // 
             // btnTitles
             // 
@@ -310,7 +309,7 @@ namespace Renamer
             this.lstFiles.FullRowSelect = true;
             this.lstFiles.Location = new System.Drawing.Point(15, 59);
             this.lstFiles.Name = "lstFiles";
-            this.lstFiles.Size = new System.Drawing.Size(985, 396);
+            this.lstFiles.Size = new System.Drawing.Size(993, 391);
             this.lstFiles.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.lstFiles.TabIndex = 4;
             this.toolTip.SetToolTip(this.lstFiles, "Double click on an entry in Season, Episode, Title or New File Name column to edi" +
@@ -771,14 +770,14 @@ namespace Renamer
             this.txtPath.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtPath_KeyDown);
             this.txtPath.Leave += new System.EventHandler(this.txtPath_Leave);
             // 
-            // label1
+            // lblFolder
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(36, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Folder";
+            this.lblFolder.AutoSize = true;
+            this.lblFolder.Location = new System.Drawing.Point(12, 9);
+            this.lblFolder.Name = "lblFolder";
+            this.lblFolder.Size = new System.Drawing.Size(36, 13);
+            this.lblFolder.TabIndex = 0;
+            this.lblFolder.Text = "Folder";
             // 
             // txtEdit
             // 
@@ -833,7 +832,7 @@ namespace Renamer
             this.rtbLog.Name = "rtbLog";
             this.rtbLog.ReadOnly = true;
             this.rtbLog.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.rtbLog.Size = new System.Drawing.Size(985, 87);
+            this.rtbLog.Size = new System.Drawing.Size(993, 91);
             this.rtbLog.TabIndex = 0;
             this.rtbLog.Text = "";
             this.rtbLog.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtbLog_LinkClicked);
@@ -871,7 +870,7 @@ namespace Renamer
 
         #endregion
         private System.Windows.Forms.SplitContainer scContainer;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblFolder;
         private System.Windows.Forms.TextBox txtPath;
         private System.Windows.Forms.Button btnPath;
         private System.Windows.Forms.Button btnConfig;
@@ -883,7 +882,7 @@ namespace Renamer
         private System.Windows.Forms.ColumnHeader cTitle;
         private System.Windows.Forms.ColumnHeader cNewName;
         private System.Windows.Forms.Button btnTitles;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lblTargetFilename;
         private System.Windows.Forms.TextBox txtTarget;
         private System.Windows.Forms.Button btnRename;
         private System.Windows.Forms.ColumnHeader cPath;
@@ -891,7 +890,7 @@ namespace Renamer
         private System.Windows.Forms.NumericUpDown numEdit;
         private System.Windows.Forms.ComboBox comEdit;
         private System.Windows.Forms.ComboBox cbProviders;
-        private System.Windows.Forms.Label lblFrom;
+        private System.Windows.Forms.Label lblTitlesFrom;
         private System.Windows.Forms.Button btnAbout;
         private System.Windows.Forms.ContextMenuStrip contextFiles;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
@@ -901,7 +900,7 @@ namespace Renamer
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label lblSubFrom;
         private System.Windows.Forms.Button btnSubs;
         private System.Windows.Forms.ComboBox cbSubs;
         private System.Windows.Forms.ToolTip toolTip;

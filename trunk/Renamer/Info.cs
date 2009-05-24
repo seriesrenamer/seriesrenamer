@@ -20,6 +20,7 @@ using System.IO;
 using Renamer.Classes;
 using Renamer.Classes.Configuration.Keywords;
 using Renamer.Classes.Configuration;
+using Renamer.Logging;
 namespace Renamer
 {
     /// <summary>
@@ -36,7 +37,7 @@ namespace Renamer
         /// List of season/episode<->name relations
         /// </summary>
         public static List<RelationCollection> Relations = new List<RelationCollection>();
-                
+
         /// <summary>
         /// List of season/episode<->name relation providers
         /// </summary>
@@ -67,65 +68,58 @@ namespace Renamer
         /// <summary>
         /// Constructor, loads all providers
         /// </summary>
-        public Info()
-        {
+        public Info() {
             //Get all series name providers
             List<string> providers = new List<string>(Directory.GetFiles(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/Databases/Titles"));
             string status = "Providers found:";
-            foreach (string str in providers)
-            {
-                if(Settings.getInstance().IsMonoCompatibilityMode)
-                Helper.Log("Provider: " + str, Helper.LogType.Status);
+            foreach (string file in providers) {
+                if (Settings.getInstance().IsMonoCompatibilityMode) {
+                    Logger.Instance.LogMessage("Provider: " + file, LogLevel.INFO);
+                }
                 RelationProvider rel = new RelationProvider();
-                rel.Name = Helper.ReadProperty(ProviderConfig.Name, str);
-                rel.RelationsPage = Helper.ReadProperty(ProviderConfig.RelationsPage, str);
-                rel.RelationsRegExp = Helper.ReadProperty(ProviderConfig.RelationsRegExp, str);
-                rel.SearchRegExp = Helper.ReadProperty(ProviderConfig.SearchRegExp, str);
-                rel.SearchResultsURL = Helper.ReadProperty(ProviderConfig.SearchResultsURL, str);
-                rel.SearchURL = Helper.ReadProperty(ProviderConfig.SearchURL, str);
-                rel.SeriesURL = Helper.ReadProperty(ProviderConfig.SeriesURL, str);
-                rel.EpisodesURL = Helper.ReadProperty(ProviderConfig.EpisodesURL, str);
-                rel.SearchRemove = Helper.ReadProperties(ProviderConfig.SearchRemove, str);
-                rel.SearchStart = Helper.ReadProperty(ProviderConfig.SearchStart, str);
-                rel.SearchEnd = Helper.ReadProperty(ProviderConfig.SearchEnd, str);
-                rel.RelationsStart = Helper.ReadProperty(ProviderConfig.RelationsStart, str);
-                rel.RelationsEnd = Helper.ReadProperty(ProviderConfig.RelationsEnd, str);
-                rel.NotFoundURL = Helper.ReadProperty(ProviderConfig.NotFoundURL, str);
-                rel.Encoding = Helper.ReadProperty(ProviderConfig.Encoding, str);
-                rel.Language = (Helper.Languages)Enum.Parse(typeof(Helper.Languages), Helper.ReadProperty(ProviderConfig.Language,str));
-                string rrtl=Helper.ReadProperty(ProviderConfig.RelationsRightToLeft, str);
-                if (rrtl == "1")
-                {
+                rel.Name = Helper.ReadProperty(ProviderConfig.Name, file);
+                rel.RelationsPage = Helper.ReadProperty(ProviderConfig.RelationsPage, file);
+                rel.RelationsRegExp = Helper.ReadProperty(ProviderConfig.RelationsRegExp, file);
+                rel.SearchRegExp = Helper.ReadProperty(ProviderConfig.SearchRegExp, file);
+                rel.SearchResultsURL = Helper.ReadProperty(ProviderConfig.SearchResultsURL, file);
+                rel.SearchURL = Helper.ReadProperty(ProviderConfig.SearchURL, file);
+                rel.SeriesURL = Helper.ReadProperty(ProviderConfig.SeriesURL, file);
+                rel.EpisodesURL = Helper.ReadProperty(ProviderConfig.EpisodesURL, file);
+                rel.SearchRemove = Helper.ReadProperties(ProviderConfig.SearchRemove, file);
+                rel.SearchStart = Helper.ReadProperty(ProviderConfig.SearchStart, file);
+                rel.SearchEnd = Helper.ReadProperty(ProviderConfig.SearchEnd, file);
+                rel.RelationsStart = Helper.ReadProperty(ProviderConfig.RelationsStart, file);
+                rel.RelationsEnd = Helper.ReadProperty(ProviderConfig.RelationsEnd, file);
+                rel.NotFoundURL = Helper.ReadProperty(ProviderConfig.NotFoundURL, file);
+                rel.Encoding = Helper.ReadProperty(ProviderConfig.Encoding, file);
+                rel.Language = (Helper.Languages)Enum.Parse(typeof(Helper.Languages), Helper.ReadProperty(ProviderConfig.Language, file));
+                string rrtl = Helper.ReadProperty(ProviderConfig.RelationsRightToLeft, file);
+                if (rrtl == "1") {
                     rel.RelationsRightToLeft = true;
                 }
-                else
-                {
+                else {
                     rel.RelationsRightToLeft = false;
                 }
-                string srtl=Helper.ReadProperty(ProviderConfig.SearchRightToLeft, str);
-                if (srtl == "1")
-                {
+                string srtl = Helper.ReadProperty(ProviderConfig.SearchRightToLeft, file);
+                if (srtl == "1") {
                     rel.SearchRightToLeft = true;
                 }
-                else
-                {
+                else {
                     rel.SearchRightToLeft = false;
                 }
-                if (rel.Name == null||rel.Name=="")
-                {
-                    Helper.Log("Invalid provider file: " + str, Helper.LogType.Error);
+                if (rel.Name == null || rel.Name == "") {
+                    Logger.Instance.LogMessage("Invalid provider file: " + file, LogLevel.ERROR);
                     continue;
                 }
                 Providers.Add(rel);
-                status += " " + rel.Name+",";
+                status += " " + rel.Name + ",";
             }
             status = status.TrimEnd(new char[] { ',' });
-            Helper.Log(status, Helper.LogType.Info);
+            Logger.Instance.LogMessage(status, LogLevel.INFO);
             //Get all subtitle providers
             List<string> subproviders = new List<string>(Directory.GetFiles(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/Databases/Subtitles"));
             status = "Subtitle Providers found:";
-            foreach (string str in subproviders)
-            {
+            foreach (string str in subproviders) {
                 SubtitleProvider sub = new SubtitleProvider();
                 sub.Name = Helper.ReadProperty(SubProviderConfig.Name, str);
                 sub.SubtitlesPage = Helper.ReadProperty(SubProviderConfig.SubtitlesPage, str);
@@ -139,41 +133,37 @@ namespace Renamer
                 sub.SearchStart = Helper.ReadProperty(SubProviderConfig.SearchStart, str);
                 sub.SearchEnd = Helper.ReadProperty(SubProviderConfig.SearchEnd, str);
                 sub.SubtitlesStart = Helper.ReadProperty(SubProviderConfig.SubtitlesStart, str);
-                sub.SubtitlesEnd = Helper.ReadProperty (SubProviderConfig.SubtitlesEnd, str);
+                sub.SubtitlesEnd = Helper.ReadProperty(SubProviderConfig.SubtitlesEnd, str);
                 sub.ConstructLink = Helper.ReadProperty(SubProviderConfig.ConstructLink, str);
                 sub.NotFoundURL = Helper.ReadProperty(SubProviderConfig.NotFoundURL, str);
                 sub.Encoding = Helper.ReadProperty(SubProviderConfig.Encoding, str);
-                sub.Language = (Helper.Languages)Enum.Parse(typeof(Helper.Languages), Helper.ReadProperty(SubProviderConfig.Language,str));
+                sub.Language = (Helper.Languages)Enum.Parse(typeof(Helper.Languages), Helper.ReadProperty(SubProviderConfig.Language, str));
                 string srtl = Helper.ReadProperty(SubProviderConfig.SearchRightToLeft, str);
-                if (srtl == "1")
-                {
+                if (srtl == "1") {
                     sub.SearchRightToLeft = true;
                 }
-                else
-                {
+                else {
                     sub.SearchRightToLeft = false;
                 }
                 string directlink = Helper.ReadProperty(SubProviderConfig.DirectLink, str);
-                if (directlink == "1")
-                {
+                if (directlink == "1") {
                     sub.DirectLink = true;
                 }
-                else
-                {
+                else {
                     sub.DirectLink = false;
                 }
                 SubProviders.Add(sub);
                 status += " " + sub.Name + ",";
             }
-            status=status.TrimEnd(new char[] { ',' });
-            Helper.Log(status, Helper.LogType.Info);
+            status = status.TrimEnd(new char[] { ',' });
+            Logger.Instance.LogMessage(status, LogLevel.INFO);
         }
 
         /// <summary>
         /// Gets currently selected provider
         /// </summary>
         /// <returns>Currently selected provider, or null if error</returns>
-        public RelationProvider GetCurrentProvider(){
+        public RelationProvider GetCurrentProvider() {
             return GetProviderByName(Helper.ReadProperty(Config.LastProvider));
         }
 
@@ -182,12 +172,9 @@ namespace Renamer
         /// </summary>
         /// <param name="name">name of the provider</param>
         /// <returns>provider matching the name, or null if not found</returns>
-        public RelationProvider GetProviderByName(string name)
-        {
-            foreach (RelationProvider rp in Providers)
-            {
-                if (rp.Name == name)
-                {
+        public RelationProvider GetProviderByName(string name) {
+            foreach (RelationProvider rp in Providers) {
+                if (rp.Name == name) {
                     return rp;
                 }
             }
@@ -198,8 +185,7 @@ namespace Renamer
         /// Gets currently selected subtitle provider
         /// </summary>
         /// <returns>Currently selected subtitle provider, or null if error</returns>
-        public SubtitleProvider GetCurrentSubtitleProvider()
-        {
+        public SubtitleProvider GetCurrentSubtitleProvider() {
             return GetSubtitleProviderByName(Helper.ReadProperty(Config.LastSubProvider));
         }
 
@@ -208,19 +194,16 @@ namespace Renamer
         /// </summary>
         /// <param name="name">name of the subtitle provider</param>
         /// <returns>subtitle provider matching the name, or null if not found</returns>
-        public SubtitleProvider GetSubtitleProviderByName(string name)
-        {
-            foreach (SubtitleProvider sp in SubProviders)
-            {
-                if (sp.Name == name)
-                {
+        public SubtitleProvider GetSubtitleProviderByName(string name) {
+            foreach (SubtitleProvider sp in SubProviders) {
+                if (sp.Name == name) {
                     return sp;
                 }
             }
             return null;
         }
 
-        
+
 
         /// <summary>
         /// Gets video files matching season and episode number
@@ -228,13 +211,10 @@ namespace Renamer
         /// <param name="season">season to search for</param>
         /// <param name="episode">episode to search for</param>
         /// <returns>List of all matching InfoEntries, never null, but may be empty</returns>
-        public List<InfoEntry> GetMatchingVideos(int season, int episode)
-        {
-            List<InfoEntry> lie=new List<InfoEntry>();
-            foreach (InfoEntry ie in Episodes)
-            {
-                if (ie.Season == season.ToString() && ie.Episode == episode.ToString() && IsVideo(ie))
-                {
+        public List<InfoEntry> GetMatchingVideos(int season, int episode) {
+            List<InfoEntry> lie = new List<InfoEntry>();
+            foreach (InfoEntry ie in Episodes) {
+                if (ie.Season == season.ToString() && ie.Episode == episode.ToString() && IsVideo(ie)) {
                     lie.Add(ie);
                 }
             }
@@ -247,13 +227,10 @@ namespace Renamer
         /// <param name="season">season to search for</param>
         /// <param name="episode">episode to search for</param>
         /// <returns>List of all matching InfoEntries, never null, but may be empty</returns>
-        public List<InfoEntry> GetMatchingSubtitles(int season, int episode)
-        {
+        public List<InfoEntry> GetMatchingSubtitles(int season, int episode) {
             List<InfoEntry> lie = new List<InfoEntry>();
-            foreach (InfoEntry ie in Episodes)
-            {
-                if (ie.Season == season.ToString() && ie.Episode == episode.ToString() && IsSubtitle(ie))
-                {
+            foreach (InfoEntry ie in Episodes) {
+                if (ie.Season == season.ToString() && ie.Episode == episode.ToString() && IsSubtitle(ie)) {
                     lie.Add(ie);
                 }
             }
@@ -265,41 +242,33 @@ namespace Renamer
         /// </summary>
         /// <param name="ieSubtitle">InfoEntry of a subtitle to find matching video file for</param>
         /// <returns>Matching video file</returns>
-        public InfoEntry GetVideo(InfoEntry ieSubtitle)
-        {
+        public InfoEntry GetVideo(InfoEntry ieSubtitle) {
             List<string> vidext = new List<string>(Helper.ReadProperties(Config.Extensions));
-            foreach (InfoEntry ie in Episodes)
-            {
-                if (Path.GetFileNameWithoutExtension(ieSubtitle.Filename) == Path.GetFileNameWithoutExtension(ie.Filename))
-                {
-                    if (vidext.Contains(ie.Extension))
-                    {
+            foreach (InfoEntry ie in Episodes) {
+                if (Path.GetFileNameWithoutExtension(ieSubtitle.Filename) == Path.GetFileNameWithoutExtension(ie.Filename)) {
+                    if (vidext.Contains(ie.Extension)) {
                         return ie;
                     }
                 }
             }
             return null;
         }
-                
+
         /// <summary>
         /// Check if InfoEntry is a video
         /// </summary>
         /// <param name="ie">InfoEntry to check</param>
         /// <returns>true if video file, false otherwise</returns>
-        public bool IsVideo(InfoEntry ie)
-        {
+        public bool IsVideo(InfoEntry ie) {
             List<string> extensions = new List<string>(Helper.ReadProperties(Config.Extensions));
-            for (int a = 0; a < extensions.Count; a++)
-            {
+            for (int a = 0; a < extensions.Count; a++) {
                 extensions[a] = extensions[a].ToLower();
             }
-            if (extensions == null)
-            {
-                Helper.Log("No Extensions found!", Helper.LogType.Warning);
+            if (extensions == null) {
+                Logger.Instance.LogMessage("No Extensions found!", LogLevel.WARNING);
                 return false;
             }
-            if (extensions.Contains(ie.Extension))
-            {
+            if (extensions.Contains(ie.Extension)) {
                 return true;
             }
             return false;
@@ -310,20 +279,16 @@ namespace Renamer
         /// </summary>
         /// <param name="ie">InfoEntry to check</param>
         /// <returns>true if subtitle file, false otherwise</returns>
-        public bool IsSubtitle(InfoEntry ie)
-        {
+        public bool IsSubtitle(InfoEntry ie) {
             List<string> extensions = new List<string>(Helper.ReadProperties(Config.SubtitleExtensions));
-            for (int a = 0; a < extensions.Count; a++)
-            {
+            for (int a = 0; a < extensions.Count; a++) {
                 extensions[a] = extensions[a].ToLower();
             }
-            if (extensions == null)
-            {
-                Helper.Log("No Subtitle Extensions found!", Helper.LogType.Warning);
+            if (extensions == null) {
+                Logger.Instance.LogMessage("No Subtitle Extensions found!", LogLevel.WARNING);
                 return false;
             }
-            if (extensions.Contains(ie.Extension))
-            {
+            if (extensions.Contains(ie.Extension)) {
                 return true;
             }
             return false;
@@ -334,29 +299,22 @@ namespace Renamer
         /// </summary>
         /// <param name="ieVideo">InfoEntry of a video to find matching subtitle file for</param>
         /// <returns>Matching subtitle file</returns>
-        public InfoEntry GetSubtitle(InfoEntry ieVideo)
-        {
+        public InfoEntry GetSubtitle(InfoEntry ieVideo) {
             List<string> subext = new List<string>(Helper.ReadProperties(Config.SubtitleExtensions));
-            foreach (InfoEntry ie in Episodes)
-            {
-                if (Path.GetFileNameWithoutExtension(ieVideo.Filename) == Path.GetFileNameWithoutExtension(ie.Filename))
-                {
-                    if (subext.Contains(ie.Extension))
-                    {
+            foreach (InfoEntry ie in Episodes) {
+                if (Path.GetFileNameWithoutExtension(ieVideo.Filename) == Path.GetFileNameWithoutExtension(ie.Filename)) {
+                    if (subext.Contains(ie.Extension)) {
                         return ie;
                     }
                 }
             }
             return null;
         }
-        public int GetNumberOfVideoFilesInFolder(string path)
-        {
+        public int GetNumberOfVideoFilesInFolder(string path) {
             List<string> vidext = new List<string>(Helper.ReadProperties(Config.Extensions));
             int count = 0;
-            foreach (string file in Directory.GetFiles(path))
-            {
-                if (vidext.Contains(Path.GetFileNameWithoutExtension(file)))
-                {
+            foreach (string file in Directory.GetFiles(path)) {
+                if (vidext.Contains(Path.GetFileNameWithoutExtension(file))) {
                     count++;
                 }
             }
@@ -368,41 +326,35 @@ namespace Renamer
         /// </summary>
         /// <param name="Showname">The Showname</param>
         /// <returns>The RelationCollection, or null if not found</returns>
-        public static RelationCollection GetRelationCollectionByName(string Showname)
-        {
-            foreach (RelationCollection rc in Relations)
-            {
-                if (rc.Showname == Showname)
-                {
+        public static RelationCollection GetRelationCollectionByName(string Showname) {
+            foreach (RelationCollection rc in Relations) {
+                if (rc.Showname == Showname) {
                     return rc;
                 }
             }
             return null;
         }
 
-        public static void AddRelationCollection(RelationCollection rc)
-        {
+        public static void AddRelationCollection(RelationCollection rc) {
             Relations.Add(rc);
-            foreach (InfoEntry ie in Info.Episodes)
-            {
-                if (ie.Showname == rc.Showname)
-                {
+            foreach (InfoEntry ie in Info.Episodes) {
+                if (ie.Showname == rc.Showname) {
                     ie.SetupRelation();
                 }
             }
         }
     }
 
-    
 
-    
-    
-    
 
-    
 
-    
-    
-    
+
+
+
+
+
+
+
+
 }
 

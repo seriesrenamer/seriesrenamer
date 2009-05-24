@@ -60,11 +60,9 @@ namespace Renamer.Dialogs
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.cbError = new System.Windows.Forms.ComboBox();
-            this.cbWarning = new System.Windows.Forms.ComboBox();
-            this.cbStatus = new System.Windows.Forms.ComboBox();
-            this.cbInfo = new System.Windows.Forms.ComboBox();
+            this.cbLogfile = new System.Windows.Forms.ComboBox();
+            this.cbLogwindow = new System.Windows.Forms.ComboBox();
+            this.cbLogmessagebox = new System.Windows.Forms.ComboBox();
             this.cbReplace = new System.Windows.Forms.ComboBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.txtSubs = new System.Windows.Forms.TextBox();
@@ -86,8 +84,6 @@ namespace Renamer.Dialogs
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.chkResize = new System.Windows.Forms.CheckBox();
             this.label22 = new System.Windows.Forms.Label();
-            this.label20 = new System.Windows.Forms.Label();
-            this.cbDebug = new System.Windows.Forms.ComboBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.chkUseSeasonSubdirs = new System.Windows.Forms.CheckBox();
             this.label19 = new System.Windows.Forms.Label();
@@ -99,6 +95,7 @@ namespace Renamer.Dialogs
             this.chkDeleteEmptyFolders = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.btnDefaults = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.nudTimeout)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSearchDepth)).BeginInit();
             this.tabPage1.SuspendLayout();
@@ -106,6 +103,7 @@ namespace Renamer.Dialogs
             this.tabPage3.SuspendLayout();
             this.tabPage4.SuspendLayout();
             this.tabControl1.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -245,102 +243,89 @@ namespace Renamer.Dialogs
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(12, 14);
+            this.label7.Location = new System.Drawing.Point(12, 16);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(92, 13);
+            this.label7.Size = new System.Drawing.Size(38, 13);
             this.label7.TabIndex = 14;
-            this.label7.Text = "On Error Message";
+            this.label7.Text = "Logfile";
             this.toolTip.SetToolTip(this.label7, "How error messages are processed");
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(12, 41);
+            this.label8.Location = new System.Drawing.Point(12, 43);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(110, 13);
+            this.label8.Size = new System.Drawing.Size(61, 13);
             this.label8.TabIndex = 15;
-            this.label8.Text = "On Warning Message";
+            this.label8.Text = "Logwindow";
             this.toolTip.SetToolTip(this.label8, "How warning messages are processed");
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(12, 68);
+            this.label9.Location = new System.Drawing.Point(12, 70);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(100, 13);
+            this.label9.Size = new System.Drawing.Size(84, 13);
             this.label9.TabIndex = 16;
-            this.label9.Text = "On Status Message";
+            this.label9.Text = "Logmessagebox";
             this.toolTip.SetToolTip(this.label9, "How status messages are processed");
             // 
-            // label10
+            // cbLogfile
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(12, 95);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(88, 13);
-            this.label10.TabIndex = 17;
-            this.label10.Text = "On Info Message";
-            this.toolTip.SetToolTip(this.label10, "How info messages are processed");
+            this.cbLogfile.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbLogfile.FormattingEnabled = true;
+            this.cbLogfile.Items.AddRange(new object[] {
+            "VERBOSE",
+            "DEBUG",
+            "LOG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL",
+            "NONE"});
+            this.cbLogfile.Location = new System.Drawing.Point(386, 13);
+            this.cbLogfile.Name = "cbLogfile";
+            this.cbLogfile.Size = new System.Drawing.Size(163, 21);
+            this.cbLogfile.TabIndex = 18;
+            this.toolTip.SetToolTip(this.cbLogfile, "Logging messages with this and higher level wrotten into the logfile");
             // 
-            // cbError
+            // cbLogwindow
             // 
-            this.cbError.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbError.FormattingEnabled = true;
-            this.cbError.Items.AddRange(new object[] {
-            "Do Nothing",
-            "Show in Log File",
-            "Show Message Box",
-            "Show in Log File and Message Box"});
-            this.cbError.Location = new System.Drawing.Point(394, 11);
-            this.cbError.Name = "cbError";
-            this.cbError.Size = new System.Drawing.Size(163, 21);
-            this.cbError.TabIndex = 18;
-            this.toolTip.SetToolTip(this.cbError, "How error messages are processed");
+            this.cbLogwindow.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbLogwindow.FormattingEnabled = true;
+            this.cbLogwindow.Items.AddRange(new object[] {
+            "VERBOSE",
+            "DEBUG",
+            "LOG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL",
+            "NONE"});
+            this.cbLogwindow.Location = new System.Drawing.Point(386, 40);
+            this.cbLogwindow.Name = "cbLogwindow";
+            this.cbLogwindow.Size = new System.Drawing.Size(163, 21);
+            this.cbLogwindow.TabIndex = 19;
+            this.toolTip.SetToolTip(this.cbLogwindow, "Logging messages with this and higher level shown in the logfile");
             // 
-            // cbWarning
+            // cbLogmessagebox
             // 
-            this.cbWarning.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbWarning.FormattingEnabled = true;
-            this.cbWarning.Items.AddRange(new object[] {
-            "Do Nothing",
-            "Show in Log File",
-            "Show Message Box",
-            "Show in Log File and Message Box"});
-            this.cbWarning.Location = new System.Drawing.Point(394, 38);
-            this.cbWarning.Name = "cbWarning";
-            this.cbWarning.Size = new System.Drawing.Size(163, 21);
-            this.cbWarning.TabIndex = 19;
-            this.toolTip.SetToolTip(this.cbWarning, "How warning messages are processed");
-            // 
-            // cbStatus
-            // 
-            this.cbStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbStatus.FormattingEnabled = true;
-            this.cbStatus.Items.AddRange(new object[] {
-            "Do Nothing",
-            "Show in Log File",
-            "Show Message Box",
-            "Show in Log File and Message Box"});
-            this.cbStatus.Location = new System.Drawing.Point(394, 65);
-            this.cbStatus.Name = "cbStatus";
-            this.cbStatus.Size = new System.Drawing.Size(163, 21);
-            this.cbStatus.TabIndex = 20;
-            this.toolTip.SetToolTip(this.cbStatus, "How status messages are processed");
-            // 
-            // cbInfo
-            // 
-            this.cbInfo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbInfo.FormattingEnabled = true;
-            this.cbInfo.Items.AddRange(new object[] {
-            "Do Nothing",
-            "Show in Log File",
-            "Show Message Box",
-            "Show in Log File and Message Box"});
-            this.cbInfo.Location = new System.Drawing.Point(394, 92);
-            this.cbInfo.Name = "cbInfo";
-            this.cbInfo.Size = new System.Drawing.Size(163, 21);
-            this.cbInfo.TabIndex = 21;
-            this.toolTip.SetToolTip(this.cbInfo, "How info messages are processed");
+            this.cbLogmessagebox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbLogmessagebox.FormattingEnabled = true;
+            this.cbLogmessagebox.Items.AddRange(new object[] {
+            "VERBOSE",
+            "DEBUG",
+            "LOG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL",
+            "NONE"});
+            this.cbLogmessagebox.Location = new System.Drawing.Point(386, 67);
+            this.cbLogmessagebox.Name = "cbLogmessagebox";
+            this.cbLogmessagebox.Size = new System.Drawing.Size(163, 21);
+            this.cbLogmessagebox.TabIndex = 20;
+            this.toolTip.SetToolTip(this.cbLogmessagebox, "Logging messages with this and higher level will popup a MessageBox");
             // 
             // cbReplace
             // 
@@ -545,18 +530,9 @@ namespace Renamer.Dialogs
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.groupBox1);
             this.tabPage3.Controls.Add(this.chkResize);
             this.tabPage3.Controls.Add(this.label22);
-            this.tabPage3.Controls.Add(this.label20);
-            this.tabPage3.Controls.Add(this.cbDebug);
-            this.tabPage3.Controls.Add(this.label7);
-            this.tabPage3.Controls.Add(this.label8);
-            this.tabPage3.Controls.Add(this.label9);
-            this.tabPage3.Controls.Add(this.label10);
-            this.tabPage3.Controls.Add(this.cbError);
-            this.tabPage3.Controls.Add(this.cbInfo);
-            this.tabPage3.Controls.Add(this.cbStatus);
-            this.tabPage3.Controls.Add(this.cbWarning);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Size = new System.Drawing.Size(560, 253);
@@ -582,31 +558,6 @@ namespace Renamer.Dialogs
             this.label22.Size = new System.Drawing.Size(224, 13);
             this.label22.TabIndex = 24;
             this.label22.Text = "Automatically resize columns to fit window size";
-            // 
-            // label20
-            // 
-            this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(12, 122);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(102, 13);
-            this.label20.TabIndex = 22;
-            this.label20.Text = "On Debug Message";
-            this.toolTip.SetToolTip(this.label20, "How debug messages are processed");
-            // 
-            // cbDebug
-            // 
-            this.cbDebug.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbDebug.FormattingEnabled = true;
-            this.cbDebug.Items.AddRange(new object[] {
-            "Do Nothing",
-            "Show in Log File",
-            "Show Message Box",
-            "Show in Log File and Message Box"});
-            this.cbDebug.Location = new System.Drawing.Point(394, 119);
-            this.cbDebug.Name = "cbDebug";
-            this.cbDebug.Size = new System.Drawing.Size(163, 21);
-            this.cbDebug.TabIndex = 23;
-            this.toolTip.SetToolTip(this.cbDebug, "How debug messages are processed");
             // 
             // tabPage4
             // 
@@ -734,6 +685,21 @@ namespace Renamer.Dialogs
             this.btnDefaults.UseVisualStyleBackColor = true;
             this.btnDefaults.Click += new System.EventHandler(this.btnDefaults_Click);
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.label7);
+            this.groupBox1.Controls.Add(this.label8);
+            this.groupBox1.Controls.Add(this.label9);
+            this.groupBox1.Controls.Add(this.cbLogfile);
+            this.groupBox1.Controls.Add(this.cbLogmessagebox);
+            this.groupBox1.Controls.Add(this.cbLogwindow);
+            this.groupBox1.Location = new System.Drawing.Point(3, 3);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(555, 104);
+            this.groupBox1.TabIndex = 26;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "groupBox1";
+            // 
             // Configuration
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -763,6 +729,8 @@ namespace Renamer.Dialogs
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
             this.tabControl1.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -785,11 +753,9 @@ namespace Renamer.Dialogs
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.ComboBox cbError;
-        private System.Windows.Forms.ComboBox cbWarning;
-        private System.Windows.Forms.ComboBox cbStatus;
-        private System.Windows.Forms.ComboBox cbInfo;
+        private System.Windows.Forms.ComboBox cbLogfile;
+        private System.Windows.Forms.ComboBox cbLogwindow;
+        private System.Windows.Forms.ComboBox cbLogmessagebox;
         private System.Windows.Forms.ComboBox cbReplace;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.TextBox txtSubs;
@@ -816,13 +782,12 @@ namespace Renamer.Dialogs
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.CheckBox chkUseSeasonSubdirs;
-        private System.Windows.Forms.Label label20;
-        private System.Windows.Forms.ComboBox cbDebug;
         private System.Windows.Forms.Label lblReplace;
         private System.Windows.Forms.TextBox txtStringReplace;
         private System.Windows.Forms.TextBox txtTags;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.CheckBox chkResize;
         private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.GroupBox groupBox1;
     }
 }
