@@ -20,7 +20,7 @@ namespace Renamer.Classes
 {
     
     /// <summary>
-    /// A season/episode<->name relation
+    /// A season/episode&lt;-&gt;name relation
     /// </summary>
     class Relation
     {

@@ -4,8 +4,9 @@ using System.Text;
 
 namespace Renamer.Logging
 {
-    // Logger of composite of loggers
-
+    /// <summary>
+    /// Logger which manages all the loggers registered in System
+    /// </summary>
     public class Logger : ILogger
     {
 

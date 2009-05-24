@@ -173,19 +173,6 @@ namespace Renamer.Classes.Configuration
                     }
                 }
             }
-
-            /// <summary>
-            /// removes trailing comments on a line
-            /// Some special handling is needed here, e.g. "http://"
-            /// </summary>
-            /// <returns>line without comments</returns>
-            private string removeComment() {
-                int commentStart = line.IndexOf(settings.Comment);
-                if (commentStart == -1 || (line.IndexOf("http://") == commentStart - 5)) {
-                    return line;
-                }
-                return line.Substring(0, line.IndexOf(settings.Comment));
-            }
         }
 
 

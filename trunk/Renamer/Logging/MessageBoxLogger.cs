@@ -8,6 +8,10 @@ namespace Renamer.Logging
     class MessageBoxLogger : ILogger
     {
         protected LogLevel filter;
+        /// <summary>
+        /// Creates a new MessageBoxLogger
+        /// </summary>
+        /// <param name="filter">Log level the logger should listen to</param>
         public MessageBoxLogger(LogLevel filter) {
             this.filter = filter;
         }

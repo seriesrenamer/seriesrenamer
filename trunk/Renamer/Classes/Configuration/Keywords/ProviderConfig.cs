@@ -19,7 +19,7 @@ using System.Text;
 namespace Renamer.Classes.Configuration.Keywords
 {
     /// <summary>
-    /// Helper class containing property names used in season/episode&lt-&gtprovider files
+    /// Helper class containing property names used in season/episode&lt;-&gt;provider files
     /// </summary>
     static class ProviderConfig
     {

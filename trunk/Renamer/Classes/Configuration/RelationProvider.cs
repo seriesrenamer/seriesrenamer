@@ -19,7 +19,7 @@ using System.Text;
 namespace Renamer.Classes.Configuration
 {
     /// <summary>
-    /// A season/episode<->name relations provider
+    /// A season/episode&lt;-&gt;name relations provider
     /// </summary>
     class RelationProvider : Provider
     {
