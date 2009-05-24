@@ -31,6 +31,7 @@ using Renamer.Dialogs;
 using Renamer.Classes.Configuration.Keywords;
 using Renamer.Classes.Configuration;
 using System.Runtime.InteropServices;
+using Renamer.Logging;
 namespace Renamer
 {
     /// <summary>
@@ -98,11 +99,11 @@ namespace Renamer
                 GetTitles(showname);
             }
             Info.timegettitles = (DateTime.Now - dt).TotalSeconds;
-            Helper.Log("Time for getting titles: " + Info.timegettitles + " Seconds", Helper.LogType.Info);
-            Helper.Log("Time for extracting names: " + Info.timeextractname + " Seconds", Helper.LogType.Info);
-            Helper.Log("Time for creating paths: " + Info.timesetpath + " Seconds", Helper.LogType.Info);
-            Helper.Log("Time for creating filenames: " + Info.timecreatenewname + " Seconds", Helper.LogType.Info);
-            Helper.Log("Time for assigning relations: " + Info.timesetuprelation + " Seconds", Helper.LogType.Info);
+            Logger.Instance.LogMessage("Time for getting titles: " + Info.timegettitles + " Seconds", LogLevel.INFO);
+            Logger.Instance.LogMessage("Time for extracting names: " + Info.timeextractname + " Seconds", LogLevel.INFO);
+            Logger.Instance.LogMessage("Time for creating paths: " + Info.timesetpath + " Seconds", LogLevel.INFO);
+            Logger.Instance.LogMessage("Time for creating filenames: " + Info.timecreatenewname + " Seconds", LogLevel.INFO);
+            Logger.Instance.LogMessage("Time for assigning relations: " + Info.timesetuprelation + " Seconds", LogLevel.INFO);
         }
 
         /// <summary>
@@ -116,7 +117,7 @@ namespace Renamer
                 // request
                 RelationProvider provider = info.GetCurrentProvider();
                 if (provider == null) {
-                    Helper.Log("No relation provider found/selected", Helper.LogType.Error);
+                    Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                     return;
                 }
                 //get rid of old relations
@@ -129,27 +130,27 @@ namespace Renamer
                     }
                 }
                 string url = provider.SearchURL;
-                Helper.Log("Search URL: " + url, Helper.LogType.Debug);
+                Logger.Instance.LogMessage("Search URL: " + url, LogLevel.DEBUG);
                 if (url == null || url == "") {
-                    Helper.Log("Can't search because no search URL is specified for this provider", Helper.LogType.Error);
+                    Logger.Instance.LogMessage("Can't search because no search URL is specified for this provider", LogLevel.ERROR);
                     break;
                 }
                 string[] LastTitles = Helper.ReadProperties(Config.LastTitles);
                 url = url.Replace("%T", Showname);
                 url = System.Web.HttpUtility.UrlPathEncode(url);
-                Helper.Log("Encoded Search URL: " + url, Helper.LogType.Debug);
+                Logger.Instance.LogMessage("Encoded Search URL: " + url, LogLevel.DEBUG);
                 HttpWebRequest requestHtml = null;
                 try {
                     requestHtml = (HttpWebRequest)(HttpWebRequest.Create(url));
                 }
                 catch (Exception ex) {
-                    Helper.Log(ex.Message, Helper.LogType.Error);
+                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                     if (requestHtml != null)
                         requestHtml.Abort();
                     break;
                 }
                 //SetProxy(requestHtml, url);
-                Helper.Log("Searching at " + url.Replace(" ", "%20"), Helper.LogType.Status);
+                Logger.Instance.LogMessage("Searching at " + url.Replace(" ", "%20"), LogLevel.INFO);
                 requestHtml.Timeout = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
                 // get response
                 HttpWebResponse responseHtml = null;
@@ -157,23 +158,23 @@ namespace Renamer
                     responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
                 }
                 catch (Exception ex) {
-                    Helper.Log(ex.Message, Helper.LogType.Error);
+                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                     if (responseHtml != null)
                         responseHtml.Close();
                     if (requestHtml != null)
                         requestHtml.Abort();
                     break;
                 }
-                Helper.Log("Search Results URL: " + responseHtml.ResponseUri.AbsoluteUri, Helper.LogType.Debug);
+                Logger.Instance.LogMessage("Search Results URL: " + responseHtml.ResponseUri.AbsoluteUri, LogLevel.DEBUG);
                 //if search engine directs us straight to the result page, skip parsing search results
                 string seriesURL = provider.SeriesURL;
                 if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL)) {
-                    Helper.Log("Search Results URL contains Series URL: " + seriesURL, Helper.LogType.Debug);
-                    Helper.Log("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesURL.Replace(" ", "%20"), Helper.LogType.Status);
+                    Logger.Instance.LogMessage("Search Results URL contains Series URL: " + seriesURL, LogLevel.DEBUG);
+                    Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesURL.Replace(" ", "%20"), LogLevel.INFO);
                     GetRelations(responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesURL, Showname);
                 }
                 else {
-                    Helper.Log("Search Results URL doesn't contain Series URL: " + seriesURL + ", this is a proper search results page", Helper.LogType.Debug);
+                    Logger.Instance.LogMessage("Search Results URL doesn't contain Series URL: " + seriesURL + ", this is a proper search results page", LogLevel.DEBUG);
                     // and download
                     StreamReader r = null;
                     try {
@@ -188,7 +189,7 @@ namespace Renamer
                         if (requestHtml != null) {
                             requestHtml.Abort();
                         }
-                        Helper.Log(ex.Message, Helper.LogType.Error);
+                        Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                         break;
                     }
                     string source = r.ReadToEnd();
@@ -386,12 +387,12 @@ namespace Renamer
                 return;
             RelationProvider provider = info.GetCurrentProvider();
             if (provider == null) {
-                Helper.Log("No relation provider found/selected", Helper.LogType.Error);
+                Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                 return;
             }
             string pattern = provider.SearchRegExp;
 
-            Helper.Log("Trying to match source at " + SourceURL + " with " + pattern, Helper.LogType.Debug);
+            Logger.Instance.LogMessage("Trying to match source at " + SourceURL + " with " + pattern, LogLevel.DEBUG);
 
             RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Singleline;
             if (provider.SearchRightToLeft)
@@ -399,18 +400,18 @@ namespace Renamer
             MatchCollection mc = Regex.Matches(source, pattern, ro);
 
             if (mc.Count == 0) {
-                Helper.Log("No results found", Helper.LogType.Info);
+                Logger.Instance.LogMessage("No results found", LogLevel.INFO);
             }
             else if (mc.Count == 1) {
                 string url = provider.RelationsPage;
-                Helper.Log("One result found on search page, going to " + url.Replace(" ", "%20") + " with %L=" + mc[0].Groups["link"].Value, Helper.LogType.Debug);
+                Logger.Instance.LogMessage("One result found on search page, going to " + url.Replace(" ", "%20") + " with %L=" + mc[0].Groups["link"].Value, LogLevel.DEBUG);
                 url = url.Replace("%L", mc[0].Groups["link"].Value);
                 url = System.Web.HttpUtility.HtmlDecode(url);
-                Helper.Log("Search engine found one result: " + url.Replace(" ", "%20"), Helper.LogType.Status);
+                Logger.Instance.LogMessage("Search engine found one result: " + url.Replace(" ", "%20"), LogLevel.INFO);
                 GetRelations(url, Showname);
             }
             else {
-                Helper.Log("Search engine found multiple results at " + SourceURL.Replace(" ", "%20"), Helper.LogType.Info);
+                Logger.Instance.LogMessage("Search engine found multiple results at " + SourceURL.Replace(" ", "%20"), LogLevel.INFO);
                 SelectResult sr = new SelectResult(mc, provider, false);
                 if (sr.ShowDialog() == DialogResult.Cancel || sr.url == "")
                     return;
@@ -424,7 +425,7 @@ namespace Renamer
                     }
                 }
                 string url = provider.RelationsPage;
-                Helper.Log("User selected " + provider.RelationsPage + "with %L=" + sr.url, Helper.LogType.Debug);
+                Logger.Instance.LogMessage("User selected " + provider.RelationsPage + "with %L=" + sr.url, LogLevel.DEBUG);
                 url = url.Replace("%L", sr.url);
                 url = System.Web.HttpUtility.HtmlDecode(url);
                 GetRelations(url, Showname);
@@ -440,10 +441,10 @@ namespace Renamer
         private void GetRelations(string url, string Showname) {
             RelationProvider provider = info.GetCurrentProvider();
             if (provider == null) {
-                Helper.Log("No relation provider found/selected", Helper.LogType.Error);
+                Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                 return;
             }
-            Helper.Log("Trying to get relations from " + url, Helper.LogType.Debug);
+            Logger.Instance.LogMessage("Trying to get relations from " + url, LogLevel.DEBUG);
             //if episode infos are stored on a new page for each season, this should be marked with %S in url, so we can iterate through all those pages
             int season = 1;
             string url2 = url;
@@ -458,13 +459,13 @@ namespace Renamer
                     return;
                 // request
                 url = System.Web.HttpUtility.UrlPathEncode(url);
-                Helper.Log("Trying to get relations for season " + season + " from " + url, Helper.LogType.Debug);
+                Logger.Instance.LogMessage("Trying to get relations for season " + season + " from " + url, LogLevel.DEBUG);
                 HttpWebRequest requestHtml = null;
                 try {
                     requestHtml = (HttpWebRequest)(HttpWebRequest.Create(url));
                 }
                 catch (Exception ex) {
-                    Helper.Log(ex.Message, Helper.LogType.Error);
+                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                     requestHtml.Abort();
                     return;
                 }
@@ -475,30 +476,30 @@ namespace Renamer
                     responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
                 }
                 catch (WebException e) {
-                    Helper.Log(e.Message, Helper.LogType.Error);
+                    Logger.Instance.LogMessage(e.Message, LogLevel.ERROR);
                     if (responseHtml != null) {
                         responseHtml.Close();
                     }
                     return;
                 }
 
-                Helper.Log("Response URL: " + responseHtml.ResponseUri.AbsoluteUri, Helper.LogType.Debug);
+                Logger.Instance.LogMessage("Response URL: " + responseHtml.ResponseUri.AbsoluteUri, LogLevel.DEBUG);
                 //if we get redirected, lets assume this page does not exist
                 if (responseHtml.ResponseUri.AbsoluteUri != url) {
-                    Helper.Log("Response URL doesn't match request URL, page doesn't seem to exist", Helper.LogType.Debug);
+                    Logger.Instance.LogMessage("Response URL doesn't match request URL, page doesn't seem to exist", LogLevel.DEBUG);
                     responseHtml.Close();
                     requestHtml.Abort();
                     break;
                 }
                 // and download
-                //Helper.Log("charset=" + responseHtml.CharacterSet, Helper.LogType.Status);
+                //Logger.Instance.LogMessage("charset=" + responseHtml.CharacterSet, LogLevel.INFO);
                 Encoding enc;
                 if (provider.Encoding != null && provider.Encoding != "") {
                     try {
                         enc = Encoding.GetEncoding(provider.Encoding);
                     }
                     catch (Exception ex) {
-                        Helper.Log("Invalid encoding in config file: " + ex.Message, Helper.LogType.Error);
+                        Logger.Instance.LogMessage("Invalid encoding in config file: " + ex.Message, LogLevel.ERROR);
                         enc = Encoding.GetEncoding(responseHtml.CharacterSet);
                     }
                 }
@@ -517,7 +518,7 @@ namespace Renamer
                 source = source.Substring(0, Math.Max(source.LastIndexOf(provider.RelationsEnd), 0));
 
                 string pattern = provider.RelationsRegExp;
-                Helper.Log("Trying to match source from " + responseHtml.ResponseUri.AbsoluteUri + " with " + pattern, Helper.LogType.Debug);
+                Logger.Instance.LogMessage("Trying to match source from " + responseHtml.ResponseUri.AbsoluteUri + " with " + pattern, LogLevel.DEBUG);
                 RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Singleline;
                 if (provider.RelationsRightToLeft)
                     ro |= RegexOptions.RightToLeft;
@@ -532,11 +533,11 @@ namespace Renamer
                     Int32.TryParse(m.Groups["Episode"].Value, out e);
                     if (url != url2) {
                         rc.Relations.Add(new Relation(season.ToString(), e.ToString(), System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                        Helper.Log("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Debug);
+                        Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), LogLevel.DEBUG);
                     }
                     else {
                         rc.Relations.Add(new Relation(s.ToString(), e.ToString(), System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                        Helper.Log("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Debug);
+                        Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), LogLevel.DEBUG);
                     }
                 }
                 Info.AddRelationCollection(rc);
@@ -546,7 +547,7 @@ namespace Renamer
                     break;
                 season++;
             }
-            Helper.Log("" + (season - 1) + " Seasons, " + rc.Relations.Count + " relations found", Helper.LogType.Debug);
+            Logger.Instance.LogMessage("" + (season - 1) + " Seasons, " + rc.Relations.Count + " relations found", LogLevel.DEBUG);
         }
         #endregion
         #region Name Creation
@@ -574,7 +575,7 @@ namespace Renamer
                         Int32.TryParse(ie.Episode, out episode);
                     }
                     catch (Exception) {
-                        Helper.Log("Couldn't Convert season or episode to int because string was garbled, too bad :P", Helper.LogType.Error);
+                        Logger.Instance.LogMessage("Couldn't Convert season or episode to int because string was garbled, too bad :P", LogLevel.ERROR);
                     }
                     List<InfoEntry> lie = info.GetMatchingVideos(season, episode);
                     if (lie != null && lie.Count == 1) {
@@ -742,7 +743,7 @@ namespace Renamer
                         }
 
                         if (ie.NewFileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 && (skip || skipall)) {
-                            Helper.Log("Skipped " + ie.Path + Path.DirectorySeparatorChar + ie.Filename + "->" + ie.Destination + Path.DirectorySeparatorChar + ie.NewFileName + " because of illegal characters in new name.", Helper.LogType.Warning);
+                            Logger.Instance.LogMessage("Skipped " + ie.Path + Path.DirectorySeparatorChar + ie.Filename + "->" + ie.Destination + Path.DirectorySeparatorChar + ie.NewFileName + " because of illegal characters in new name.", LogLevel.WARNING);
                             skip = false;
                             continue;
                         }
@@ -786,10 +787,10 @@ namespace Renamer
                     }
                     catch (Exception ex) {
                         if (skipall) {
-                            Helper.Log("Skipping " + ie.Filename + ":\r\n" + ex.Message, Helper.LogType.Warning);
+                            Logger.Instance.LogMessage("Skipping " + ie.Filename + ":\r\n" + ex.Message, LogLevel.WARNING);
                             continue;
                         }
-                        Helper.Log(ie.Path + Path.DirectorySeparatorChar + ie.Filename + " -> " + ie.Destination + Path.DirectorySeparatorChar + ie.NewFileName + ": " + ex.Message, Helper.LogType.Error);
+                        Logger.Instance.LogMessage(ie.Path + Path.DirectorySeparatorChar + ie.Filename + " -> " + ie.Destination + Path.DirectorySeparatorChar + ie.NewFileName + ": " + ex.Message, LogLevel.ERROR);
                     }
                 }
             }
@@ -829,7 +830,7 @@ namespace Renamer
                 List<string> extensions = new List<string>(Helper.ReadProperties(Config.Extensions));
                 extensions.AddRange(Helper.ReadProperties(Config.SubtitleExtensions));
                 if (extensions == null) {
-                    Helper.Log("No File Extensions found!", Helper.LogType.Warning);
+                    Logger.Instance.LogMessage("No File Extensions found!", LogLevel.WARNING);
                     return;
                 }
                 for (int i = 0; i < extensions.Count; i++) {
@@ -848,12 +849,11 @@ namespace Renamer
                     //if a pattern containing %S%E is used, only use the first number for season
                     if (patterns[i].Contains("%S%E")) {
                         patterns[i] = patterns[i].Replace("%S", "(?<Season>\\d)");
-                        patterns[i] = patterns[i].Replace("%E", "(?<Episode>\\d+)");
                     }
                     else {
                         patterns[i] = patterns[i].Replace("%S", "(?<Season>\\d+)");
-                        patterns[i] = patterns[i].Replace("%E", "(?<Episode>\\d+)");
                     }
+                    patterns[i] = patterns[i].Replace("%E", "(?<Episode>\\d+)");
                 }
 
                 //some declarations already for speed
@@ -920,7 +920,7 @@ namespace Renamer
 
                             //if season recognized from directory name doesn't match season recognized from filename, the file might be located in a wrong directory
                             if (DirectorySeason != -1 && ie.Season != DirectorySeason.ToString()) {
-                                Helper.Log("File seems to be located inconsistently: " + ie.Filename + " was recognized as season " + ie.Season + ", but folder name indicates that it should be season " + DirectorySeason.ToString(), Helper.LogType.Warning);
+                                Logger.Instance.LogMessage("File seems to be located inconsistently: " + ie.Filename + " was recognized as season " + ie.Season + ", but folder name indicates that it should be season " + DirectorySeason.ToString(), LogLevel.WARNING);
                             }
                             break;
                         }
@@ -948,7 +948,9 @@ namespace Renamer
                 RenameSubsToMatchVideos();
             }
 
-            Helper.Log("Found " + Info.Episodes.Count + " Files", Helper.LogType.Info);
+
+            
+            Logger.Instance.LogMessage("Found " + Info.Episodes.Count + " Files", LogLevel.INFO);
             FillListView();
 
             //also update some gui elements for the sake of it
@@ -984,19 +986,19 @@ namespace Renamer
         /// </summary>
         private void GetSubtitles() {
             if (settings.IsMonoCompatibilityMode) {
-                Helper.Log("Subtitle downloading is not supported in Mono, since additional dlls for unpacking are required which won't work here :(", Helper.LogType.Warning);
+                Logger.Instance.LogMessage("Subtitle downloading is not supported in Mono, since additional dlls for unpacking are required which won't work here :(", LogLevel.WARNING);
                 return;
             }
             info.SubtitleLinks.Clear();
             // request
             SubtitleProvider subprovider = info.GetCurrentSubtitleProvider();
             if (subprovider == null) {
-                Helper.Log("No subtitle provider found/selected", Helper.LogType.Error);
+                Logger.Instance.LogMessage("No subtitle provider found/selected", LogLevel.ERROR);
                 return;
             }
             string url = subprovider.SearchURL;
             if (url == null || url == "") {
-                Helper.Log("Can't search because no search URL is specified for this subtitle provider", Helper.LogType.Error);
+                Logger.Instance.LogMessage("Can't search because no search URL is specified for this subtitle provider", LogLevel.ERROR);
                 return;
             }
             url = url.Replace("%T", Helper.ReadProperties(Config.LastTitles)[0]);
@@ -1006,10 +1008,10 @@ namespace Renamer
                 requestHtml = (HttpWebRequest)(HttpWebRequest.Create(url));
             }
             catch (Exception ex) {
-                Helper.Log(ex.Message, Helper.LogType.Error);
+                Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                 return;
             }
-            Helper.Log("Searching at " + url.Replace(" ", "%20"), Helper.LogType.Status);
+            Logger.Instance.LogMessage("Searching at " + url.Replace(" ", "%20"), LogLevel.INFO);
             requestHtml.Timeout = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
             // get response
             HttpWebResponse responseHtml = null;
@@ -1017,7 +1019,7 @@ namespace Renamer
                 responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
             }
             catch (Exception ex) {
-                Helper.Log(ex.Message, Helper.LogType.Error);
+                Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                 if (responseHtml != null)
                     responseHtml.Close();
                 return;
@@ -1025,7 +1027,7 @@ namespace Renamer
             //if search engine directs us straight to the result page, skip parsing search results
             string seriesURL = subprovider.SeriesURL;
             if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL)) {
-                Helper.Log("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + subprovider.SubtitlesURL.Replace(" ", "%20"), Helper.LogType.Status);
+                Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + subprovider.SubtitlesURL.Replace(" ", "%20"), LogLevel.INFO);
                 GetSubtitleFromSeriesPage(responseHtml.ResponseUri.AbsoluteUri + subprovider.SubtitlesURL);
             }
             else {
@@ -1038,7 +1040,7 @@ namespace Renamer
                 catch (Exception ex) {
                     if (r != null)
                         r.Close();
-                    Helper.Log(ex.Message, Helper.LogType.Error);
+                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                     return;
                 }
                 string source = r.ReadToEnd();
@@ -1083,7 +1085,7 @@ namespace Renamer
                     MessageBox.Show("Match: "+m.Value+"\r\nName: "+m.Groups["name"].Value+"\r\nyear: "+m.Groups["year"].Value+"\r\nlink: "+m.Groups["link"].Value);
             }*/
             if (mc.Count == 0) {
-                Helper.Log("No results found", Helper.LogType.Info);
+                Logger.Instance.LogMessage("No results found", LogLevel.INFO);
             }
             else if (mc.Count == 1) {
                 string url = subprovider.SubtitlesPage;
@@ -1096,7 +1098,7 @@ namespace Renamer
                 }
             }
             else {
-                Helper.Log("Search engine found multiple results at " + SourceURL.Replace(" ", "%20"), Helper.LogType.Info);
+                Logger.Instance.LogMessage("Search engine found multiple results at " + SourceURL.Replace(" ", "%20"), LogLevel.INFO);
                 SelectResult sr = new SelectResult(mc, subprovider, true);
                 if (sr.ShowDialog() == DialogResult.Cancel)
                     return;
@@ -1138,7 +1140,7 @@ namespace Renamer
                     requestHtml = (HttpWebRequest)(HttpWebRequest.Create(anotherlink));
                 }
                 catch (Exception ex) {
-                    Helper.Log(ex.Message, Helper.LogType.Error);
+                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                     return;
                 }
                 requestHtml.Timeout = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
@@ -1148,7 +1150,7 @@ namespace Renamer
                     responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
                 }
                 catch (Exception ex) {
-                    Helper.Log(ex.Message, Helper.LogType.Error);
+                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                     if (responseHtml != null)
                         responseHtml.Close();
                     return;
@@ -1191,7 +1193,7 @@ namespace Renamer
                     }
                     catch (Exception ex)
                     {
-                            Helper.Log(ex.Message, Helper.LogType.Error);
+                            Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                             return;
                     }
                     requestHtml.Timeout = 5000;
@@ -1203,7 +1205,7 @@ namespace Renamer
                     }
                     catch (WebException e)
                     {
-                            Helper.Log(e.Message, Helper.LogType.Error);
+                            Logger.Instance.LogMessage(e.Message, LogLevel.ERROR);
                             return;
                     }
                     //if we get redirected, lets assume this page does not exist
@@ -1212,7 +1214,7 @@ namespace Renamer
                             break;
                     }
                     // and download
-                    //Helper.Log("charset=" + responseHtml.CharacterSet, Helper.LogType.Status);
+                    //Logger.Instance.LogMessage("charset=" + responseHtml.CharacterSet, LogLevel.INFO);
 
                     StreamReader r = new StreamReader(responseHtml.GetResponseStream(), Encoding.GetEncoding(responseHtml.CharacterSet));
                     string source = r.ReadToEnd();
@@ -1226,12 +1228,12 @@ namespace Renamer
                             if (url != url2)
                             {
                                     Info.AddRelationCollection(new Relation(season.ToString(), m.Groups["Episode"].Value, System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                                    //Helper.Log("Found Relation: " + "S" + season.ToString() + "E" + m.Groups["Episode"].Value + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Status);
+                                    //Logger.Instance.LogMessage("Found Relation: " + "S" + season.ToString() + "E" + m.Groups["Episode"].Value + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), LogLevel.INFO);
                             }
                             else
                             {
                                     Info.AddRelationCollection(new Relation(m.Groups["Season"].Value, m.Groups["Episode"].Value, System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                                    //Helper.Log("Found Relation: " + "S" + m.Groups["Season"].Value + "E" + m.Groups["Episode"].Value + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), Helper.LogType.Status);
+                                    //Logger.Instance.LogMessage("Found Relation: " + "S" + m.Groups["Season"].Value + "E" + m.Groups["Episode"].Value + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), LogLevel.INFO);
                             }
                     }
                     // THOU SHALL NOT FORGET THE BREAK
@@ -1273,7 +1275,7 @@ namespace Renamer
                 extensions[a] = extensions[a].ToLower();
             }
             if (extensions == null) {
-                Helper.Log("No Subtitle Extensions found!", Helper.LogType.Warning);
+                Logger.Instance.LogMessage("No Subtitle Extensions found!", LogLevel.WARNING);
                 return;
             }
 
@@ -1361,7 +1363,7 @@ namespace Renamer
                     List<FileSystemInfo> fsi = Helper.GetAllFilesRecursively(folder, "*." + ex);
                     Files.AddRange(fsi);
                 }
-                string[] patterns = Helper.ReadProperties(Config.EpIdentifier);
+                string[] patterns = (string[])Helper.ReadProperties(Config.EpIdentifier);
                 foreach (FileSystemInfo file in Files) {
                     string Season = "";
                     string Episode = "";
@@ -1448,14 +1450,14 @@ namespace Renamer
                                         MatchedSubtitles++;
                                     }
                                     catch (Exception ex) {
-                                        Helper.Log(source + " --> " + target + ": " + ex.Message, Helper.LogType.Error);
+                                        Logger.Instance.LogMessage(source + " --> " + target + ": " + ex.Message, LogLevel.ERROR);
                                     }
                                 }
                             }
                         }
                     }
                 }
-                Helper.Log("Downloaded " + Files.Count + " subtitles and matched " + MatchedSubtitles + " of them.", Helper.LogType.Status);
+                Logger.Instance.LogMessage("Downloaded " + Files.Count + " subtitles and matched " + MatchedSubtitles + " of them.", LogLevel.INFO);
                 //cleanup
                 info.SubtitleFiles.Clear();
                 Directory.Delete(folder, true);
@@ -1502,7 +1504,7 @@ namespace Renamer
         private void lstFiles_SubItemClicked(object sender, ListViewEx.SubItemEventArgs e) {
             if (e.SubItem != 0 && e.SubItem != 1) {
                 if (settings.IsMonoCompatibilityMode) {
-                    Helper.Log("Editing Entries dynamically is not supported in Mono unfortunately :(", Helper.LogType.Warning);
+                    Logger.Instance.LogMessage("Editing Entries dynamically is not supported in Mono unfortunately :(", LogLevel.WARNING);
                     return;
                 }
                 RelationCollection rc = Info.GetRelationCollectionByName(Info.Episodes[(int)e.Item.Tag].Showname);
@@ -1635,20 +1637,30 @@ namespace Renamer
         //Main Initialization
         private void Form1_Load(object sender, EventArgs e) {
             settings = Settings.getInstance();
+            Logger logger = Logger.Instance;
+            // Add Logger
+            logger.addLogger(new FileLogger(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "Renamer.log", true, Helper.ReadEnum<LogLevel>(Config.LogFileLevel)));
+            logger.addLogger(new MessageBoxLogger(Helper.ReadEnum<LogLevel>(Config.LogMessageBoxLevel)));
+
             //mono compatibility fixes
             if (Type.GetType("Mono.Runtime") != null) {
-                Helper.LogDisplay = txtLog;
+                logger.addLogger(new TextBoxLogger(txtLog, Helper.ReadEnum<LogLevel>(Config.LogTextBoxLevel)));
                 rtbLog.Visible = false;
                 txtLog.Visible = true;
-                Helper.Log("Running on Mono", Helper.LogType.Info);
+                Logger.Instance.LogMessage("Running on Mono", LogLevel.INFO);
             }
             else {
-                Helper.LogDisplay = rtbLog;
+                logger.addLogger(new RichTextBoxLogger(rtbLog, Helper.ReadEnum<LogLevel>(Config.LogTextBoxLevel)));
             }
+
+            // Init logging here:
+
+            
+
+
             //and read a value to make sure it is loaded into memory
             Helper.ReadProperty(Config.Case);
 
-            Helper.ClearLog();
             info = new Info();
             lstFiles.ListViewItemSorter = lvwColumnSorter;
             txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
@@ -1663,7 +1675,7 @@ namespace Renamer
             cbProviders.SelectedIndex = Math.Max(0, cbProviders.Items.IndexOf(LastProvider));
             RelationProvider provider = info.GetCurrentProvider();
             if (provider == null) {
-                Helper.Log("No relation provider found/selected", Helper.LogType.Error);
+                Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                 return;
             }
             Helper.WriteProperty(Config.LastProvider, cbProviders.Text);
@@ -1705,7 +1717,7 @@ namespace Renamer
                     lstFiles.Columns[i].Width = width;
                 }
                 catch (Exception) {
-                    Helper.Log("Invalid Value for ColumnWidths[" + i + "]", Helper.LogType.Error);
+                    Logger.Instance.LogMessage("Invalid Value for ColumnWidths[" + i + "]", LogLevel.ERROR);
                 }
                 try {
                     int order = lstFiles.Columns[i].DisplayIndex;
@@ -1713,7 +1725,7 @@ namespace Renamer
                     lstFiles.Columns[i].DisplayIndex = order;
                 }
                 catch (Exception) {
-                    Helper.Log("Invalid Value for ColumnOrder[" + i + "]", Helper.LogType.Error);
+                    Logger.Instance.LogMessage("Invalid Value for ColumnOrder[" + i + "]", LogLevel.ERROR);
                 }
             }
             string[] Windowsize = Helper.ReadProperties(Config.WindowSize);
@@ -1726,7 +1738,7 @@ namespace Renamer
                     this.Height = h;
                 }
                 catch (Exception) {
-                    Helper.Log("Couldn't process WindowSize property: " + Helper.ReadProperty(Config.WindowSize), Helper.LogType.Error);
+                    Logger.Instance.LogMessage("Couldn't process WindowSize property: " + Helper.ReadProperty(Config.WindowSize), LogLevel.ERROR);
                 }
                 //focus fix
                 txtPath.Focus();
@@ -1833,7 +1845,7 @@ namespace Renamer
                 Process myProc = Process.Start(e.LinkText);
             }
             catch (Exception ex) {
-                Helper.Log("Couldn't open " + e.LinkText + ":" + ex.Message, Helper.LogType.Error);
+                Logger.Instance.LogMessage("Couldn't open " + e.LinkText + ":" + ex.Message, LogLevel.ERROR);
             }
         }
 
@@ -2243,7 +2255,7 @@ namespace Renamer
                     Info.Episodes.Remove(ie);
                 }
                 catch (Exception ex) {
-                    Helper.Log("Error deleting file: " + ex.Message, Helper.LogType.Error);
+                    Logger.Instance.LogMessage("Error deleting file: " + ex.Message, LogLevel.ERROR);
                 }
             }
             FillListView();
@@ -2257,7 +2269,7 @@ namespace Renamer
                 Process myProc = Process.Start(VideoPath);
             }
             catch (Exception ex) {
-                Helper.Log("Couldn't open " + VideoPath + ":" + ex.Message, Helper.LogType.Error);
+                Logger.Instance.LogMessage("Couldn't open " + VideoPath + ":" + ex.Message, LogLevel.ERROR);
             }
         }
 
@@ -2399,12 +2411,12 @@ namespace Renamer
                 UpdateList(true);
             }
             Info.timeloadfolder = (DateTime.Now - dt).TotalSeconds;
-            Helper.Log("Time for loading folder: " + Info.timeloadfolder + " Seconds", Helper.LogType.Info);
-            Helper.Log("Time for extracting names: " + Info.timeextractname + " Seconds", Helper.LogType.Info);
-            Helper.Log("Time for creating paths: " + Info.timesetpath + " Seconds", Helper.LogType.Info);
-            Helper.Log("Time for creating filenames: " + Info.timecreatenewname + " Seconds", Helper.LogType.Info);
-            Helper.Log("Time for assigning relations: " + Info.timesetuprelation + " Seconds", Helper.LogType.Info);
-            Helper.Log("Time for extracting numbers: " + Info.timeextractnumbers + " Seconds", Helper.LogType.Info);
+            Logger.Instance.LogMessage("Time for loading folder: " + Info.timeloadfolder + " Seconds", LogLevel.INFO);
+            Logger.Instance.LogMessage("Time for extracting names: " + Info.timeextractname + " Seconds", LogLevel.INFO);
+            Logger.Instance.LogMessage("Time for creating paths: " + Info.timesetpath + " Seconds", LogLevel.INFO);
+            Logger.Instance.LogMessage("Time for creating filenames: " + Info.timecreatenewname + " Seconds", LogLevel.INFO);
+            Logger.Instance.LogMessage("Time for assigning relations: " + Info.timesetuprelation + " Seconds", LogLevel.INFO);
+            Logger.Instance.LogMessage("Time for extracting numbers: " + Info.timeextractnumbers + " Seconds", LogLevel.INFO);
         }
         /// <summary>
         /// Extracts season from directory name
@@ -2464,7 +2476,7 @@ namespace Renamer
                     Directory.Delete(path, true);
                 }
                 catch (Exception ex) {
-                    Helper.Log("Couldn't delete " + path + ": " + ex.Message, Helper.LogType.Error);
+                    Logger.Instance.LogMessage("Couldn't delete " + path + ": " + ex.Message, LogLevel.ERROR);
                 }
             }
         }
@@ -2483,7 +2495,7 @@ namespace Renamer
                 }
             }
             if (lvi == null) {
-                Helper.Log("Synching between data and gui failed because item doesn't exist in GUI.", Helper.LogType.Error);
+                Logger.Instance.LogMessage("Synching between data and gui failed because item doesn't exist in GUI.", LogLevel.ERROR);
                 return;
             }
             InfoEntry ie = Info.Episodes[item];
@@ -2517,6 +2529,7 @@ namespace Renamer
         /// Fills list view control with info data
         /// </summary>
         private void FillListView() {
+            // TODO: show at least a progressbar while adding items, user can't see anything but processor utilization will be very high
             lstFiles.Items.Clear();
             for (int i = 0; i < Info.Episodes.Count; i++) {
                 InfoEntry ie = Info.Episodes[i];
@@ -2805,10 +2818,10 @@ namespace Renamer
                 SyncItem((int)lvi.Tag, false);
             }
             if (count > 0) {
-                Helper.Log(SearchString + " was replaced with " + ReplaceString + " in " + count + " fields.", Helper.LogType.Status);
+                Logger.Instance.LogMessage(SearchString + " was replaced with " + ReplaceString + " in " + count + " fields.", LogLevel.INFO);
             }
             else {
-                Helper.Log(SearchString + " was not found in any of the selected files.", Helper.LogType.Status);
+                Logger.Instance.LogMessage(SearchString + " was not found in any of the selected files.", LogLevel.INFO);
             }
         }
 

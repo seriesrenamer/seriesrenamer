@@ -93,14 +93,14 @@ namespace Renamer.Dialogs
                 txtExtract.Text = txtExtract.Text.Substring(0, txtExtract.Text.Length - Environment.NewLine.Length);
 
             //Get some enums
-            cbError.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelError));
-            cbWarning.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelWarning));
-            cbStatus.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelStatus));
-            cbInfo.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelInfo));
-            cbDebug.SelectedIndex = (int)(Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelDebug));
-            cbReplace.SelectedIndex = (int)(Helper.InvalidFilenameAction)Enum.Parse(typeof(Helper.InvalidFilenameAction), Helper.ReadProperty(Config.InvalidFilenameAction));
-            cbUmlaut.SelectedIndex = (int)(InfoEntry.UmlautAction)Enum.Parse(typeof(InfoEntry.UmlautAction), Helper.ReadProperty(Config.Umlaute)) - 1;
-            cbCase.SelectedIndex = (int)(InfoEntry.Case)Enum.Parse(typeof(InfoEntry.Case), Helper.ReadProperty(Config.Case)) - 1;
+
+            cbLogfile.SelectedIndex = (int)(Helper.ReadEnum<Logging.LogLevel>(Config.LogFileLevel));
+            cbLogwindow.SelectedIndex = (int)(Helper.ReadEnum<Logging.LogLevel>(Config.LogTextBoxLevel));
+            cbLogmessagebox.SelectedIndex = (int)(Helper.ReadEnum<Logging.LogLevel>(Config.LogMessageBoxLevel));
+
+            cbReplace.SelectedIndex = (int)Helper.ReadEnum<Helper.InvalidFilenameAction>(Config.InvalidFilenameAction);
+            cbUmlaut.SelectedIndex = (int)Helper.ReadEnum<InfoEntry.UmlautAction>(Config.Umlaute) - 1;
+            cbCase.SelectedIndex = (int)Helper.ReadEnum<InfoEntry.Case>(Config.Case) - 1;
 
             //Get some ints
             nudTimeout.Value = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
@@ -148,11 +148,10 @@ namespace Renamer.Dialogs
             string[] extract = txtExtract.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             Helper.WriteProperties(Config.Extract, extract);
 
-            Helper.WriteProperty(Config.LogLevelError, ((Helper.LogLevel)cbError.SelectedIndex).ToString());
-            Helper.WriteProperty(Config.LogLevelInfo, ((Helper.LogLevel)cbInfo.SelectedIndex).ToString());
-            Helper.WriteProperty(Config.LogLevelStatus, ((Helper.LogLevel)cbStatus.SelectedIndex).ToString());
-            Helper.WriteProperty(Config.LogLevelWarning, ((Helper.LogLevel)cbWarning.SelectedIndex).ToString());
-            Helper.WriteProperty(Config.LogLevelDebug, ((Helper.LogLevel)cbDebug.SelectedIndex).ToString());
+            Helper.WriteProperty(Config.LogFileLevel, cbLogfile.SelectedIndex.ToString());
+            Helper.WriteProperty(Config.LogTextBoxLevel, cbLogwindow.SelectedIndex.ToString());
+            Helper.WriteProperty(Config.LogMessageBoxLevel, cbLogmessagebox.SelectedIndex.ToString());
+
             Helper.WriteProperty(Config.Umlaute, Enum.GetName(typeof(InfoEntry.UmlautAction), cbUmlaut.SelectedIndex + 1));
             Helper.WriteProperty(Config.Case, Enum.GetName(typeof(InfoEntry.Case), cbCase.SelectedIndex + 1));
             Helper.WriteProperty(Config.InvalidFilenameAction, ((Helper.InvalidFilenameAction)cbReplace.SelectedIndex).ToString());

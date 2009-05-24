@@ -73,6 +73,7 @@
     <Compile Include="Classes\Configuration\Keywords\ProviderConfig.cs" />
     <Compile Include="Classes\Configuration\Keywords\SubProviderConfig.cs" />
     <Compile Include="Classes\RelationCollection.cs" />
+    <Compile Include="Classes\WinHttpSafeNativeMethods.cs" />
     <Compile Include="Dialogs\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -146,6 +147,13 @@
     <Compile Include="ListViewEx.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\FileLogger.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\ListBoxLogger.cs" />
+    <Compile Include="Logging\MessageBoxLogger.cs" />
+    <Compile Include="Logging\RichTextBoxLogger.cs" />
+    <Compile Include="Logging\TextBoxLogger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Dialogs\ReplaceWindow.cs">
       <SubType>Form</SubType>
@@ -159,6 +167,7 @@
     <Compile Include="Dialogs\SetEpisodes.Designer.cs">
       <DependentUpon>SetEpisodes.cs</DependentUpon>
     </Compile>
+    <Compile Include="Classes\SeriesNameExtractor.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Dialogs\AboutBox.resx">
@@ -290,8 +299,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DLLs\ICSharpCode.SharpZipLib.dll" />
-    <Content Include="DLLs\unrar.dll" />
+    <Content Include="Logging\DLLs\ICSharpCode.SharpZipLib.dll" />
+    <Content Include="Logging\DLLs\unrar.dll" />
     <Content Include="sr1.ico" />
   </ItemGroup>
   <ItemGroup>

@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using Renamer.Logging;
 
 namespace Renamer.Classes.SubtitleEdit
 {
@@ -75,7 +76,7 @@ namespace Renamer.Classes.SubtitleEdit
                         status=2;
                         continue;
                     }catch(FormatException){
-                        Helper.Log("Error parsing "+path+" at line "+i+":"+line,Helper.LogType.Warning);
+                        Logger.Instance.LogMessage("Error parsing "+path+" at line "+i+":"+line,LogLevel.WARNING);
                         status=0;
                         continue;
                     }
@@ -99,7 +100,7 @@ namespace Renamer.Classes.SubtitleEdit
                     }
                     catch (Exception)
                     {
-                        Helper.Log("Error parsing " + path + " at line " + i + ":" + line, Helper.LogType.Warning);
+                        Logger.Instance.LogMessage("Error parsing " + path + " at line " + i + ":" + line, LogLevel.WARNING);
                         status = 0;
                     }
                 }
@@ -223,7 +224,7 @@ namespace Renamer.Classes.SubtitleEdit
             }
             catch (Exception ex)
             {
-                Helper.Log("Couldn't write subtitle file " + path + ":" + ex.Message, Helper.LogType.Error);
+                Logger.Instance.LogMessage("Couldn't write subtitle file " + path + ":" + ex.Message, LogLevel.ERROR);
             }
         }
         

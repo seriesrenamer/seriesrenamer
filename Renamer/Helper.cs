@@ -23,6 +23,7 @@ using System.Text.RegularExpressions;
 using Renamer.Classes;
 using Renamer.Classes.Configuration.Keywords;
 using Renamer.Classes.Configuration;
+using Renamer.Logging;
 namespace Renamer
 {
     /// <summary>
@@ -31,16 +32,6 @@ namespace Renamer
     public class Helper
     {
         /// <summary>
-        /// Type of log message
-        /// </summary>
-        public enum LogType : int { Error, Info, Warning, Status, Plain, Debug };
-
-        /// <summary>
-        /// where log message of specific type is to show up
-        /// </summary>
-        public enum LogLevel : int { None, LogFile, MessageBox, Log_and_Message };
-
-        /// <summary>
         /// action to take when encountering invalid filename
         /// </summary>
         public enum InvalidFilenameAction : int { Ask, Skip, Replace };
@@ -48,139 +39,17 @@ namespace Renamer
         public enum Languages : int { None, German, English, French, Italian };
 
         /// <summary>
-        /// Control to show log in
-        /// </summary>
-        public static Control LogDisplay;
-
-        /// <summary>
-        /// logs to a file and/or message box
-        /// </summary>
-        /// <param name="line">message to log</param>
-        /// <param name="logtype">type of the message</param>
-        public static void Log(string line, LogType logtype) {
-            string message = "";
-            //get current loglevel filter and add logtype to message
-            LogLevel ll = LogLevel.None;
-            Color type = Color.Black;
-            if (logtype == LogType.Error) {
-                ll = (Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelError)); ;
-                if (ll == LogLevel.None) return;
-                message = "ERROR: ";
-                type = Color.Red;
-            }
-            if (logtype == LogType.Info) {
-                ll = (Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelInfo)); ;
-                if (ll == LogLevel.None) return;
-                message = "INFO: ";
-                type = Color.Green;
-            }
-            if (logtype == LogType.Warning) {
-                ll = (Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelWarning)); ;
-                if (ll == LogLevel.None) return;
-                message = "WARNING: ";
-                type = Color.Yellow;
-            }
-            if (logtype == LogType.Status) {
-                ll = (Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelStatus)); ;
-                if (ll == LogLevel.None) return;
-                message = "STATUS: ";
-            }
-            if (logtype == LogType.Plain) {
-                ll = LogLevel.LogFile;
-                message = "LOG: ";
-            }
-            if (logtype == LogType.Debug) {
-                ll = (Helper.LogLevel)Enum.Parse(typeof(Helper.LogLevel), Helper.ReadProperty(Config.LogLevelDebug)); ;
-                if (ll == LogLevel.None) return;
-                message = "DEBUG: ";
-            }
-
-            //add actual message to message
-            message += line;
-
-            //and some output
-            if (ll != LogLevel.MessageBox) {
-                File.AppendAllText(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "Renamer.log", message + Environment.NewLine);
-                if (LogDisplay != null) {
-                    LogDisplay.Text = message + Environment.NewLine + LogDisplay.Text;
-                }
-                //richtextbox, additional colouring
-                if (LogDisplay is RichTextBox) {
-                    RichTextBox rtbLog = ((RichTextBox)LogDisplay);
-                    int start = 0;
-                    int end = 0;
-                    while (true) {
-                        end = rtbLog.Text.IndexOf("\n", start);
-                        if (end < 0) {
-                            end = rtbLog.Text.Length - 1;
-                        }
-                        bool found = false;
-                        if (!found && rtbLog.Find("Error:", start, end, RichTextBoxFinds.None) == start) {
-                            rtbLog.SelectionColor = Color.Red;
-                            rtbLog.SelectionFont = new Font(rtbLog.SelectionFont, FontStyle.Bold);
-                            found = true;
-                        }
-
-                        if (!found && rtbLog.Find("Warning:", start, end, RichTextBoxFinds.None) == start) {
-                            rtbLog.SelectionColor = Color.Orange;
-                            rtbLog.SelectionFont = new Font(rtbLog.SelectionFont, FontStyle.Bold);
-                            found = true;
-                        }
-
-                        if (!found && rtbLog.Find("Info:", start, end, RichTextBoxFinds.None) == start) {
-                            rtbLog.SelectionColor = Color.DarkGreen;
-                            rtbLog.SelectionFont = new Font(rtbLog.SelectionFont, FontStyle.Bold);
-                            found = true;
-                        }
-
-                        if (!found && rtbLog.Find("Status:", start, end, RichTextBoxFinds.None) == start) {
-                            rtbLog.SelectionColor = Color.Black;
-                            rtbLog.SelectionFont = new Font(rtbLog.SelectionFont, FontStyle.Bold);
-                            found = true;
-                        }
-
-                        if (!found && rtbLog.Find("LOG:", start, end, RichTextBoxFinds.None) == start) {
-                            rtbLog.SelectionColor = Color.Black;
-                            rtbLog.SelectionFont = new Font(rtbLog.SelectionFont, FontStyle.Regular);
-                            found = true;
-                        }
-
-                        if (!found && rtbLog.Find("DEBUG:", start, end, RichTextBoxFinds.None) == start) {
-                            rtbLog.SelectionColor = Color.DarkGray;
-                            rtbLog.SelectionFont = new Font(rtbLog.SelectionFont, FontStyle.Bold);
-                            found = true;
-                        }
-                        if (found) {
-                            rtbLog.SelectionStart = rtbLog.SelectionStart + rtbLog.SelectionLength;
-                            rtbLog.SelectionLength = end - rtbLog.SelectionStart;
-                            rtbLog.SelectionColor = Color.Black;
-                            rtbLog.SelectionFont = new Font(rtbLog.SelectionFont, FontStyle.Regular);
-                        }
-                        start = end + 1;
-                        if (end == rtbLog.Text.Length - 1) break;
-                    }
-                }
-            }
-            if (ll == LogLevel.Log_and_Message || ll == LogLevel.MessageBox) {
-                MessageBox.Show(message);
-            }
-        }
-        /// <summary>
-        /// Deletes log file, only called at program start
-        /// </summary>
-        public static void ClearLog() {
-            File.Delete(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + Helper.ReadProperty(Config.LogName));
-        }
-
-
-
-        /// <summary>
-        /// returns true if str=="1" and catches exception
+        /// Converts a string to a bool, by compare it to some string values
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
         public static bool StringToBool(string str) {
-            return str == "1" || str == "true";
+            try {
+                return Convert.ToInt32(str) > 0 || str == System.Boolean.TrueString;
+            }
+            catch {
+                return false;
+            }
         }
 
         /// <summary>
@@ -190,15 +59,10 @@ namespace Renamer
         /// <param name="container">string in which the letters should be contained</param>
         /// <returns>true if container contains those letters, false otherwise</returns>
         public static bool ContainsLetters(string letters, string container) {
-            int pos = 0;
             foreach (char c in letters) {
                 bool found = false;
-                for (int i = pos; i < container.Length; i++) {
-                    if (char.ToLower(c) == char.ToLower(container[i])) {
-                        pos = i;
-                        found = true;
-                        break;
-                    }
+                if (container.Contains(c.ToString())) {
+                    found = true;
                 }
                 if (!found) {
                     return false;
@@ -209,29 +73,36 @@ namespace Renamer
 
 
         /// <summary>
-        /// Capitalizes The String As In This Description
+        /// Make the first letter of every word UPPERCASE, words must be sepperated by space
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static string VISSpeak(string str) {
+        public static string UpperEveryFirst(string str) {
             str = str.ToLower();
-            string[] arr = str.Split(new char[] { ' ' });
+            string[] words = str.Split(' ');
             string result = "";
-            for (int i = 0; i < arr.Length; i++) {
-                string s = arr[i];
+            for (int i = 0; i < words.Length; i++) {
+                string word = words[i];
+                if (word.Length == 0) {
+                    continue;
+                }
+
+                // Is this Part really needed? why care if there is a number on the beginning of a word
+                // TODO: chris
                 int firstAlphaIndex = 0;
-                for (int j = 0; j < s.Length; j++) {
-                    if (char.IsLetter(s[j])) {
+                for (int j = 0; j < word.Length; j++) {
+                    if (char.IsLetter(word[j])) {
                         firstAlphaIndex = j;
                         break;
                     }
                 }
-                if (s.Length > 0 && char.IsLower(s[firstAlphaIndex])) {
-                    s = s.Substring(0, firstAlphaIndex) + char.ToUpper(s[firstAlphaIndex]) + s.Substring(firstAlphaIndex + 1);
+
+                if (char.IsLower(word[firstAlphaIndex])) {
+                    word = word.Substring(0, firstAlphaIndex) + char.ToUpper(word[firstAlphaIndex]) + word.Substring(firstAlphaIndex + 1);
                 }
-                result += s + " ";
+                words[i] = word;
             }
-            result = result.Remove(result.Length - 1);
+            result = String.Join(" ", words);
             return result;
         }
 
@@ -334,9 +205,21 @@ namespace Renamer
                 Int32.TryParse(result, out value);
             }
             catch (Exception) {
-                Helper.Log("Couldn't parse property " + Identifier + " = " + result, Helper.LogType.Error);
+                Logger.Instance.LogMessage("Couldn't parse property to int " + Identifier + " = " + result, LogLevel.ERROR);
             }
             return value;
+        }
+
+        public static T ReadEnum<T>(string identifier) {
+            string result = null;
+            try {
+                result = ReadProperty(identifier);
+                return (T)Enum.Parse(typeof(T), ReadProperty(identifier));
+            }
+            catch{
+                Logger.Instance.LogMessage("Couldn't parse property to Enum<" + typeof(T).ToString() + "> " + identifier + " = " + result, LogLevel.ERROR);
+                return default(T);
+            }
         }
 
         /// <summary>
@@ -350,6 +233,9 @@ namespace Renamer
             }
             //note: if this is an array really but this function is called, return it in one string form
             if (variable is string[]) {
+                if (((string[])variable).Length == 0) {
+                    return "";
+                }
                 string value = "";
                 foreach (string s in ((string[])variable)) {
                     value += s + Helper.ReadProperty(Config.Delimiter);
@@ -388,7 +274,7 @@ namespace Renamer
             if (config == null) {
                 return null;
             }
-            return MakeConfigString(config[Identifier]);
+            return (string)MakeConfigString(config[Identifier]).Clone();
         }
 
         /// <summary>
@@ -421,7 +307,7 @@ namespace Renamer
             if (config == null) {
                 return null;
             }
-            return MakeConfigStringArray(config[Identifier]);
+            return (string[])MakeConfigStringArray(config[Identifier]).Clone();
         }
 
         /// <summary>
@@ -546,48 +432,6 @@ namespace Renamer
                 }
             }
             return files;
-        }
-
-        /// <summary>
-        /// Obsolete function for computing a hash of a movie file for osdb project
-        /// </summary>
-        /// <param name="filename">File to compute hash from</param>
-        /// <returns>byte[] containing hash</returns>
-        public static byte[] ComputeMovieHash(string filename) {
-            byte[] result;
-            using (Stream input = File.OpenRead(filename)) {
-                result = ComputeMovieHash(input);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Obsolete function for computing a hash of a movie file for osdb project
-        /// </summary>
-        /// <param name="input">stream to compute hash from</param>
-        /// <returns>byte[] containing hash</returns>
-        private static byte[] ComputeMovieHash(Stream input) {
-            long lhash, streamsize;
-            streamsize = input.Length;
-            lhash = streamsize;
-
-            long i = 0;
-            byte[] buffer = new byte[sizeof(long)];
-            while (i < 65536 / sizeof(long) && (input.Read(buffer, 0, sizeof(long)) > 0)) {
-                i++;
-                lhash += BitConverter.ToInt64(buffer, 0);
-            }
-
-            input.Position = Math.Max(0, streamsize - 65536);
-            i = 0;
-            while (i < 65536 / sizeof(long) && (input.Read(buffer, 0, sizeof(long)) > 0)) {
-                i++;
-                lhash += BitConverter.ToInt64(buffer, 0);
-            }
-            input.Close();
-            byte[] result = BitConverter.GetBytes(lhash);
-            Array.Reverse(result);
-            return result;
         }
     }
 }

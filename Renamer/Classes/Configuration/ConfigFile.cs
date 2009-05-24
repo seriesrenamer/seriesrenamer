@@ -19,6 +19,7 @@ using System.Collections;
 using System.IO;
 using Renamer.Classes.Configuration.Keywords;
 using System.Diagnostics;
+using Renamer.Logging;
 
 namespace Renamer.Classes.Configuration
 {
@@ -37,6 +38,11 @@ namespace Renamer.Classes.Configuration
         /// Contains either a String or a list of Strings
         /// </summary>
         private Hashtable variables = new Hashtable();
+        /// <summary>
+        /// Hashtable containing variables with Identifiers<br/>
+        /// Contains either a String or a list of Strings
+        /// </summary>
+        private Hashtable originalVariables = new Hashtable();
 
         /// <summary>
         /// If set, cache has changed and file needs to be saved
@@ -54,7 +60,6 @@ namespace Renamer.Classes.Configuration
             }
             ConfigFileParser parser = new ConfigFileParser(this);
             parser.readConfigFile(filepath);
-
         }
 
         /// <summary>
@@ -109,15 +114,15 @@ namespace Renamer.Classes.Configuration
                             continue;
                         }
                         //skipping comments
-                        if (line.StartsWith(settings.Comment)) {
+                        if (lastState != ParserState.MultiValueField && line.StartsWith(settings.Comment)) {
                             if (lastState != ParserState.Comment) {
-                                //Helper.Log("Skipping comment", Helper.LogType.Debug);
+                                //FIX Cannot log here, because this will cause a endless loop of calls to myself 
+                                //Logger.Instance.LogMessage("Skipping comment", LogLevel.DEBUG);
                                 lastState = ParserState.Comment;
                             }
                             continue;
                         }
                         // remove comments at the end of a line
-                        line = this.removeComment();
                         int linePosition;
                         string valuePartOfLine;
                         if (lastState != ParserState.MultiValueField) {
@@ -132,19 +137,19 @@ namespace Renamer.Classes.Configuration
                                     continue;
                                 }
                                 if (String.IsNullOrEmpty(valuePartOfLine)) {
-                                    //Helper.Log("Option " + currentKey + " is empty", Helper.LogType.Debug);
+                                    //Logger.Instance.LogMessage("Option " + currentKey + " is empty", LogLevel.DEBUG);
                                 }
 
                                 config[currentKey] = valuePartOfLine;
                                 this.lastState = ParserState.NormalLine;
                             }
                             else {
-                                //Helper.Log("The configfile seems to be corrupt (at line " + lineCounter + "), I'll try to ignore this", Helper.LogType.Warning);
+                                //Logger.Instance.LogMessage("The configfile seems to be corrupt (at line " + lineCounter + "), I'll try to ignore this", LogLevel.WARNING);
                             }
                         }
                         else /* Multi Value Field */ {
                             if (line == settings.EndMultiValueField) {
-                                config[currentKey] = currentValues.ToArray();
+                                config[currentKey] = currentValues;
                                 this.lastState = ParserState.NormalLine;
                                 continue;
                             }
@@ -156,8 +161,8 @@ namespace Renamer.Classes.Configuration
                 catch (Exception ex) {
                     config.LoadDefaults();
                     config.Flush();
-                    Helper.Log("Couldn't process config file " + filepath + ":" + ex.Message, Helper.LogType.Error);
-                    Helper.Log("Using default values", Helper.LogType.Warning);
+                    Logger.Instance.LogMessage("Couldn't process config file " + filepath + ":" + ex.Message, LogLevel.ERROR);
+                    Logger.Instance.LogMessage("Using default values", LogLevel.WARNING);
                 }
                 finally {
                     if (s != null) {
@@ -243,7 +248,7 @@ namespace Renamer.Classes.Configuration
                             continue;
                         }
                         // redirect comments
-                        if (line.StartsWith(settings.Comment)) {
+                        if (lastState != ParserState.MultiValueField && line.StartsWith(settings.Comment)) {
                             fileWriter.WriteLine(line);
                             lastState = ParserState.Comment;
                             continue;
@@ -281,7 +286,7 @@ namespace Renamer.Classes.Configuration
                     File.Move(filepath + ".tmp", filepath);
                 }
                 catch (Exception ex) {
-                    Helper.Log("Couldn't write config file " + filepath + "\nFehler:\n" + ex.Message, Helper.LogType.Error);
+                    Logger.Instance.LogMessage("Couldn't write config file " + filepath + "\nFehler:\n" + ex.Message, LogLevel.ERROR);
                 }
                 finally {
                     if (writeStream != null) {
@@ -304,14 +309,15 @@ namespace Renamer.Classes.Configuration
                         this.lastState = ParserState.MultiValueField;
                         line += settings.BeginMultiValueField;
                         fileWriter.WriteLine(line);
+
+                        //recoverEasyRegex((string[])config[currentKey]));
                         foreach (string val in ((string[])config[currentKey])) {
                             fileWriter.WriteLine("\t" + val);
-                            Debug.WriteLine(currentKey + ": " + val);
                         }
                         line = settings.EndMultiValueField;
                     }
                     else {
-                        line += config[currentKey];
+                        line += (string)config[currentKey];
                         this.lastState = ParserState.NormalLine;
                     }
                 }
@@ -360,7 +366,13 @@ namespace Renamer.Classes.Configuration
         /// </summary>
         /// <param name="key">Key for the variable.</param>
         /// <param name="value">The variable itself.</param>
-        public void addVariable(string key, object value) {
+        private void addVariable(string key, object value) {
+            if (value is string[]) {
+                this.originalVariables.Add(key, ((string[])value).Clone());
+            }
+            else {
+                this.originalVariables.Add(key, ((string)value).Clone());
+            }
             this.variables.Add(key, value);
             this.needsFlush = true;
         }
@@ -393,15 +405,21 @@ namespace Renamer.Classes.Configuration
                     return this[key];
                 }
                 else {
-                    Helper.Log("Couldn't find property " + key + " in " + FilePath, Renamer.Helper.LogType.Error);
+                    Logger.Instance.LogMessage("Couldn't find property " + key + " in " + FilePath, LogLevel.ERROR);
                     return null;
                 }
             }
             set {
+
+                if (value is List<string>) {
+                    value = ((List<string>)value).ToArray();
+                }
+
                 if (this.containsVariable(key)) {
                     this.setVariable(key, value);
                 }
                 else {
+
                     this.addVariable(key, value);
                 }
             }
@@ -430,7 +448,7 @@ namespace Renamer.Classes.Configuration
             object[] keys = new object[this.variables.Keys.Count];
             this.variables.Keys.CopyTo(keys, 0);
             foreach (object key in keys) {
-                if (this.variables[key] is List<string>) {
+                if (this.variables[key] is List<string>) {                   
                     Debug.WriteLine(this.variables);
                     this.variables[key] = ((List<string>)this.variables[key]).ToArray();
                 }
