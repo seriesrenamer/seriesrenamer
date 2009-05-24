@@ -72,9 +72,9 @@
   <ItemGroup>
     <Compile Include="Classes\Configuration\Keywords\Config.cs" />
     <Compile Include="Classes\Configuration\Keywords\ProviderConfig.cs" />
-    <Compile Include="Classes\Configuration\Keywords\SubProviderConfig.cs" />
     <Compile Include="Classes\RelationCollection.cs" />
     <Compile Include="Classes\WinHttpSafeNativeMethods.cs" />
+    <Compile Include="DataGenerator.cs" />
     <Compile Include="Dialogs\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,11 +83,11 @@
     </Compile>
     <Compile Include="Classes\Configuration\ConfigFile.cs" />
     <Compile Include="Classes\InfoEntry.cs" />
-    <Compile Include="Classes\Configuration\Provider.cs" />
+    <Compile Include="Classes\Provider\Provider.cs" />
     <Compile Include="Classes\Relation.cs" />
-    <Compile Include="Classes\Configuration\RelationProvider.cs" />
+    <Compile Include="Classes\Provider\RelationProvider.cs" />
     <Compile Include="Classes\SubtitleFile.cs" />
-    <Compile Include="Classes\Configuration\SubtitleProvider.cs" />
+    <Compile Include="Classes\Provider\SubtitleProvider.cs" />
     <Compile Include="Dialogs\Configuration.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -148,6 +148,7 @@
     <Compile Include="ListViewEx.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Logging\AbstractLogger.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Logging\FileLogger.cs" />
     <Compile Include="Logging\ILogger.cs" />

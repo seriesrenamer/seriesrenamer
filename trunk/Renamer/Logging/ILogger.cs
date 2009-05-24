@@ -46,5 +46,7 @@ namespace Renamer.Logging
         /// <param name="strMessage">Log message, should be saved</param>
         /// <param name="level">Loglevel of the message</param>
         void LogMessage(string strMessage, LogLevel level);
+
+        LogLevel Filter { get; }
     }
 }

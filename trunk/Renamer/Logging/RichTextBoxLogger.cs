@@ -10,7 +10,7 @@ namespace Renamer.Logging
     /// <summary>
     /// Logger offers a nice colored logging to a Richtextbox
     /// </summary>
-    public class RichTextBoxLogger : ILogger
+    public class RichTextBoxLogger : AbstractLogger
     {
         private RichTextBox richTextBox;
         private string logColorString;
@@ -28,8 +28,7 @@ namespace Renamer.Logging
         /// </summary>
         /// <param name="txtBox"></param>
         /// <param name="filter">Log level the logger should listen to</param>
-        public RichTextBoxLogger(RichTextBox txtBox, LogLevel filter) {
-            this.filter = filter;
+        public RichTextBoxLogger(RichTextBox txtBox, LogLevel filter) : base(filter) {
             richTextBox = txtBox;
             logColorIndex = new Hashtable();
             logColor = new Hashtable();
@@ -70,8 +69,8 @@ namespace Renamer.Logging
             this.logColorString = sb.ToString();
         }
 
-        public void LogMessage(string strLogMessage, LogLevel level) {
-            if (level.CompareTo(filter) < 0) {
+        public override void LogMessage(string strLogMessage, LogLevel level) {
+            if (checkFilter(level)) {
                 return;
             }
             //Add Color to color table if not avaiable
@@ -83,7 +82,7 @@ namespace Renamer.Logging
                 this.generateColorString();
                 addColorTableToRtb();
             }
-            string rtMessage = "\\cf" + (colorindex + 1) + "\\b " + level.ToString() + ": \\b0\\cf0 " + strLogMessage + "\\par";
+            string rtMessage = "\\cf" + (colorindex + 1) + "\\b " + level.ToString() + ": \\b0\\cf0 " + strLogMessage.Replace("\\", "\\\\") + "\\par";
             int insertPos = rtf.IndexOf(rtfInserPosString) + rtfInserPosString.Length;
 
             rtf = rtf.Insert(insertPos, rtMessage);

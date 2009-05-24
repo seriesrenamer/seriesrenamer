@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using Renamer.Dialogs;
 using System.Runtime.InteropServices;
 using Renamer.Classes.Configuration.Keywords;
+using Renamer.Classes.Provider;
 
 namespace Renamer
 {
@@ -58,7 +59,7 @@ namespace Renamer
             //once
             for (int a = 0; a < 1; a++) {
                 // request
-                RelationProvider provider = info.GetCurrentProvider();
+                RelationProvider provider = RelationProvider.GetCurrentProvider();
                 if (provider == null) {
                     Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                     return;
@@ -72,7 +73,7 @@ namespace Renamer
                         ie.Language = provider.Language;
                     }
                 }
-                string url = provider.SearchURL;
+                string url = provider.SearchUrl;
                 Logger.Instance.LogMessage("Search URL: " + url, LogLevel.DEBUG);
                 if (url == null || url == "") {
                     Logger.Instance.LogMessage("Can't search because no search URL is specified for this provider", LogLevel.ERROR);
@@ -110,11 +111,11 @@ namespace Renamer
                 }
                 Logger.Instance.LogMessage("Search Results URL: " + responseHtml.ResponseUri.AbsoluteUri, LogLevel.DEBUG);
                 //if search engine directs us straight to the result page, skip parsing search results
-                string seriesURL = provider.SeriesURL;
+                string seriesURL = provider.SeriesUrl;
                 if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL)) {
                     Logger.Instance.LogMessage("Search Results URL contains Series URL: " + seriesURL, LogLevel.DEBUG);
-                    Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesURL.Replace(" ", "%20"), LogLevel.INFO);
-                    GetRelations(responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesURL, Showname);
+                    Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesUrl.Replace(" ", "%20"), LogLevel.INFO);
+                    GetRelations(responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesUrl, Showname);
                 }
                 else {
                     Logger.Instance.LogMessage("Search Results URL doesn't contain Series URL: " + seriesURL + ", this is a proper search results page", LogLevel.DEBUG);
@@ -168,7 +169,7 @@ namespace Renamer
         private void ParseSearch(ref string source, string SourceURL, string Showname) {
             if (source == "")
                 return;
-            RelationProvider provider = info.GetCurrentProvider();
+            RelationProvider provider = RelationProvider.GetCurrentProvider();
             if (provider == null) {
                 Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                 return;
@@ -222,7 +223,7 @@ namespace Renamer
         /// <param name="url">URL of the page to parse</param>
         /// <param name="Showname">Showname</param>
         private void GetRelations(string url, string Showname) {
-            RelationProvider provider = info.GetCurrentProvider();
+            RelationProvider provider = RelationProvider.GetCurrentProvider();
             if (provider == null) {
                 Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                 return;
@@ -528,6 +529,7 @@ namespace Renamer
             }
 
             Logger.Instance.LogMessage("Found " + Info.Episodes.Count + " Files", LogLevel.INFO);
+            /*
             FillListView();
 
             //also update some gui elements for the sake of it
@@ -541,6 +543,45 @@ namespace Renamer
             if (LastSubProvider == null)
                 LastSubProvider = "";
             cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
+            */
+        }
+        private void SelectRecognizedFilesForProcessing() {
+            foreach (InfoEntry ie in Info.Episodes) {
+                if (ie.Season != "" && ie.Episode != "") {
+                    ie.Process = true;
+                    ie.Movie = false;
+                }
+                else {
+                    ie.Process = false;
+                    ie.Movie = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Extracts season from directory name
+        /// </summary>
+        /// <param name="path">path from which to extract the data (NO FILEPATH, JUST FOLDER)</param>
+        /// <returns>recognized season, -1 if not recognized</returns>
+        public int ExtractSeasonFromDirectory(string path) {
+            string[] patterns = Helper.ReadProperties(Config.Extract);
+            string[] folders = path.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = patterns.Length - 1; i >= 0; i--) {
+                string pattern = patterns[i];
+                pattern = pattern.Replace("%T", "*.?");
+                pattern = pattern.Replace("%S", "(?<Season>\\d)");
+                Match m = Regex.Match(folders[folders.Length - 1], pattern, RegexOptions.IgnoreCase);
+
+                if (m.Success) {
+                    try {
+                        return Int32.Parse(m.Groups["Season"].Value);
+                    }
+                    catch (Exception) {
+                        return -1;
+                    }
+                }
+            }
+            return -1;
         }
     }
 }

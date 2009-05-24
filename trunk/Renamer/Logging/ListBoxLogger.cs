@@ -8,22 +8,21 @@ namespace Renamer.Logging
     /// <summary>
     /// Logger which can log to a ListBox
     /// </summary>
-    public class ListBoxLogger : ILogger
+    public class ListBoxLogger : AbstractLogger
     {
         ListBox m_listBox;
-        private LogLevel filter;
         /// <summary>
         /// Creates a new ListBoxLogger
         /// </summary>
         /// <param name="listBox">ListBox, log entries should e added</param>
         /// <param name="filter">Log level the logger should listen to</param>
-        public ListBoxLogger(ListBox listBox, LogLevel filter) {
-            this.filter = filter;
+        public ListBoxLogger(ListBox listBox, LogLevel filter)
+            : base(filter) {
             m_listBox = listBox;
         }
 
-        public void LogMessage(string strMessage, LogLevel level) {
-            if (level.CompareTo(filter) < 0) {
+        public override void LogMessage(string strMessage, LogLevel level) {
+            if (checkFilter(level)) {
                 return;
             }
             MethodInvoker logDelegate = delegate {
