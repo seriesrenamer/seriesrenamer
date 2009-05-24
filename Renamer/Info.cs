@@ -21,6 +21,7 @@ using Renamer.Classes;
 using Renamer.Classes.Configuration.Keywords;
 using Renamer.Classes.Configuration;
 using Renamer.Logging;
+using Renamer.Classes.Provider;
 namespace Renamer
 {
     /// <summary>
@@ -39,16 +40,6 @@ namespace Renamer
         public static List<RelationCollection> Relations = new List<RelationCollection>();
 
         /// <summary>
-        /// List of season/episode<->name relation providers
-        /// </summary>
-        public List<RelationProvider> Providers = new List<RelationProvider>();
-
-        /// <summary>
-        /// List of subtitle file providers
-        /// </summary>
-        public List<SubtitleProvider> SubProviders = new List<SubtitleProvider>();
-
-        /// <summary>
         /// List of subtitle links which are to be downloaded
         /// </summary>
         public List<string> SubtitleLinks = new List<string>();
@@ -65,145 +56,6 @@ namespace Renamer
         public static double timecreatenewname = 0;
         public static double timesetuprelation = 0;
         public static double timeextractnumbers = 0;
-        /// <summary>
-        /// Constructor, loads all providers
-        /// </summary>
-        public Info() {
-            //Get all series name providers
-            List<string> providers = new List<string>(Directory.GetFiles(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/Databases/Titles"));
-            string status = "Providers found:";
-            foreach (string file in providers) {
-                if (Settings.getInstance().IsMonoCompatibilityMode) {
-                    Logger.Instance.LogMessage("Provider: " + file, LogLevel.INFO);
-                }
-                RelationProvider rel = new RelationProvider();
-                rel.Name = Helper.ReadProperty(ProviderConfig.Name, file);
-                rel.RelationsPage = Helper.ReadProperty(ProviderConfig.RelationsPage, file);
-                rel.RelationsRegExp = Helper.ReadProperty(ProviderConfig.RelationsRegExp, file);
-                rel.SearchRegExp = Helper.ReadProperty(ProviderConfig.SearchRegExp, file);
-                rel.SearchResultsURL = Helper.ReadProperty(ProviderConfig.SearchResultsURL, file);
-                rel.SearchURL = Helper.ReadProperty(ProviderConfig.SearchURL, file);
-                rel.SeriesURL = Helper.ReadProperty(ProviderConfig.SeriesURL, file);
-                rel.EpisodesURL = Helper.ReadProperty(ProviderConfig.EpisodesURL, file);
-                rel.SearchRemove = Helper.ReadProperties(ProviderConfig.SearchRemove, file);
-                rel.SearchStart = Helper.ReadProperty(ProviderConfig.SearchStart, file);
-                rel.SearchEnd = Helper.ReadProperty(ProviderConfig.SearchEnd, file);
-                rel.RelationsStart = Helper.ReadProperty(ProviderConfig.RelationsStart, file);
-                rel.RelationsEnd = Helper.ReadProperty(ProviderConfig.RelationsEnd, file);
-                rel.NotFoundURL = Helper.ReadProperty(ProviderConfig.NotFoundURL, file);
-                rel.Encoding = Helper.ReadProperty(ProviderConfig.Encoding, file);
-                rel.Language = (Helper.Languages)Enum.Parse(typeof(Helper.Languages), Helper.ReadProperty(ProviderConfig.Language, file));
-                string rrtl = Helper.ReadProperty(ProviderConfig.RelationsRightToLeft, file);
-                if (rrtl == "1") {
-                    rel.RelationsRightToLeft = true;
-                }
-                else {
-                    rel.RelationsRightToLeft = false;
-                }
-                string srtl = Helper.ReadProperty(ProviderConfig.SearchRightToLeft, file);
-                if (srtl == "1") {
-                    rel.SearchRightToLeft = true;
-                }
-                else {
-                    rel.SearchRightToLeft = false;
-                }
-                if (rel.Name == null || rel.Name == "") {
-                    Logger.Instance.LogMessage("Invalid provider file: " + file, LogLevel.ERROR);
-                    continue;
-                }
-                Providers.Add(rel);
-                status += " " + rel.Name + ",";
-            }
-            status = status.TrimEnd(new char[] { ',' });
-            Logger.Instance.LogMessage(status, LogLevel.INFO);
-            //Get all subtitle providers
-            List<string> subproviders = new List<string>(Directory.GetFiles(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/Databases/Subtitles"));
-            status = "Subtitle Providers found:";
-            foreach (string str in subproviders) {
-                SubtitleProvider sub = new SubtitleProvider();
-                sub.Name = Helper.ReadProperty(SubProviderConfig.Name, str);
-                sub.SubtitlesPage = Helper.ReadProperty(SubProviderConfig.SubtitlesPage, str);
-                sub.SubtitleRegExp = Helper.ReadProperty(SubProviderConfig.SubtitleRegExp, str);
-                sub.SearchRegExp = Helper.ReadProperty(SubProviderConfig.SearchRegExp, str);
-                sub.SearchResultsURL = Helper.ReadProperty(SubProviderConfig.SearchResultsURL, str);
-                sub.SearchURL = Helper.ReadProperty(SubProviderConfig.SearchURL, str);
-                sub.SeriesURL = Helper.ReadProperty(SubProviderConfig.SeriesURL, str);
-                sub.SubtitlesURL = Helper.ReadProperty(SubProviderConfig.SubtitlesURL, str);
-                sub.SearchRemove = Helper.ReadProperties(SubProviderConfig.SearchRemove, str);
-                sub.SearchStart = Helper.ReadProperty(SubProviderConfig.SearchStart, str);
-                sub.SearchEnd = Helper.ReadProperty(SubProviderConfig.SearchEnd, str);
-                sub.SubtitlesStart = Helper.ReadProperty(SubProviderConfig.SubtitlesStart, str);
-                sub.SubtitlesEnd = Helper.ReadProperty(SubProviderConfig.SubtitlesEnd, str);
-                sub.ConstructLink = Helper.ReadProperty(SubProviderConfig.ConstructLink, str);
-                sub.NotFoundURL = Helper.ReadProperty(SubProviderConfig.NotFoundURL, str);
-                sub.Encoding = Helper.ReadProperty(SubProviderConfig.Encoding, str);
-                sub.Language = (Helper.Languages)Enum.Parse(typeof(Helper.Languages), Helper.ReadProperty(SubProviderConfig.Language, str));
-                string srtl = Helper.ReadProperty(SubProviderConfig.SearchRightToLeft, str);
-                if (srtl == "1") {
-                    sub.SearchRightToLeft = true;
-                }
-                else {
-                    sub.SearchRightToLeft = false;
-                }
-                string directlink = Helper.ReadProperty(SubProviderConfig.DirectLink, str);
-                if (directlink == "1") {
-                    sub.DirectLink = true;
-                }
-                else {
-                    sub.DirectLink = false;
-                }
-                SubProviders.Add(sub);
-                status += " " + sub.Name + ",";
-            }
-            status = status.TrimEnd(new char[] { ',' });
-            Logger.Instance.LogMessage(status, LogLevel.INFO);
-        }
-
-        /// <summary>
-        /// Gets currently selected provider
-        /// </summary>
-        /// <returns>Currently selected provider, or null if error</returns>
-        public RelationProvider GetCurrentProvider() {
-            return GetProviderByName(Helper.ReadProperty(Config.LastProvider));
-        }
-
-        /// <summary>
-        /// Gets a provider by its name
-        /// </summary>
-        /// <param name="name">name of the provider</param>
-        /// <returns>provider matching the name, or null if not found</returns>
-        public RelationProvider GetProviderByName(string name) {
-            foreach (RelationProvider rp in Providers) {
-                if (rp.Name == name) {
-                    return rp;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Gets currently selected subtitle provider
-        /// </summary>
-        /// <returns>Currently selected subtitle provider, or null if error</returns>
-        public SubtitleProvider GetCurrentSubtitleProvider() {
-            return GetSubtitleProviderByName(Helper.ReadProperty(Config.LastSubProvider));
-        }
-
-        /// <summary>
-        /// Gets a subtitle provider by its name
-        /// </summary>
-        /// <param name="name">name of the subtitle provider</param>
-        /// <returns>subtitle provider matching the name, or null if not found</returns>
-        public SubtitleProvider GetSubtitleProviderByName(string name) {
-            foreach (SubtitleProvider sp in SubProviders) {
-                if (sp.Name == name) {
-                    return sp;
-                }
-            }
-            return null;
-        }
-
-
 
         /// <summary>
         /// Gets video files matching season and episode number

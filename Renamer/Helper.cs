@@ -198,6 +198,14 @@ namespace Renamer
             }
             return matches;
         }
+        public static bool ReadBool(string identifier, string filename) {
+            string result = ReadProperty(identifier, filename);
+            return StringToBool(result);
+        }
+        public static bool ReadBool(string identifier) {
+            string result = ReadProperty(identifier);
+            return StringToBool(result);
+        }
         public static int ReadInt(string Identifier) {
             string result = ReadProperty(Identifier);
             int value = -1;
@@ -226,6 +234,24 @@ namespace Renamer
                 return default(T);
             }
         }
+        /// <summary>
+        /// Read a enum value from the Configuration
+        /// </summary>
+        /// <typeparam name="T">Type of expected enum value</typeparam>
+        /// <param name="identifier">Identifier the enum value is stored</param>
+        /// <returns></returns>
+        public static T ReadEnum<T>(string identifier, string file) {
+
+            string result = null;
+            try {
+                result = ReadProperty(identifier, file);
+                return (T)Enum.Parse(typeof(T), result);
+            }
+            catch {
+                Logger.Instance.LogMessage("Couldn't parse property to Enum<" + typeof(T).ToString() + "> " + identifier + " = " + result, LogLevel.ERROR);
+                return default(T);
+            }
+        }
 
         /// <summary>
         /// Returns a variable as a string, adds a delemiter between fields of an array
@@ -234,7 +260,7 @@ namespace Renamer
         /// <returns></returns>
         private static string MakeConfigString(object variable) {
             if (variable == null) {
-                return null;
+                return "";
             }
             //note: if this is an array really but this function is called, return it in one string form
             if (variable is string[]) {
@@ -257,7 +283,7 @@ namespace Renamer
         /// <returns></returns>
         private static string[] MakeConfigStringArray(object variable) {
             if (variable == null) {
-                return null;
+                return new string[0];
             }
             //note: if this is an array really but this function is called, return it in one string form
             if (variable is string[]) {
@@ -438,5 +464,6 @@ namespace Renamer
             }
             return files;
         }
+
     }
 }

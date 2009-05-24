@@ -23,6 +23,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using Renamer.Classes;
 using Renamer.Classes.Configuration;
+using Renamer.Classes.Provider;
 
 namespace Renamer.Dialogs
 {

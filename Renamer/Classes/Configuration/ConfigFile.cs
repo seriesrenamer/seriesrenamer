@@ -29,6 +29,11 @@ namespace Renamer.Classes.Configuration
     class ConfigFile : IEnumerable
     {
         /// <summary>
+        /// File extension of config files
+        /// </summary>
+        public static string filePattern = "*.cfg";
+
+        /// <summary>
         /// Path of the file, is empty for internal defaults
         /// </summary>
         public string FilePath = "";

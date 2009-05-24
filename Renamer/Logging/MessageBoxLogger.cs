@@ -5,19 +5,18 @@ using System.Windows.Forms;
 
 namespace Renamer.Logging
 {
-    class MessageBoxLogger : ILogger
+    class MessageBoxLogger : AbstractLogger
     {
         protected LogLevel filter;
         /// <summary>
         /// Creates a new MessageBoxLogger
         /// </summary>
         /// <param name="filter">Log level the logger should listen to</param>
-        public MessageBoxLogger(LogLevel filter) {
-            this.filter = filter;
+        public MessageBoxLogger(LogLevel filter) : base(filter) {
         }
 
-        public void LogMessage(string strLogMessage, LogLevel level) {
-            if (level.CompareTo(filter) < 0) {
+        public override void LogMessage(string strLogMessage, LogLevel level) {
+            if (checkFilter(level)) {
                 return;
             }
             MessageBoxIcon icon;

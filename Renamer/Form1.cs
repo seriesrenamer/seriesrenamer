@@ -32,6 +32,7 @@ using Renamer.Classes.Configuration.Keywords;
 using Renamer.Classes.Configuration;
 using System.Runtime.InteropServices;
 using Renamer.Logging;
+using Renamer.Classes.Provider;
 namespace Renamer
 {
     /// <summary>
@@ -115,7 +116,7 @@ namespace Renamer
                 this.Cursor = Cursors.WaitCursor;
 
                 // request
-                RelationProvider provider = info.GetCurrentProvider();
+                RelationProvider provider = RelationProvider.GetCurrentProvider();
                 if (provider == null) {
                     Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                     return;
@@ -129,7 +130,7 @@ namespace Renamer
                         ie.Language = provider.Language;
                     }
                 }
-                string url = provider.SearchURL;
+                string url = provider.SearchUrl;
                 Logger.Instance.LogMessage("Search URL: " + url, LogLevel.DEBUG);
                 if (url == null || url == "") {
                     Logger.Instance.LogMessage("Can't search because no search URL is specified for this provider", LogLevel.ERROR);
@@ -167,11 +168,11 @@ namespace Renamer
                 }
                 Logger.Instance.LogMessage("Search Results URL: " + responseHtml.ResponseUri.AbsoluteUri, LogLevel.DEBUG);
                 //if search engine directs us straight to the result page, skip parsing search results
-                string seriesURL = provider.SeriesURL;
+                string seriesURL = provider.SeriesUrl;
                 if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL)) {
                     Logger.Instance.LogMessage("Search Results URL contains Series URL: " + seriesURL, LogLevel.DEBUG);
-                    Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesURL.Replace(" ", "%20"), LogLevel.INFO);
-                    GetRelations(responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesURL, Showname);
+                    Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesUrl.Replace(" ", "%20"), LogLevel.INFO);
+                    GetRelations(responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesUrl, Showname);
                 }
                 else {
                     Logger.Instance.LogMessage("Search Results URL doesn't contain Series URL: " + seriesURL + ", this is a proper search results page", LogLevel.DEBUG);
@@ -218,165 +219,6 @@ namespace Renamer
         }
 
         /// <summary>
-        /// Some network function for faster automatic proxy detection
-        /// </summary>
-        internal static class WinHttpSafeNativeMethods
-        {
-
-            internal static IEnumerable<Uri> GetProxiesForUrl(
-                    Uri requestUrl) {
-                return GetProxiesForUrl(requestUrl, string.Empty);
-            }
-
-            internal static IEnumerable<Uri> GetProxiesForUrl(
-                    Uri requestUrl, string userAgent) {
-
-                IntPtr hHttpSession = IntPtr.Zero;
-                string[] proxyList = null;
-                ;
-
-                try {
-                    hHttpSession = WinHttpOpen(userAgent,
-                            AccessType.NoProxy, null, null, 0);
-
-                    if (hHttpSession != IntPtr.Zero) {
-
-                        AutoProxyOptions autoProxyOptions = new AutoProxyOptions();
-                        autoProxyOptions.Flags = AccessType.AutoDetect;
-                        autoProxyOptions.AutoLogonIfChallenged = true;
-                        autoProxyOptions.AutoDetectFlags =
-                                AutoDetectType.Dhcp | AutoDetectType.DnsA;
-
-                        ProxyInfo proxyInfo = new ProxyInfo();
-
-                        if (WinHttpGetProxyForUrl(hHttpSession,
-                                requestUrl.ToString(), ref autoProxyOptions, ref proxyInfo)) {
-                            if (!string.IsNullOrEmpty(proxyInfo.Proxy)) {
-                                proxyList = proxyInfo.Proxy.Split(';', ' ');
-                            }
-                        }
-                    }
-                }
-                catch (System.DllNotFoundException) {
-                    // winhttp.dll is not found. 
-                }
-                catch (System.EntryPointNotFoundException) {
-                    // A method within winhttp.dll is not found. 
-                }
-                finally {
-                    if (hHttpSession != IntPtr.Zero) {
-                        WinHttpCloseHandle(hHttpSession);
-                        hHttpSession = IntPtr.Zero;
-                    }
-                }
-
-                if (proxyList != null && proxyList.Length > 0) {
-                    Uri proxyUrl;
-                    foreach (string address in proxyList) {
-                        if (TryCreateUrlFromPartialAddress(address, out proxyUrl)) {
-                            yield return proxyUrl;
-                        }
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Some network function for faster automatic proxy detection
-            /// </summary>
-            private static bool TryCreateUrlFromPartialAddress(string address, out Uri url) {
-                address = address.Trim();
-
-                if (string.IsNullOrEmpty(address)) {
-                    url = null;
-                    return false;
-                }
-
-                try {
-                    if (address.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-                            address.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) {
-                        url = new Uri(address);
-                    }
-                    else if (address.StartsWith("//", StringComparison.Ordinal)) {
-                        url = new Uri("http:" + address);
-                    }
-                    else {
-                        url = new Uri("http://" + address);
-                    }
-                    return true;
-                }
-                catch (UriFormatException) {
-                    url = null;
-                }
-                return false;
-            }
-
-            [DllImport("winhttp.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-            private static extern IntPtr WinHttpOpen(
-                    string userAgent,
-                    AccessType accessType,
-                    string proxyName,
-                    string proxyBypass,
-                    int flags);
-
-            [DllImport("winhttp.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            private static extern bool WinHttpGetProxyForUrl(
-                    IntPtr hSession,
-                    string url,
-                    [In] ref AutoProxyOptions autoProxyOptions,
-                    [In, Out] ref ProxyInfo proxyInfo);
-
-            [DllImport("winhttp.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            private static extern bool WinHttpCloseHandle(IntPtr httpSession);
-
-            private enum AccessType
-            {
-                NoProxy = 1,
-                AutoDetect = 1,
-                AutoProxyConfigUrl = 2
-            }
-
-            [Flags]
-            private enum AutoDetectType
-            {
-                Dhcp = 1,
-                DnsA = 2,
-            }
-
-            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-            private struct AutoProxyOptions
-            {
-
-                internal AccessType Flags;
-
-                internal AutoDetectType AutoDetectFlags;
-
-                [MarshalAs(UnmanagedType.LPTStr)]
-                internal string AutoConfigUrl;
-
-                private IntPtr lpvReserved;
-
-                private int dwReserved;
-
-                internal bool AutoLogonIfChallenged;
-            }
-
-            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-            private struct ProxyInfo
-            {
-
-                internal AccessType dwAccessType;
-
-                [MarshalAs(UnmanagedType.LPTStr)]
-                internal string Proxy;
-
-                [MarshalAs(UnmanagedType.LPTStr)]
-                internal string ProxyBypass;
-            }
-        }
-
-        /// <summary>
         /// Parses search results from a series search
         /// </summary>
         /// <param name="source">Source code of the search results page</param>
@@ -385,7 +227,7 @@ namespace Renamer
         private void ParseSearch(ref string source, string SourceURL, string Showname) {
             if (source == "")
                 return;
-            RelationProvider provider = info.GetCurrentProvider();
+            RelationProvider provider = RelationProvider.GetCurrentProvider();
             if (provider == null) {
                 Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                 return;
@@ -439,7 +281,7 @@ namespace Renamer
         /// <param name="url">URL of the page to parse</param>
         /// <param name="Showname">Showname</param>
         private void GetRelations(string url, string Showname) {
-            RelationProvider provider = info.GetCurrentProvider();
+            RelationProvider provider = RelationProvider.GetCurrentProvider();
             if (provider == null) {
                 Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                 return;
@@ -991,12 +833,12 @@ namespace Renamer
             }
             info.SubtitleLinks.Clear();
             // request
-            SubtitleProvider subprovider = info.GetCurrentSubtitleProvider();
+            SubtitleProvider subprovider = SubtitleProvider.GetCurrentProvider();
             if (subprovider == null) {
                 Logger.Instance.LogMessage("No subtitle provider found/selected", LogLevel.ERROR);
                 return;
             }
-            string url = subprovider.SearchURL;
+            string url = subprovider.SearchUrl;
             if (url == null || url == "") {
                 Logger.Instance.LogMessage("Can't search because no search URL is specified for this subtitle provider", LogLevel.ERROR);
                 return;
@@ -1025,7 +867,7 @@ namespace Renamer
                 return;
             }
             //if search engine directs us straight to the result page, skip parsing search results
-            string seriesURL = subprovider.SeriesURL;
+            string seriesURL = subprovider.SeriesUrl;
             if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL)) {
                 Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + subprovider.SubtitlesURL.Replace(" ", "%20"), LogLevel.INFO);
                 GetSubtitleFromSeriesPage(responseHtml.ResponseUri.AbsoluteUri + subprovider.SubtitlesURL);
@@ -1075,7 +917,7 @@ namespace Renamer
         private void ParseSubtitleSearch(ref string source, string SourceURL) {
             if (source == "")
                 return;
-            SubtitleProvider subprovider = info.GetCurrentSubtitleProvider();
+            SubtitleProvider subprovider = SubtitleProvider.GetCurrentProvider();
             string pattern = subprovider.SearchRegExp;
             RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Singleline;
             if (subprovider.SearchRightToLeft)
@@ -1124,7 +966,7 @@ namespace Renamer
         /// </summary>
         /// <param name="extracted">Extracted value from search results which is inserted into "ConstructLink" url</param>
         private void ConstructLinks(string extracted) {
-            SubtitleProvider subprovider = info.GetCurrentSubtitleProvider();
+            SubtitleProvider subprovider = SubtitleProvider.GetCurrentProvider();
             string link = subprovider.ConstructLink;
             link = link.Replace("%L", extracted);
             int loop = 1;
@@ -1157,7 +999,7 @@ namespace Renamer
                 }
 
                 responseHtml.Close();
-                if (subprovider.NotFoundURL == "" || responseHtml.ResponseUri.ToString() != subprovider.NotFoundURL) {
+                if (subprovider.NotFoundUrl == "" || responseHtml.ResponseUri.ToString() != subprovider.NotFoundUrl) {
                     info.SubtitleLinks.Add(responseHtml.ResponseUri.ToString());
                 }
             }
@@ -1666,14 +1508,13 @@ namespace Renamer
             txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
 
             //relations provider combo box
-            foreach (RelationProvider rel in info.Providers) {
-                cbProviders.Items.Add(rel.Name);
-            }
+            cbProviders.Items.AddRange(RelationProvider.ProviderNames);
+
             string LastProvider = Helper.ReadProperty(Config.LastProvider);
             if (LastProvider == null)
                 LastProvider = "";
             cbProviders.SelectedIndex = Math.Max(0, cbProviders.Items.IndexOf(LastProvider));
-            RelationProvider provider = info.GetCurrentProvider();
+            RelationProvider provider = RelationProvider.GetCurrentProvider();
             if (provider == null) {
                 Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                 return;
@@ -1681,9 +1522,7 @@ namespace Renamer
             Helper.WriteProperty(Config.LastProvider, cbProviders.Text);
 
             //subtitle provider combo box
-            foreach (SubtitleProvider sub in info.SubProviders) {
-                cbSubs.Items.Add(sub.Name);
-            }
+            cbSubs.Items.AddRange(SubtitleProvider.ProviderNames);
             string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
             if (LastSubProvider == null)
                 LastSubProvider = "";
@@ -2588,7 +2427,6 @@ namespace Renamer
             }
         }
 
-        //Get focussed control
         /// <summary>
         /// Gets focussed control
         /// </summary>
