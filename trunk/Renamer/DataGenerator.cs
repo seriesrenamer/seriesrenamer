@@ -547,11 +547,11 @@ namespace Renamer
         }
         private void SelectRecognizedFilesForProcessing() {
             foreach (InfoEntry ie in Info.Episodes) {
-                if (ie.Season != "" && ie.Episode != "") {
-                    ie.Process = true;
-                    ie.Movie = false;
-                } else if(ie.Showname.ToLower()=="sample") {
+                if(ie.Showname.ToLower()=="sample") {
                     ie.Process = false;
+                    ie.Movie = false;
+                } else if (ie.Season != "" && ie.Episode != "") {
+                    ie.Process = true;
                     ie.Movie = false;
                 } else {
                     ie.Process = false;

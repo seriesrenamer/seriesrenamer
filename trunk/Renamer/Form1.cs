@@ -810,11 +810,13 @@ namespace Renamer
 
         private void SelectRecognizedFilesForProcessing() {
             foreach (InfoEntry ie in Info.Episodes) {
-                if (ie.Season != "" && ie.Episode != "") {
+                if (ie.Showname.ToLower() == "sample") {
+                    ie.Process = false;
+                    ie.Movie = false;
+                } else if (ie.Season != "" && ie.Episode != "") {
                     ie.Process = true;
                     ie.Movie = false;
-                }
-                else {
+                } else {
                     ie.Process = false;
                     ie.Movie = true;
                 }
@@ -2149,7 +2151,7 @@ namespace Renamer
         public void SelectSimilarFilesForProcessing(string Basepath, string Showname) {
             List<InfoEntry> matches = Helper.FindSimilarByName(Info.Episodes, Showname);
             foreach (InfoEntry ie in Info.Episodes) {
-                if (matches.Contains(ie)) {
+                if (matches.Contains(ie)&&ie.Showname.ToLower()!="sample") {
                     ie.Process = true;
                     ie.Movie = false;
                 }
