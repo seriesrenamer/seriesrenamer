@@ -550,8 +550,10 @@ namespace Renamer
                 if (ie.Season != "" && ie.Episode != "") {
                     ie.Process = true;
                     ie.Movie = false;
-                }
-                else {
+                } else if(ie.Showname.ToLower()=="sample") {
+                    ie.Process = false;
+                    ie.Movie = false;
+                } else {
                     ie.Process = false;
                     ie.Movie = true;
                 }
