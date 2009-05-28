@@ -72,7 +72,9 @@
   <ItemGroup>
     <Compile Include="Classes\Configuration\Keywords\Config.cs" />
     <Compile Include="Classes\Configuration\Keywords\ProviderConfig.cs" />
+    <Compile Include="Classes\RegexConverter.cs" />
     <Compile Include="Classes\RelationCollection.cs" />
+    <Compile Include="Classes\SubtitleFileManager.cs" />
     <Compile Include="Classes\WinHttpSafeNativeMethods.cs" />
     <Compile Include="DataGenerator.cs" />
     <Compile Include="Dialogs\AboutBox.cs">
@@ -137,13 +139,13 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Helper.cs" />
-    <Compile Include="Info.cs" />
     <Compile Include="Dialogs\InputBox.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Dialogs\InputBox.Designer.cs">
       <DependentUpon>InputBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="InfoEntryManager.cs" />
     <Compile Include="ListViewColumnSorter.cs" />
     <Compile Include="ListViewEx.cs">
       <SubType>Component</SubType>
@@ -170,6 +172,7 @@
       <DependentUpon>SetEpisodes.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\SeriesNameExtractor.cs" />
+    <Compile Include="RelationManager.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Dialogs\AboutBox.resx">

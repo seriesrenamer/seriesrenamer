@@ -19,9 +19,9 @@ using System.Collections;
 
 namespace Renamer.Classes
 {
-    class RelationCollection
+    public class RelationCollection : IEnumerable
     {
-        public List<Relation> Relations = new List<Relation>();
+        protected List<Relation> Relations = new List<Relation>();
         public string Showname = "";
 
         public RelationCollection(string Showname)
@@ -91,6 +91,30 @@ namespace Renamer.Classes
             }
             return max;
         }
+
+        public void AddRelation(Relation relation) {
+            this.Relations.Add(relation);
+        }
+
+        public int Count {
+            get {
+                return this.Relations.Count;
+            }
+        }
+
+        public Relation this[int id]{
+            get {
+                return this.Relations[id];
+            }
+        }
+
+        #region IEnumerable Member
+
+        public IEnumerator GetEnumerator() {
+            return this.Relations.GetEnumerator();
+        }
+
+        #endregion
     }
 
 }

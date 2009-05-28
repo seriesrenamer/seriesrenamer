@@ -46,11 +46,6 @@ namespace Renamer
         private Settings settings;
 
         /// <summary>
-        /// Info class contains all data about files, titles etc fetched from webpages
-        /// </summary>
-        private Info info;
-
-        /// <summary>
         /// Custom sorting class to sort list view for 2 columns
         /// </summary>
         private ListViewColumnSorter lvwColumnSorter = new ListViewColumnSorter();
@@ -81,366 +76,10 @@ namespace Renamer
         }
 
         #region processing
-        #region Data Acquisition
-
-        private void GetAllTitles() {
-            DateTime dt = DateTime.Now;
-            Info.timecreatenewname = 0;
-            Info.timeextractname = 0;
-            Info.timesetpath = 0;
-            Info.timesetuprelation = 0;
-            //make a list of shownames
-            List<string> shownames = new List<string>();
-            foreach (InfoEntry ie in Info.Episodes) {
-                if (ie.Process && !shownames.Contains(ie.Showname)) {
-                    shownames.Add(ie.Showname);
-                }
-            }
-            foreach (string showname in shownames) {
-                GetTitles(showname);
-            }
-            Info.timegettitles = (DateTime.Now - dt).TotalSeconds;
-            Logger.Instance.LogMessage("Time for getting titles: " + Info.timegettitles + " Seconds", LogLevel.INFO);
-            Logger.Instance.LogMessage("Time for extracting names: " + Info.timeextractname + " Seconds", LogLevel.INFO);
-            Logger.Instance.LogMessage("Time for creating paths: " + Info.timesetpath + " Seconds", LogLevel.INFO);
-            Logger.Instance.LogMessage("Time for creating filenames: " + Info.timecreatenewname + " Seconds", LogLevel.INFO);
-            Logger.Instance.LogMessage("Time for assigning relations: " + Info.timesetuprelation + " Seconds", LogLevel.INFO);
-        }
-
-        /// <summary>
-        /// gets titles, by using database search feature and parsing results, after that, shows them in gui
-        /// </summary>
-        private void GetTitles(string Showname) {
-            //once
-            for (int a = 0; a < 1; a++) {
-                this.Cursor = Cursors.WaitCursor;
-
-                // request
-                RelationProvider provider = RelationProvider.GetCurrentProvider();
-                if (provider == null) {
-                    Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
-                    return;
-                }
-                //get rid of old relations
-                Info.Relations.Remove(Info.GetRelationCollectionByName(Showname));
-                foreach (InfoEntry ie in Info.Episodes) {
-                    if (ie.Showname == Showname && ie.Process) {
-                        ie.Name = "";
-                        ie.NewFileName = "";
-                        ie.Language = provider.Language;
-                    }
-                }
-                string url = provider.SearchUrl;
-                Logger.Instance.LogMessage("Search URL: " + url, LogLevel.DEBUG);
-                if (url == null || url == "") {
-                    Logger.Instance.LogMessage("Can't search because no search URL is specified for this provider", LogLevel.ERROR);
-                    break;
-                }
-                string[] LastTitles = Helper.ReadProperties(Config.LastTitles);
-                url = url.Replace("%T", Showname);
-                url = System.Web.HttpUtility.UrlPathEncode(url);
-                Logger.Instance.LogMessage("Encoded Search URL: " + url, LogLevel.DEBUG);
-                HttpWebRequest requestHtml = null;
-                try {
-                    requestHtml = (HttpWebRequest)(HttpWebRequest.Create(url));
-                }
-                catch (Exception ex) {
-                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
-                    if (requestHtml != null)
-                        requestHtml.Abort();
-                    break;
-                }
-                //SetProxy(requestHtml, url);
-                Logger.Instance.LogMessage("Searching at " + url.Replace(" ", "%20"), LogLevel.INFO);
-                requestHtml.Timeout = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
-                // get response
-                HttpWebResponse responseHtml = null;
-                try {
-                    responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
-                }
-                catch (Exception ex) {
-                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
-                    if (responseHtml != null)
-                        responseHtml.Close();
-                    if (requestHtml != null)
-                        requestHtml.Abort();
-                    break;
-                }
-                Logger.Instance.LogMessage("Search Results URL: " + responseHtml.ResponseUri.AbsoluteUri, LogLevel.DEBUG);
-                //if search engine directs us straight to the result page, skip parsing search results
-                string seriesURL = provider.SeriesUrl;
-                if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL)) {
-                    Logger.Instance.LogMessage("Search Results URL contains Series URL: " + seriesURL, LogLevel.DEBUG);
-                    Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesUrl.Replace(" ", "%20"), LogLevel.INFO);
-                    GetRelations(responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesUrl, Showname);
-                }
-                else {
-                    Logger.Instance.LogMessage("Search Results URL doesn't contain Series URL: " + seriesURL + ", this is a proper search results page", LogLevel.DEBUG);
-                    // and download
-                    StreamReader r = null;
-                    try {
-                        r = new StreamReader(responseHtml.GetResponseStream());
-                    }
-                    catch (Exception ex) {
-                        if (r != null)
-                            r.Close();
-                        if (responseHtml != null) {
-                            responseHtml.Close();
-                        }
-                        if (requestHtml != null) {
-                            requestHtml.Abort();
-                        }
-                        Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
-                        break;
-                    }
-                    string source = r.ReadToEnd();
-                    r.Close();
-
-                    //Source cropping
-                    source = source.Substring(Math.Max(source.IndexOf(provider.SearchStart), 0));
-                    source = source.Substring(0, Math.Max(source.LastIndexOf(provider.SearchEnd), source.Length - 1));
-                    ParseSearch(ref source, responseHtml.ResponseUri.AbsoluteUri, Showname);
-                }
-
-                responseHtml.Close();
-                FillListView();
-            }
-            Cursor = Cursors.Default;
-        }
-
-        private void SetProxy(HttpWebRequest client, string url) {
-            // Comment out foreach statement to use normal System.Net proxy detection 
-            foreach (
-                    Uri address
-                    in WinHttpSafeNativeMethods.GetProxiesForUrl(new Uri(url))) {
-                client.Proxy = new WebProxy(address);
-                break;
-            }
-        }
-
-        /// <summary>
-        /// Parses search results from a series search
-        /// </summary>
-        /// <param name="source">Source code of the search results page</param>
-        /// <param name="Showname">Showname</param>
-        /// <param name="SourceURL">URL of the page source</param>
-        private void ParseSearch(ref string source, string SourceURL, string Showname) {
-            if (source == "")
-                return;
-            RelationProvider provider = RelationProvider.GetCurrentProvider();
-            if (provider == null) {
-                Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
-                return;
-            }
-            string pattern = provider.SearchRegExp;
-
-            Logger.Instance.LogMessage("Trying to match source at " + SourceURL + " with " + pattern, LogLevel.DEBUG);
-
-            RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Singleline;
-            if (provider.SearchRightToLeft)
-                ro |= RegexOptions.RightToLeft;
-            MatchCollection mc = Regex.Matches(source, pattern, ro);
-
-            if (mc.Count == 0) {
-                Logger.Instance.LogMessage("No results found", LogLevel.INFO);
-            }
-            else if (mc.Count == 1) {
-                string url = provider.RelationsPage;
-                Logger.Instance.LogMessage("One result found on search page, going to " + url.Replace(" ", "%20") + " with %L=" + mc[0].Groups["link"].Value, LogLevel.DEBUG);
-                url = url.Replace("%L", mc[0].Groups["link"].Value);
-                url = System.Web.HttpUtility.HtmlDecode(url);
-                Logger.Instance.LogMessage("Search engine found one result: " + url.Replace(" ", "%20"), LogLevel.INFO);
-                GetRelations(url, Showname);
-            }
-            else {
-                Logger.Instance.LogMessage("Search engine found multiple results at " + SourceURL.Replace(" ", "%20"), LogLevel.INFO);
-                SelectResult sr = new SelectResult(mc, provider, false);
-                if (sr.ShowDialog() == DialogResult.Cancel || sr.url == "")
-                    return;
-
-                //Apply language of selected result to matching episodes
-                if (provider.Language == Helper.Languages.None) {
-                    foreach (InfoEntry ie in Info.Episodes) {
-                        if (ie.Showname == Showname && ie.Process) {
-                            ie.Language = sr.Language;
-                        }
-                    }
-                }
-                string url = provider.RelationsPage;
-                Logger.Instance.LogMessage("User selected " + provider.RelationsPage + "with %L=" + sr.url, LogLevel.DEBUG);
-                url = url.Replace("%L", sr.url);
-                url = System.Web.HttpUtility.HtmlDecode(url);
-                GetRelations(url, Showname);
-            }
-        }
-
-        //parse page(s) containing relations
-        /// <summary>
-        /// Parses page containing the relation data
-        /// </summary>
-        /// <param name="url">URL of the page to parse</param>
-        /// <param name="Showname">Showname</param>
-        private void GetRelations(string url, string Showname) {
-            RelationProvider provider = RelationProvider.GetCurrentProvider();
-            if (provider == null) {
-                Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
-                return;
-            }
-            Logger.Instance.LogMessage("Trying to get relations from " + url, LogLevel.DEBUG);
-            //if episode infos are stored on a new page for each season, this should be marked with %S in url, so we can iterate through all those pages
-            int season = 1;
-            string url2 = url;
-            //Create new RelationCollection
-            RelationCollection rc = new RelationCollection(Showname);
-            while (true) {
-                if (url2.Contains("%S")) {
-                    url = url2.Replace("%S", season.ToString());
-                }
-
-                if (url == null || url == "")
-                    return;
-                // request
-                url = System.Web.HttpUtility.UrlPathEncode(url);
-                Logger.Instance.LogMessage("Trying to get relations for season " + season + " from " + url, LogLevel.DEBUG);
-                HttpWebRequest requestHtml = null;
-                try {
-                    requestHtml = (HttpWebRequest)(HttpWebRequest.Create(url));
-                }
-                catch (Exception ex) {
-                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
-                    requestHtml.Abort();
-                    return;
-                }
-                requestHtml.Timeout = Helper.ReadInt(Config.Timeout);
-                // get response
-                HttpWebResponse responseHtml = null;
-                try {
-                    responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
-                }
-                catch (WebException e) {
-                    Logger.Instance.LogMessage(e.Message, LogLevel.ERROR);
-                    if (responseHtml != null) {
-                        responseHtml.Close();
-                    }
-                    return;
-                }
-
-                Logger.Instance.LogMessage("Response URL: " + responseHtml.ResponseUri.AbsoluteUri, LogLevel.DEBUG);
-                //if we get redirected, lets assume this page does not exist
-                if (responseHtml.ResponseUri.AbsoluteUri != url) {
-                    Logger.Instance.LogMessage("Response URL doesn't match request URL, page doesn't seem to exist", LogLevel.DEBUG);
-                    responseHtml.Close();
-                    requestHtml.Abort();
-                    break;
-                }
-                // and download
-                //Logger.Instance.LogMessage("charset=" + responseHtml.CharacterSet, LogLevel.INFO);
-                Encoding enc;
-                if (provider.Encoding != null && provider.Encoding != "") {
-                    try {
-                        enc = Encoding.GetEncoding(provider.Encoding);
-                    }
-                    catch (Exception ex) {
-                        Logger.Instance.LogMessage("Invalid encoding in config file: " + ex.Message, LogLevel.ERROR);
-                        enc = Encoding.GetEncoding(responseHtml.CharacterSet);
-                    }
-                }
-                else {
-                    enc = Encoding.GetEncoding(responseHtml.CharacterSet);
-                }
-                StreamReader r = new StreamReader(responseHtml.GetResponseStream(), enc);
-                string source = r.ReadToEnd();
-                r.Close();
-                responseHtml.Close();
-
-
-
-                //Source cropping
-                source = source.Substring(Math.Max(source.IndexOf(provider.RelationsStart), 0));
-                source = source.Substring(0, Math.Max(source.LastIndexOf(provider.RelationsEnd), 0));
-
-                string pattern = provider.RelationsRegExp;
-                Logger.Instance.LogMessage("Trying to match source from " + responseHtml.ResponseUri.AbsoluteUri + " with " + pattern, LogLevel.DEBUG);
-                RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Singleline;
-                if (provider.RelationsRightToLeft)
-                    ro |= RegexOptions.RightToLeft;
-                MatchCollection mc = Regex.Matches(source, pattern, ro);
-
-                for (int i = 0; i < mc.Count; i++) {
-                    Match m = mc[i];
-                    //if we are iterating through season pages, take season from page url directly
-                    //parse season and episode numbers
-                    int s, e;
-                    Int32.TryParse(m.Groups["Season"].Value, out s);
-                    Int32.TryParse(m.Groups["Episode"].Value, out e);
-                    if (url != url2) {
-                        rc.Relations.Add(new Relation(season.ToString(), e.ToString(), System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                        Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), LogLevel.DEBUG);
-                    }
-                    else {
-                        rc.Relations.Add(new Relation(s.ToString(), e.ToString(), System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                        Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), LogLevel.DEBUG);
-                    }
-                }
-                Info.AddRelationCollection(rc);
-
-                // THOU SHALL NOT FORGET THE BREAK
-                if (!url2.Contains("%S"))
-                    break;
-                season++;
-            }
-            Logger.Instance.LogMessage("" + (season - 1) + " Seasons, " + rc.Relations.Count + " relations found", LogLevel.DEBUG);
-        }
-        #endregion
         #region Name Creation
 
-        /// <summary>
-        /// creates names for all entries using season, episode and name and the target pattern
-        /// <param name="movie">If used on movie files, target pattern will be ignored and only name property is used</param>
-        /// </summary>
-        private void CreateNewNames() {
-            for (int i = 0; i < Info.Episodes.Count; i++) {
-                Info.Episodes[i].CreateNewName();
-            }
-        }
 
-        /// <summary>
-        /// Creates subtitle destination and names subs when no show information is fetched yet, so they have the same name as their video files for better playback
-        /// </summary>
-        void RenameSubsToMatchVideos() {
-            foreach (InfoEntry ie in Info.Episodes) {
-                if (info.IsSubtitle(ie)) {
-                    int season = -1;
-                    int episode = -1;
-                    try {
-                        Int32.TryParse(ie.Season, out season);
-                        Int32.TryParse(ie.Episode, out episode);
-                    }
-                    catch (Exception) {
-                        Logger.Instance.LogMessage("Couldn't Convert season or episode to int because string was garbled, too bad :P", LogLevel.ERROR);
-                    }
-                    List<InfoEntry> lie = info.GetMatchingVideos(season, episode);
-                    if (lie != null && lie.Count == 1) {
-                        if (ie.NewFileName == "") {
-                            if (lie[0].NewFileName == "") {
-                                ie.NewFileName = Path.GetFileNameWithoutExtension(lie[0].Filename) + "." + ie.Extension;
-                            }
-                            else {
-                                ie.NewFileName = Path.GetFileNameWithoutExtension(lie[0].NewFileName) + "." + ie.Extension;
-                            }
 
-                            //Move to Video file
-                            ie.Destination = lie[0].Destination;
-
-                            //Don't do this again if name fits already
-                            if (ie.NewFileName == ie.Filename) {
-                                ie.NewFileName = "";
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// Removes unneeded tags from videos
@@ -454,76 +93,12 @@ namespace Renamer
                 regexes.Add("[\\._\\(\\[-]+" + s);
             }
             foreach (ListViewItem lvi in lstFiles.Items) {
-                InfoEntry ie = Info.Episodes[((int)lvi.Tag)];
-                ie.Process = false;
+                InfoEntry ie = InfoEntryManager.Instance[((int)lvi.Tag)];
+                ie.ProcessingRequested = false;
                 //Go through all selected files and remove tags and clean them up
                 if (lvi.Selected) {
-                    ie.Name = "";
-                    ie.Destination = "";
-                    ie.Movie = true;
-                    string temp = Path.GetFileNameWithoutExtension(ie.Filename);
-                    //figure out if this is a multi file video
-                    string end = "CD";
-                    //Check for single number
-                    if (char.IsNumber(temp[temp.Length - 1])) {
-                        end += temp[temp.Length - 1].ToString();
-                    }
-                    //Check for IofN format                    
-                    else if (Regex.Match(temp, "\\dof\\d", RegexOptions.IgnoreCase).Success) {
-                        end = temp.Substring(temp.Length - 4, 1);
-                    }
-                    //Check for a/b
-                    else if (char.ToLower(temp[temp.Length - 1]) == 'a') {
-                        end += "1";
-                    }
-                    else if (char.ToLower(temp[temp.Length - 1]) == 'b') {
-                        end += "2";
-                    }
-                    else {
-                        end = "";
-                    }
-
-                    //try to match tags                    
-                    bool removed = false;
-                    foreach (string s in regexes) {
-                        Match m = Regex.Match(temp, s, RegexOptions.IgnoreCase);
-                        if (m.Success) {
-                            temp = temp.Substring(0, m.Index);
-                            removed = true;
-                        }
-                    }
-
-                    //add possible existant file index back
-                    if (removed) {
-                        temp = temp + " " + end;
-                    }
-
-                    //Get rid of dots and _
-                    int i = -1;
-                    int pos = 0;
-                    while ((i = temp.IndexOf(".", pos + 1)) != -1) {
-                        if ((Convert.ToInt32(char.IsNumber(temp[i - 1])) + Convert.ToInt32(char.IsNumber(temp[Math.Min(i + 1, temp.Length - 1)]))) < 2) {
-                            temp = temp.Substring(0, i) + " " + temp.Substring(i + 1);
-                        }
-                        pos = i;
-                    }
-                    temp = temp.Replace("_", " ");
-                    //temp = Regex.Replace(temp, "([^0-9]\\.[^0-9]|[0-9]\\.[^0-9]|[^0-9]\\.[0-9]|_)", " ");
-                    temp = temp.Trim();
-
-
+                    ie.RemoveVideoTags(regexes.ToArray());
                     lvi.Selected = false;
-
-                    ie.Name = temp;
-                    if (ie.NewFileName != "" || ie.Destination != "") {
-                        ie.Process = true;
-                        //string seasondir = Helper.ReadProperty(Config.Extract).Replace("%S", "\\d*");
-                        //seasondir = seasondir.Replace("%E", "\\d*");
-                    }
-
-                    //Move and process multiple part movie files (i.e. "CD1")
-                    //SetDestinationPath(ie, ie.Path, (Helper.ReadInt(Config.CreateDirectoryStructure) > 0), (Helper.ReadInt(Config.UseSeasonSubDir) > 0));
-
                 }
                 SyncItem(((int)lvi.Tag), false);
             }
@@ -534,479 +109,19 @@ namespace Renamer
         /// Main Rename function
         /// </summary>
         private void Rename() {
-            bool skip = false;
-            bool skipall = (Helper.InvalidFilenameAction)Enum.Parse(typeof(Helper.InvalidFilenameAction), Helper.ReadProperty(Config.InvalidFilenameAction)) == Helper.InvalidFilenameAction.Skip;
-            string replace = Helper.ReadProperty(Config.InvalidCharReplace);
-
-            //Go through all files and do stuff
-            for (int i = 0; i < Info.Episodes.Count; i++) {
-                InfoEntry ie = Info.Episodes[i];
-                if (ie.Process /*&& ie.Name != "" */&& ((ie.Filename != ie.NewFileName && ie.NewFileName != "") || (ie.Destination != ie.Path && ie.Destination != ""))) {
-                    try {
-                        while (ie.NewFileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 && !skipall) {
-                            if ((Helper.InvalidFilenameAction)Enum.Parse(typeof(Helper.InvalidFilenameAction), Helper.ReadProperty(Config.InvalidFilenameAction)) == Helper.InvalidFilenameAction.Replace) {
-                                string pattern = "[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]";
-                                ie.NewFileName = Regex.Replace(ie.NewFileName, pattern, replace);
-                            }
-                            else if ((Helper.InvalidFilenameAction)Enum.Parse(typeof(Helper.InvalidFilenameAction), Helper.ReadProperty(Config.InvalidFilenameAction)) == Helper.InvalidFilenameAction.Ask) {
-                                InvalidFilename td = new InvalidFilename(ie.NewFileName);
-                                td.ShowDialog();
-                                if (td.action == InvalidFilename.Action.SkipAll) {
-                                    skipall = true;
-                                    if (td.remember) {
-                                        Helper.WriteProperty(Config.InvalidFilenameAction, Helper.InvalidFilenameAction.Skip.ToString());
-                                    }
-                                    break;
-                                }
-                                else if (td.action == InvalidFilename.Action.Skip) {
-                                    skip = true;
-                                    break;
-                                }
-                                else if (td.action == InvalidFilename.Action.Filename) {
-                                    ie.NewFileName = td.FileName;
-                                }
-                                else if (td.action == InvalidFilename.Action.Replace) {
-                                    if (td.remember) {
-                                        Helper.WriteProperty(Config.InvalidFilenameAction, Helper.InvalidFilenameAction.Replace.ToString());
-                                        Helper.WriteProperty(Config.InvalidCharReplace, td.Replace);
-                                    }
-                                    replace = td.Replace;
-                                    string pattern = "[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]";
-                                    ie.NewFileName = Regex.Replace(ie.NewFileName, pattern, replace);
-                                }
-                            }
-                        }
-
-                        //check for empty extension
-                        if (ie.NewFileName != "" && Path.GetExtension(ie.NewFileName) == "") {
-                            if (MessageBox.Show(ie.Path + Path.DirectorySeparatorChar + ie.Filename + "->" + ie.Destination + Path.DirectorySeparatorChar + ie.NewFileName + " has no extension. Rename anyway?", "No extension", MessageBoxButtons.YesNo) == DialogResult.No) {
-                                skip = true;
-                            }
-                        }
-
-                        if (ie.NewFileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 && (skip || skipall)) {
-                            Logger.Instance.LogMessage("Skipped " + ie.Path + Path.DirectorySeparatorChar + ie.Filename + "->" + ie.Destination + Path.DirectorySeparatorChar + ie.NewFileName + " because of illegal characters in new name.", LogLevel.WARNING);
-                            skip = false;
-                            continue;
-                        }
-                        if (skipall || skip) {
-                            continue;
-                        }
-
-                        //create directory if needed
-                        if (ie.Destination != "" && !Directory.Exists(ie.Destination)) {
-                            Directory.CreateDirectory(ie.Destination);
-                        }
-                        //Move to desired destination      
-                        if (ie.Destination != "") {
-                            if (ie.NewFileName != "") {
-                                File.Move(ie.Path + Path.DirectorySeparatorChar + ie.Filename, ie.Destination + Path.DirectorySeparatorChar + ie.NewFileName);
-                            }
-                            else {
-                                File.Move(ie.Path + Path.DirectorySeparatorChar + ie.Filename, ie.Destination + Path.DirectorySeparatorChar + ie.Filename);
-                            }
-                        }
-                        else {
-                            if (ie.NewFileName != "") {
-                                File.Move(ie.Path + Path.DirectorySeparatorChar + ie.Filename, ie.Path + Path.DirectorySeparatorChar + ie.NewFileName);
-                            }
-                            else {
-                                File.Move(ie.Path + Path.DirectorySeparatorChar + ie.Filename, ie.Path + Path.DirectorySeparatorChar + ie.Filename);
-                            }
-                        }
-                        //Delete empty folders code
-                        if (Helper.ReadProperty(Config.DeleteEmptyFolders) == "1") {
-                            DeleteAllEmptyFolders(ie.Path, new List<string>(Helper.ReadProperties(Config.IgnoreFiles)));
-                        }
-                        if (ie.NewFileName != "") {
-                            ie.Filename = ie.NewFileName;
-                        }
-                        if (ie.Destination != "") {
-                            ie.Path = ie.Destination;
-                        }
-                        ie.Destination = "";
-                        ie.NewFileName = "";
-                    }
-                    catch (Exception ex) {
-                        if (skipall) {
-                            Logger.Instance.LogMessage("Skipping " + ie.Filename + ":\r\n" + ex.Message, LogLevel.WARNING);
-                            continue;
-                        }
-                        Logger.Instance.LogMessage(ie.Path + Path.DirectorySeparatorChar + ie.Filename + " -> " + ie.Destination + Path.DirectorySeparatorChar + ie.NewFileName + ": " + ex.Message, LogLevel.ERROR);
-                    }
-                }
-            }
-            if (Helper.ReadProperty(Config.DeleteAllEmptyFolders) == "1") {
-                //Delete all empty folders code
-                DeleteAllEmptyFolders(Helper.ReadProperty(Config.LastDirectory), new List<string>(Helper.ReadProperties(Config.IgnoreFiles)));
-            }
+            InfoEntryManager.Instance.Rename();
             //Get a list of all involved folders
             FillListView();
         }
 
-        /// <summary>
-        /// Updatess list view and do lots of other connected stuff with it
-        /// </summary>
-        /// <param name="clear">if true, list is cleared first and unconnected subtitle files are scheduled to be renamed</param>
-        /// <param name="KeepShowName">if set, show name isn't altered</param>
-        public void UpdateList(bool clear) {
-            if (clear) {
-                Info.Episodes.Clear();
-            }
-
-            //scan for files which got deleted so we can remove them
-            for (int i = Info.Episodes.Count - 1; i >= 0; i--) {
-                InfoEntry ie = Info.Episodes[i];
-                if (!File.Exists(ie.Path + Path.DirectorySeparatorChar + ie.Name)) {
-                    Info.Episodes.Remove(ie);
-                    i--;
-                }
-            }
-
-            string path = Helper.ReadProperty(Config.LastDirectory);
-            path = path.TrimEnd(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
-            bool CreateDirectoryStructure = Helper.ReadProperty(Config.CreateDirectoryStructure) == "1";
-            bool UseSeasonSubdirs = Helper.ReadProperty(Config.UseSeasonSubDir) == "1";
-            if (Directory.Exists(path)) {
-                //scan for new files
-                List<string> extensions = new List<string>(Helper.ReadProperties(Config.Extensions));
-                extensions.AddRange(Helper.ReadProperties(Config.SubtitleExtensions));
-                if (extensions == null) {
-                    Logger.Instance.LogMessage("No File Extensions found!", LogLevel.WARNING);
-                    return;
-                }
-                for (int i = 0; i < extensions.Count; i++) {
-                    extensions[i] = extensions[i].ToLower();
-                }
-                List<FileSystemInfo> Files = new List<FileSystemInfo>();
-                foreach (string ex in extensions) {
-                    List<FileSystemInfo> fsi = Helper.GetAllFilesRecursively(path, "*." + ex);
-                    Files.AddRange(fsi);
-                }
-
-                //Loop through all files and recognize things, YAY!
-                string[] patterns = Helper.ReadProperties(Config.EpIdentifier);
-                for (int i = 0; i < patterns.Length; i++) {
-                    //replace %S and %E by proper regexps
-                    //if a pattern containing %S%E is used, only use the first number for season
-                    if (patterns[i].Contains("%S%E")) {
-                        patterns[i] = patterns[i].Replace("%S", "(?<Season>\\d)");
-                    }
-                    else {
-                        patterns[i] = patterns[i].Replace("%S", "(?<Season>\\d+)");
-                    }
-                    patterns[i] = patterns[i].Replace("%E", "(?<Episode>\\d+)");
-                }
-
-                //some declarations already for speed
-                string strSeason = "";
-                string strEpisode = "";
-                Match m = null;
-                int DirectorySeason = -1;
-                InfoEntry ie = null;
-                bool contains = false;
-                DateTime dt;
-                string currentpath = "";
-                foreach (FileSystemInfo file in Files) {
-                    //showname and season recognized from path
-                    DirectorySeason = -1;
-
-                    //Check if there is already an entry on this file, and if not, create one
-                    ie = null;
-                    currentpath = Path.GetDirectoryName(file.FullName);
-                    foreach (InfoEntry i in Info.Episodes) {
-                        if (i.Filename == file.Name && i.Path == currentpath) {
-                            ie = i;
-                            break;
-                        }
-                    }
-
-                    if (ie == null) {
-                        ie = new InfoEntry();
-                    }
-
-                    //Set basic values, by setting those values destination directory and filename will be generated automagically
-                    ie.Filename = file.Name;
-                    ie.Path = currentpath;
-                    ie.Extension = Path.GetExtension(file.FullName).ToLower().Replace(".", "");
-                    //Get season number and showname from directory
-                    DirectorySeason = ExtractSeasonFromDirectory(Path.GetDirectoryName(file.FullName));
-                    dt = DateTime.Now;
-                    //try to recognize season and episode from filename
-                    foreach (string pattern in patterns) {
-                        //Try to match. If it works, get the season and the episode from the match
-                        m = Regex.Match(file.Name, pattern, RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
-                        if (m.Success) {
-                            strSeason = "";
-                            strEpisode = "";
-                            try {
-                                strSeason = Int32.Parse(m.Groups["Season"].Value).ToString();
-                            }
-                            catch (FormatException) {
-                            }
-                            try {
-                                strEpisode = Int32.Parse(m.Groups["Episode"].Value).ToString();
-                            }
-                            catch (FormatException) {
-                            }
-                            //Fix for .0216. notation for example, 4 numbers should always be recognized as %S%S%E%E
-                            if (strEpisode.Length == 3 && strSeason.Length == 1) {
-                                strSeason += strEpisode[0];
-                                strEpisode = strEpisode.Substring(1);
-                                if (strSeason[0] == '0') {
-                                    strSeason = strSeason.Substring(1);
-                                }
-                            }
-                            ie.Episode = strEpisode;
-                            ie.Season = strSeason;
-
-                            //if season recognized from directory name doesn't match season recognized from filename, the file might be located in a wrong directory
-                            if (DirectorySeason != -1 && ie.Season != DirectorySeason.ToString()) {
-                                Logger.Instance.LogMessage("File seems to be located inconsistently: " + ie.Filename + " was recognized as season " + ie.Season + ", but folder name indicates that it should be season " + DirectorySeason.ToString(), LogLevel.WARNING);
-                            }
-                            break;
-                        }
-                    }
-                    Info.timeextractnumbers += (DateTime.Now - dt).TotalSeconds;
-                    //if season number couldn't be extracted, try to get it from folder
-                    //(this should never happen if a pattern like %S%E is set)
-                    if (ie.Season == "" && DirectorySeason != -1) {
-                        ie.Season = DirectorySeason.ToString();
-                    }
-                    //if nothing could be recognized, assume that this is a movie
-                    if (ie.Season == "" && ie.Episode == "") {
-                        ie.Movie = true;
-                    }
-                    //if not added yet, add it
-                    if (!contains) {
-                        Info.Episodes.Add(ie);
-                    }
-                }
-                //SelectSimilarFilesForProcessing(path,Helper.ReadProperties(Config.LastTitles)[0]);
-                SelectRecognizedFilesForProcessing();
-            }
-
-            if (clear) {
-                RenameSubsToMatchVideos();
-            }
-
-
-            
-            Logger.Instance.LogMessage("Found " + Info.Episodes.Count + " Files", LogLevel.INFO);
-            FillListView();
-
-            //also update some gui elements for the sake of it
-            txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
-            txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
-            string LastProvider = Helper.ReadProperty(Config.LastProvider);
-            if (LastProvider == null)
-                LastProvider = "";
-            cbProviders.SelectedIndex = Math.Max(0, cbProviders.Items.IndexOf(LastProvider));
-            string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
-            if (LastSubProvider == null)
-                LastSubProvider = "";
-            cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
-        }
-
-        private void SelectRecognizedFilesForProcessing() {
-            foreach (InfoEntry ie in Info.Episodes) {
-                if (ie.Showname.ToLower() == "sample") {
-                    ie.Process = false;
-                    ie.Movie = false;
-                } else if (ie.Season != "" && ie.Episode != "") {
-                    ie.Process = true;
-                    ie.Movie = false;
-                } else {
-                    ie.Process = false;
-                    ie.Movie = true;
-                }
-            }
-        }
         #endregion
         #region Subtitles
         #region Parsing
-        /// <summary>
-        /// Main subtitle acquisition function
-        /// </summary>
-        private void GetSubtitles() {
-            if (settings.IsMonoCompatibilityMode) {
-                Logger.Instance.LogMessage("Subtitle downloading is not supported in Mono, since additional dlls for unpacking are required which won't work here :(", LogLevel.WARNING);
-                return;
-            }
-            info.SubtitleLinks.Clear();
-            // request
-            SubtitleProvider subprovider = SubtitleProvider.GetCurrentProvider();
-            if (subprovider == null) {
-                Logger.Instance.LogMessage("No subtitle provider found/selected", LogLevel.ERROR);
-                return;
-            }
-            string url = subprovider.SearchUrl;
-            if (url == null || url == "") {
-                Logger.Instance.LogMessage("Can't search because no search URL is specified for this subtitle provider", LogLevel.ERROR);
-                return;
-            }
-            url = url.Replace("%T", Helper.ReadProperties(Config.LastTitles)[0]);
-            url = System.Web.HttpUtility.UrlPathEncode(url);
-            HttpWebRequest requestHtml;
-            try {
-                requestHtml = (HttpWebRequest)(HttpWebRequest.Create(url));
-            }
-            catch (Exception ex) {
-                Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
-                return;
-            }
-            Logger.Instance.LogMessage("Searching at " + url.Replace(" ", "%20"), LogLevel.INFO);
-            requestHtml.Timeout = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
-            // get response
-            HttpWebResponse responseHtml = null;
-            try {
-                responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
-            }
-            catch (Exception ex) {
-                Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
-                if (responseHtml != null)
-                    responseHtml.Close();
-                return;
-            }
-            //if search engine directs us straight to the result page, skip parsing search results
-            string seriesURL = subprovider.SeriesUrl;
-            if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL)) {
-                Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + subprovider.SubtitlesURL.Replace(" ", "%20"), LogLevel.INFO);
-                GetSubtitleFromSeriesPage(responseHtml.ResponseUri.AbsoluteUri + subprovider.SubtitlesURL);
-            }
-            else {
-
-                // and download
-                StreamReader r = null;
-                try {
-                    r = new StreamReader(responseHtml.GetResponseStream());
-                }
-                catch (Exception ex) {
-                    if (r != null)
-                        r.Close();
-                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
-                    return;
-                }
-                string source = r.ReadToEnd();
-                r.Close();
 
 
-                //Source cropping
-                source = source.Substring(Math.Max(source.IndexOf(subprovider.SearchStart), 0));
-                source = source.Substring(0, Math.Max(source.LastIndexOf(subprovider.SearchEnd), 0));
+       
 
-                ParseSubtitleSearch(ref source, responseHtml.ResponseUri.AbsoluteUri);
-            }
-            int i;
-            if (info.SubtitleLinks.Count > 0) {
-                i = DownloadSubtitles();
-                ProcessSubtitles(i);
-                FillListView();
-                string folder = Helper.ReadProperty(Config.LastDirectory) + "TEMP" + i.ToString();
-            }
 
-            responseHtml.Close();
-        }
-
-        /// <summary>
-        /// Subtitle Search Result Parsing function.
-        /// Extracts search results (i.e. Show names) and gets links to them.
-        /// If more than one show is found, user gets to select one, otherwise he will be directly forwarded
-        /// For now only pages where search links directly to subtitles work
-        /// </summary>
-        /// <param name="source">HTML Source of the search results page</param>
-        /// <param name="SourceURL">URL of the source</param>
-        private void ParseSubtitleSearch(ref string source, string SourceURL) {
-            if (source == "")
-                return;
-            SubtitleProvider subprovider = SubtitleProvider.GetCurrentProvider();
-            string pattern = subprovider.SearchRegExp;
-            RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Singleline;
-            if (subprovider.SearchRightToLeft)
-                ro |= RegexOptions.RightToLeft;
-            MatchCollection mc = Regex.Matches(source, pattern, ro);
-            /*foreach(Match m in mc){
-                    MessageBox.Show("Match: "+m.Value+"\r\nName: "+m.Groups["name"].Value+"\r\nyear: "+m.Groups["year"].Value+"\r\nlink: "+m.Groups["link"].Value);
-            }*/
-            if (mc.Count == 0) {
-                Logger.Instance.LogMessage("No results found", LogLevel.INFO);
-            }
-            else if (mc.Count == 1) {
-                string url = subprovider.SubtitlesPage;
-                url = url.Replace("%L", mc[0].Groups["link"].Value);
-                if (subprovider.ConstructLink != "") {
-                    ConstructLinks(mc[0].Groups["link"].Value);
-                }
-                else {
-                    GetSubtitleFromSeriesPage(url);
-                }
-            }
-            else {
-                Logger.Instance.LogMessage("Search engine found multiple results at " + SourceURL.Replace(" ", "%20"), LogLevel.INFO);
-                SelectResult sr = new SelectResult(mc, subprovider, true);
-                if (sr.ShowDialog() == DialogResult.Cancel)
-                    return;
-                if (sr.urls.Count == 0)
-                    return;
-                foreach (string str in sr.urls) {
-                    string url = subprovider.SubtitlesPage;
-                    url = url.Replace("%L", str);
-                    if (subprovider.ConstructLink != "") {
-                        ConstructLinks(str);
-                    }
-                    else {
-                        GetSubtitleFromSeriesPage(url);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Used if the download link(s) can be constructed directly from the search results page
-        /// %L gets replaced with the value aquired from Search results page "link" property, 
-        /// %P will allow to iterate over pages/seasons etc
-        /// </summary>
-        /// <param name="extracted">Extracted value from search results which is inserted into "ConstructLink" url</param>
-        private void ConstructLinks(string extracted) {
-            SubtitleProvider subprovider = SubtitleProvider.GetCurrentProvider();
-            string link = subprovider.ConstructLink;
-            link = link.Replace("%L", extracted);
-            int loop = 1;
-            if (link.Contains("%P")) {
-                loop = 20;
-            }
-            //TODO: Make 20 setable somewhere or find better cancel condition
-            for (int i = 1; i < loop + 1; i++) {
-                string anotherlink = link.Replace("%P", i.ToString());
-                anotherlink = System.Web.HttpUtility.UrlPathEncode(anotherlink);
-                HttpWebRequest requestHtml;
-                try {
-                    requestHtml = (HttpWebRequest)(HttpWebRequest.Create(anotherlink));
-                }
-                catch (Exception ex) {
-                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
-                    return;
-                }
-                requestHtml.Timeout = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
-                // get response
-                HttpWebResponse responseHtml = null;
-                try {
-                    responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
-                }
-                catch (Exception ex) {
-                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
-                    if (responseHtml != null)
-                        responseHtml.Close();
-                    return;
-                }
-
-                responseHtml.Close();
-                if (subprovider.NotFoundUrl == "" || responseHtml.ResponseUri.ToString() != subprovider.NotFoundUrl) {
-                    info.SubtitleLinks.Add(responseHtml.ResponseUri.ToString());
-                }
-            }
-
-        }
         /// <summary>
         /// This function is needed if Subtitle links are located on a series page, not implemented yet
         /// </summary>
@@ -1087,232 +202,14 @@ namespace Renamer
         }
         #endregion
 
-        /// <summary>
-        /// Downloads all collected subtitle links in a temp directory
-        /// </summary>
-        /// <returns></returns>
-        private int DownloadSubtitles() {
-            //find empty temp dir
-            int i = 0;
-            string folder = "TEMP" + i.ToString();
-            while (Directory.Exists(Helper.ReadProperty(Config.LastDirectory) + folder)) {
-                i++;
-                folder = "TEMP" + i.ToString();
-            }
-            Directory.CreateDirectory(Helper.ReadProperty(Config.LastDirectory) + folder);
-            foreach (string url in info.SubtitleLinks) {
-                WebClient Client = new WebClient();
-                string target = Helper.ReadProperty(Config.LastDirectory) + folder + Path.DirectorySeparatorChar + Path.GetFileName(url);
-                Client.DownloadFile(url, target);
-            }
-            return i;
-        }
+ 
 
-        /// <summary>
-        /// Extracts all downloaded archives and moves subtitles to the movie files with proper naming
-        /// </summary>
-        /// <param name="i">Index of the temporary directory in which subtitles are stored. Temp Directory Name is "TEMP"+i</param>
-        private void ProcessSubtitles(int i) {
-            string folder = Helper.ReadProperty(Config.LastDirectory) + "TEMP" + i.ToString();
-            List<string> extensions = new List<string>(Helper.ReadProperties(Config.SubtitleExtensions));
-            for (int a = 0; a < extensions.Count; a++) {
-                extensions[a] = extensions[a].ToLower();
-            }
-            if (extensions == null) {
-                Logger.Instance.LogMessage("No Subtitle Extensions found!", LogLevel.WARNING);
-                return;
-            }
-
-            if (Directory.Exists(folder)) {
-                //extract downloaded archives
-                List<string> archives = new List<string>();
-                archives.AddRange(Directory.GetFiles(folder, "*.zip"));
-                archives.AddRange(Directory.GetFiles(folder, "*.rar"));
-                if (archives.Count > 0) {
-                    Unrar unrar = null;
-                    foreach (string file in archives) {
-                        if (Path.GetExtension(file).ToLower() == ".rar") {
-                            try {
-
-
-                                // Create new unrar class and attach event handlers for
-                                // progress, missing volumes, and password
-                                unrar = new Unrar();
-                                //AttachHandlers(unrar);
-
-                                // Set destination path for all files
-                                unrar.DestinationPath = folder;
-
-                                // Open archive for extraction
-                                unrar.Open(file, Unrar.OpenMode.Extract);
-
-                                // Extract each file with subtitle extension
-                                while (unrar.ReadHeader()) {
-
-                                    string extension = Path.GetExtension(unrar.CurrentFile.FileName).Substring(1).ToLower().Replace(".", "");
-                                    if (extensions.Contains(extension)) {
-                                        unrar.Extract();
-                                    }
-                                    else {
-                                        unrar.Skip();
-                                    }
-                                }
-                            }
-                            catch (Exception ex) {
-                                MessageBox.Show(ex.Message);
-                            }
-                            finally {
-                                if (unrar != null)
-                                    unrar.Close();
-                            }
-                        }
-                        else {
-                            using (ZipInputStream s = new ZipInputStream(File.OpenRead(file))) {
-
-                                ZipEntry theEntry;
-                                while ((theEntry = s.GetNextEntry()) != null) {
-
-                                    string directoryName = Path.GetDirectoryName(theEntry.Name);
-                                    string fileName = Path.GetFileName(theEntry.Name);
-                                    string extension = Path.GetExtension(theEntry.Name).Substring(1).ToLower().Replace(".", "");
-
-                                    //put it all in one dir!                				
-                                    if (fileName != String.Empty && extensions.Contains(extension)) {
-                                        using (FileStream streamWriter = File.Create(folder + Path.DirectorySeparatorChar + fileName)) {
-                                            int size = 2048;
-                                            byte[] data = new byte[2048];
-                                            while (true) {
-                                                size = s.Read(data, 0, data.Length);
-                                                if (size > 0) {
-                                                    streamWriter.Write(data, 0, size);
-                                                }
-                                                else {
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //now that everything is extracted, try to assign subtitles to episodes                
-                //first, figure out episode and season numbers from filenames
-
-                //scan for subtitle files in temp folder             
-                List<FileSystemInfo> Files = new List<FileSystemInfo>();
-                foreach (string ex in extensions) {
-                    List<FileSystemInfo> fsi = Helper.GetAllFilesRecursively(folder, "*." + ex);
-                    Files.AddRange(fsi);
-                }
-                string[] patterns = (string[])Helper.ReadProperties(Config.EpIdentifier);
-                foreach (FileSystemInfo file in Files) {
-                    string Season = "";
-                    string Episode = "";
-                    foreach (string str in patterns) {
-                        //replace %S and %E by proper regexps
-                        string pattern = null;
-                        if (str.Contains("%S%E")) {
-                            pattern = str.Replace("%S", "(?<Season>\\d)");
-                            pattern = pattern.Replace("%E", "(?<Episode>\\d+)");
-                        }
-                        else {
-                            pattern = str.Replace("%S", "(?<Season>\\d+)");
-                            pattern = pattern.Replace("%E", "(?<Episode>\\d+)");
-                        }
-                        Match m = Regex.Match(file.Name, pattern, RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
-                        if (m.Success) {
-
-                            try {
-                                Season = Int32.Parse(m.Groups["Season"].Value).ToString();
-                            }
-                            catch (FormatException) {
-                            }
-                            try {
-                                Episode = Int32.Parse(m.Groups["Episode"].Value).ToString();
-                            }
-                            catch (FormatException) {
-                            }
-                            break;
-                        }
-                    }
-
-                    //now that season and episode are known, assign the filename to a SubtitleFile object
-                    bool contains = false;
-                    foreach (SubtitleFile s in info.SubtitleFiles) {
-                        if (s.Episode == Episode && s.Season == Season && Season != "" && Episode != "") {
-                            s.Filenames.Add(file.Name);
-                            contains = true;
-                        }
-                    }
-                    if (!contains) {
-                        SubtitleFile sf = new SubtitleFile();
-                        sf.Episode = Episode;
-                        sf.Season = Season;
-                        sf.Filenames.Add(file.Name);
-                        info.SubtitleFiles.Add(sf);
-                    }
-                }
-                int MatchedSubtitles = 0;
-                //Move subtitle files to their video files
-                foreach (InfoEntry ie in Info.Episodes) {
-                    List<string> ext = new List<string>(Helper.ReadProperties(Config.Extensions));
-                    for (int b = 0; b < ext.Count; b++) {
-                        ext[b] = ext[b].ToLower();
-                    }
-                    if (ext.Contains(Path.GetExtension(ie.Filename).Substring(1).ToLower()) && ie.Process && ie.Episode != "" && ie.Season != "") {
-                        foreach (SubtitleFile sf in info.SubtitleFiles) {
-                            if (sf.Season == ie.Season && sf.Episode == ie.Episode) {
-                                bool move = false;
-                                string source = "";
-                                string target = ie.Path + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(ie.Filename) + Path.GetExtension(sf.Filenames[0]);
-                                if (sf.Filenames.Count == 1) {
-                                    move = true;
-                                    source = folder + Path.DirectorySeparatorChar + sf.Filenames[0];
-                                }
-                                else {
-                                    FileSelector fs = new FileSelector(sf.Filenames);
-                                    if (fs.ShowDialog() == DialogResult.OK) {
-                                        move = true;
-                                        source = folder + Path.DirectorySeparatorChar + sf.Filenames[fs.selection];
-                                    }
-                                }
-
-                                if (File.Exists(target)) {
-                                    if (MessageBox.Show(target + " already exists. Overwrite?", "Overwrite?", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes) {
-                                        File.Delete(target);
-                                    }
-                                    else {
-                                        move = false;
-                                    }
-                                }
-                                if (move) {
-                                    try {
-                                        File.Copy(source, target);
-                                        MatchedSubtitles++;
-                                    }
-                                    catch (Exception ex) {
-                                        Logger.Instance.LogMessage(source + " --> " + target + ": " + ex.Message, LogLevel.ERROR);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                Logger.Instance.LogMessage("Downloaded " + Files.Count + " subtitles and matched " + MatchedSubtitles + " of them.", LogLevel.INFO);
-                //cleanup
-                info.SubtitleFiles.Clear();
-                Directory.Delete(folder, true);
-                UpdateList(true);
-            }
-        }
+       
         #endregion
         #region LstFilesEvents
         //Update Coloring when file is checked/unchecked and set process flag
         private void lstFiles_ItemChecked(object sender, ItemCheckedEventArgs e) {
-            Info.Episodes[(int)e.Item.Tag].Process = e.Item.Checked;
+            InfoEntryManager.Instance[(int)e.Item.Tag].ProcessingRequested = e.Item.Checked;
             Colorize(e.Item);
         }
 
@@ -1351,13 +248,13 @@ namespace Renamer
                     Logger.Instance.LogMessage("Editing Entries dynamically is not supported in Mono unfortunately :(", LogLevel.WARNING);
                     return;
                 }
-                RelationCollection rc = Info.GetRelationCollectionByName(Info.Episodes[(int)e.Item.Tag].Showname);
+                RelationCollection rc = RelationManager.Instance.GetRelationCollection(InfoEntryManager.Instance[(int)e.Item.Tag].Showname);
                 if (e.SubItem == 4) {
                     //if season is valid and there are relations at all, show combobox. Otherwise, just show edit box
-                    if (rc != null && Info.Relations.Count > 0 && Convert.ToInt32(e.Item.SubItems[2].Text) >= rc.FindMinSeason() && Convert.ToInt32(e.Item.SubItems[2].Text) <= rc.FindMaxSeason()) {
+                    if (rc != null && RelationManager.Instance.Count > 0 && Convert.ToInt32(e.Item.SubItems[2].Text) >= rc.FindMinSeason() && Convert.ToInt32(e.Item.SubItems[2].Text) <= rc.FindMaxSeason()) {
                         comEdit.Items.Clear();
-                        foreach (Relation rel in rc.Relations) {
-                            if (rel.Season == Info.Episodes[(int)e.Item.Tag].Season) {
+                        foreach (Relation rel in rc) {
+                            if (rel.Season == InfoEntryManager.Instance[(int)e.Item.Tag].Season) {
                                 comEdit.Items.Add(rel.Name);
                             }
                         }
@@ -1372,14 +269,14 @@ namespace Renamer
                 }
                 else {
                     //clamp season and episode values to allowed values
-                    if (rc != null && rc.Relations.Count > 0) {
+                    if (rc != null && rc.Count > 0) {
                         if (e.SubItem == 2) {
                             numEdit.Minimum = rc.FindMinSeason();
                             numEdit.Maximum = rc.FindMaxSeason();
                         }
                         else if (e.SubItem == 3) {
-                            numEdit.Minimum = rc.FindMinEpisode(Convert.ToInt32(Info.Episodes[(int)e.Item.Tag].Season));
-                            numEdit.Maximum = rc.FindMaxEpisode(Convert.ToInt32(Info.Episodes[(int)e.Item.Tag].Season));
+                            numEdit.Minimum = rc.FindMinEpisode(Convert.ToInt32(InfoEntryManager.Instance[(int)e.Item.Tag].Season));
+                            numEdit.Maximum = rc.FindMaxEpisode(Convert.ToInt32(InfoEntryManager.Instance[(int)e.Item.Tag].Season));
                         }
                     }
                     else {
@@ -1396,66 +293,79 @@ namespace Renamer
             string dir = Helper.ReadProperty(Config.LastDirectory);
             bool CreateDirectoryStructure = Helper.ReadInt(Config.CreateDirectoryStructure) == 1;
             bool UseSeasonSubdirs = Helper.ReadInt(Config.UseSeasonSubDir) == 1;
+            int tmp = -1;
             //add lots of stuff here
             switch (e.SubItem) {
                 //season
                 case 2:
-                    Info.Episodes[(int)e.Item.Tag].Season = e.DisplayText;
+                    try{
+                        tmp = Int32.Parse(e.DisplayText);
+                    }
+                    catch (Exception ex){
+                        Logger.Instance.LogMessage("Cannot parse '" + e.DisplayText + "' to an integer", LogLevel.WARNING);
+                    }
+                    InfoEntryManager.Instance[(int)e.Item.Tag].Season = tmp;
                     if (e.DisplayText == "") {
-                        Info.Episodes[(int)e.Item.Tag].Movie = true;
+                        InfoEntryManager.Instance[(int)e.Item.Tag].Movie = true;
                     }
                     else {
-                        Info.Episodes[(int)e.Item.Tag].Movie = false;
+                        InfoEntryManager.Instance[(int)e.Item.Tag].Movie = false;
                     }
                     //SetupRelation((int)e.Item.Tag);
-                    //foreach (InfoEntry ie in Info.Episodes)
+                    //foreach (InfoEntry ie in InfoEntryManager.Episodes)
                     //{
                     //    SetDestinationPath(ie, dir, CreateDirectoryStructure, UseSeasonSubdirs);
                     //}
                     break;
                 //Episode
                 case 3:
-                    Info.Episodes[(int)e.Item.Tag].Episode = e.DisplayText;
+                    try {
+                        tmp = Int32.Parse(e.DisplayText);
+                    }
+                    catch (Exception ex) {
+                        Logger.Instance.LogMessage("Cannot parse '" + e.DisplayText + "' to an integer", LogLevel.WARNING);
+                    }
+                    InfoEntryManager.Instance[(int)e.Item.Tag].Episode = tmp;
                     if (e.DisplayText == "") {
-                        Info.Episodes[(int)e.Item.Tag].Movie = true;
+                        InfoEntryManager.Instance[(int)e.Item.Tag].Movie = true;
                     }
                     else {
-                        Info.Episodes[(int)e.Item.Tag].Movie = false;
+                        InfoEntryManager.Instance[(int)e.Item.Tag].Movie = false;
                     }
                     //SetupRelation((int)e.Item.Tag);                    
-                    //SetDestinationPath(Info.Episodes[(int)e.Item.Tag], dir, CreateDirectoryStructure, UseSeasonSubdirs);
+                    //SetDestinationPath(InfoEntryManager.Instance[(int)e.Item.Tag], dir, CreateDirectoryStructure, UseSeasonSubdirs);
                     break;
                 //name
                 case 4:
                     //backtrack to see if entered text matches a season/episode
-                    RelationCollection rc = Info.GetRelationCollectionByName(Info.Episodes[(int)e.Item.Tag].Showname);
+                    RelationCollection rc = RelationManager.Instance.GetRelationCollection(InfoEntryManager.Instance[(int)e.Item.Tag].Showname);
                     if (rc != null) {
-                        foreach (Relation rel in rc.Relations) {
+                        foreach (Relation rel in rc) {
                             //if found, set season and episode in gui and sync back to data
                             if (e.DisplayText == rel.Name) {
-                                e.Item.SubItems[2].Text = rel.Season;
-                                e.Item.SubItems[3].Text = rel.Episode;
+                                e.Item.SubItems[2].Text = rel.Season.ToString();
+                                e.Item.SubItems[3].Text = rel.Episode.ToString();
                             }
                         }
                     }
-                    Info.Episodes[(int)e.Item.Tag].Name = e.DisplayText;
+                    InfoEntryManager.Instance[(int)e.Item.Tag].Name = e.DisplayText;
                     break;
                 //Filename
                 case 5:
-                    Info.Episodes[(int)e.Item.Tag].NewFileName = e.DisplayText;
+                    InfoEntryManager.Instance[(int)e.Item.Tag].NewFileName = e.DisplayText;
                     break;
                 //Destination
                 case 6:
                     try {
                         Path.GetDirectoryName(e.DisplayText);
-                        Info.Episodes[(int)e.Item.Tag].Destination = e.DisplayText;
+                        InfoEntryManager.Instance[(int)e.Item.Tag].Destination = e.DisplayText;
                     }
                     catch (Exception) {
                         e.Cancel = true;
                     }
                     break;
                 case 7:
-                    Info.Episodes[(int)e.Item.Tag].Showname = e.DisplayText;
+                    InfoEntryManager.Instance[(int)e.Item.Tag].Showname = e.DisplayText;
                     break;
                 default:
                     throw new Exception("Unreachable code");
@@ -1472,7 +382,7 @@ namespace Renamer
         private void lstFiles_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
                 foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                    Process myProc = Process.Start(Info.Episodes[(int)lvi.Tag].Path + Path.DirectorySeparatorChar + Info.Episodes[(int)lvi.Tag].Filename);
+                    Process myProc = Process.Start(InfoEntryManager.Instance[(int)lvi.Tag].Filepath + Path.DirectorySeparatorChar + InfoEntryManager.Instance[(int)lvi.Tag].Filename);
                 }
             }
         }
@@ -1480,7 +390,7 @@ namespace Renamer
         #region GUI-Events
         //Main Initialization
         private void Form1_Load(object sender, EventArgs e) {
-            settings = Settings.getInstance();
+            settings = Settings.Instance;
             Logger logger = Logger.Instance;
             // Add Logger
             logger.addLogger(new FileLogger(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "Renamer.log", true, Helper.ReadEnum<LogLevel>(Config.LogFileLevel)));
@@ -1505,7 +415,6 @@ namespace Renamer
             //and read a value to make sure it is loaded into memory
             Helper.ReadProperty(Config.Case);
 
-            info = new Info();
             lstFiles.ListViewItemSorter = lvwColumnSorter;
             txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
 
@@ -1721,7 +630,7 @@ namespace Renamer
 
         //Clear episode informations fetched from providers
         private void btnClear_Click(object sender, EventArgs e) {
-            Info.Relations.Clear();
+            RelationManager.Instance.Clear();
             UpdateList(true);
         }
 
@@ -1743,7 +652,9 @@ namespace Renamer
 
             DialogResult dr = fbdPath.ShowDialog();
             if (dr == DialogResult.OK) {
-                SetPath(fbdPath.SelectedPath);
+                string path = fbdPath.SelectedPath;
+                InfoEntryManager.Instance.SetPath(ref path);
+                UpdateList(true);
             }
         }
 
@@ -1757,7 +668,8 @@ namespace Renamer
 
         //Fetch all title information etc yada yada yada blalblabla
         private void btnTitles_Click(object sender, EventArgs e) {
-            GetAllTitles();
+            DataGenerator.GetAllTitles();
+            FillListView();
         }
 
 
@@ -1780,7 +692,7 @@ namespace Renamer
         //Enter = Change current directory
         private void txtPath_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
-                SetPath(txtPath.Text);
+                InfoEntryManager.Instance.SetPath(txtPath.Text);
             }
             else if (e.KeyCode == Keys.Escape) {
                 txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
@@ -1790,7 +702,7 @@ namespace Renamer
 
         //Focus lost = change current directory
         private void txtPath_Leave(object sender, EventArgs e) {
-            SetPath(txtPath.Text);
+            InfoEntryManager.Instance.SetPath(txtPath.Text);
         }
 
         //Start renaming
@@ -1802,7 +714,7 @@ namespace Renamer
         private void txtTarget_Leave(object sender, EventArgs e) {
             if (txtTarget.Text != Helper.ReadProperty(Config.TargetPattern)) {
                 Helper.WriteProperty(Config.TargetPattern, txtTarget.Text);
-                CreateNewNames();
+                InfoEntryManager.Instance.CreateNewNames();
                 FillListView();
             }
         }
@@ -1812,7 +724,7 @@ namespace Renamer
             if (e.KeyCode == Keys.Enter) {
                 if (txtTarget.Text != Helper.ReadProperty(Config.TargetPattern)) {
                     Helper.WriteProperty(Config.TargetPattern, txtTarget.Text);
-                    CreateNewNames();
+                    InfoEntryManager.Instance.CreateNewNames();
                     FillListView();
                 }
             }
@@ -1824,7 +736,7 @@ namespace Renamer
 
         //start fetching subtitles
         private void btnSubs_Click(object sender, EventArgs e) {
-            GetSubtitles();
+            DataGenerator.GetSubtitles();
         }
 
         //Cleanup, save some stuff etc
@@ -1867,17 +779,17 @@ namespace Renamer
             if (lstFiles.SelectedItems.Count == 1) {
                 //if selected file is a subtitle
                 List<string> subext = new List<string>(Helper.ReadProperties(Config.SubtitleExtensions));
-                if (subext.Contains(Info.Episodes[((int)lstFiles.SelectedItems[0].Tag)].Extension.ToLower())) {
+                if (subext.Contains(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)].Extension.ToLower())) {
                     editSubtitleToolStripMenuItem.Visible = true;
                 }
 
                 //if selected file is a video and there is a matching subtitle
-                if (info.GetSubtitle(Info.Episodes[((int)lstFiles.SelectedItems[0].Tag)]) != null) {
+                if (InfoEntryManager.Instance.GetSubtitle(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)]) != null) {
                     editSubtitleToolStripMenuItem.Visible = true;
                 }
 
                 //if there is a matching video
-                if (info.GetVideo(Info.Episodes[((int)lstFiles.SelectedItems[0].Tag)]) != null) {
+                if (InfoEntryManager.Instance.GetVideo(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)]) != null) {
                     viewToolStripMenuItem.Visible = true;
                 }
             }
@@ -1904,18 +816,18 @@ namespace Renamer
                 for (int i = 0; i < lstFiles.SelectedItems.Count; i++) {
                     ListViewItem lvi = lstFiles.SelectedItems[i];
                     if (i == 0) {
-                        CreateDirectoryStructure = Info.Episodes[((int)lvi.Tag)].CreateDirectoryStructure;
-                        Case = Info.Episodes[((int)lvi.Tag)].Casing;
-                        Umlaute = Info.Episodes[((int)lvi.Tag)].UmlautUsage;
+                        CreateDirectoryStructure = InfoEntryManager.Instance[((int)lvi.Tag)].CreateDirectoryStructure;
+                        Case = InfoEntryManager.Instance[((int)lvi.Tag)].Casing;
+                        Umlaute = InfoEntryManager.Instance[((int)lvi.Tag)].UmlautUsage;
                     }
                     else {
-                        if (CreateDirectoryStructure != Info.Episodes[((int)lvi.Tag)].CreateDirectoryStructure) {
+                        if (CreateDirectoryStructure != InfoEntryManager.Instance[((int)lvi.Tag)].CreateDirectoryStructure) {
                             CreateDirectoryStructure = InfoEntry.DirectoryStructure.Unset;
                         }
-                        if (Case != Info.Episodes[((int)lvi.Tag)].Casing) {
+                        if (Case != InfoEntryManager.Instance[((int)lvi.Tag)].Casing) {
                             Case = InfoEntry.Case.Unset;
                         }
-                        if (Umlaute != Info.Episodes[((int)lvi.Tag)].UmlautUsage) {
+                        if (Umlaute != InfoEntryManager.Instance[((int)lvi.Tag)].UmlautUsage) {
                             Umlaute = InfoEntry.UmlautAction.Unset;
                         }
                     }
@@ -1949,15 +861,15 @@ namespace Renamer
                 }
                 for (int i = 0; i < lstFiles.SelectedItems.Count; i++) {
                     ListViewItem lvi = lstFiles.SelectedItems[i];
-                    if (Info.Episodes[((int)lvi.Tag)].Filename != "")
+                    if (InfoEntryManager.Instance[((int)lvi.Tag)].Filename != "")
                         OldFilename = true;
-                    if (Info.Episodes[((int)lvi.Tag)].Path != "")
+                    if (InfoEntryManager.Instance[((int)lvi.Tag)].Filepath != "")
                         OldPath = true;
-                    if (Info.Episodes[((int)lvi.Tag)].Name != "")
+                    if (InfoEntryManager.Instance[((int)lvi.Tag)].Name != "")
                         Name = true;
-                    if (Info.Episodes[((int)lvi.Tag)].Destination != "")
+                    if (InfoEntryManager.Instance[((int)lvi.Tag)].Destination != "")
                         Destination = true;
-                    if (Info.Episodes[((int)lvi.Tag)].NewFileName != "")
+                    if (InfoEntryManager.Instance[((int)lvi.Tag)].NewFileName != "")
                         NewFilename = true;
                 }
                 originalNameToolStripMenuItem.Visible = OldFilename;
@@ -1993,24 +905,24 @@ namespace Renamer
 
         //Check all list boxes
         private void checkAllToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (InfoEntry ie in Info.Episodes) {
-                ie.Process = true;
+            foreach (InfoEntry ie in InfoEntryManager.Instance) {
+                ie.ProcessingRequested = true;
             }
             SyncAllItems(false);
         }
 
         //Uncheck all list boxes
         private void uncheckAllToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (InfoEntry ie in Info.Episodes) {
-                ie.Process = false;
+            foreach (InfoEntry ie in InfoEntryManager.Instance) {
+                ie.ProcessingRequested = false;
             }
             SyncAllItems(false);
         }
 
         //Invert check status of Selected list boxes
         private void invertCheckToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (InfoEntry ie in Info.Episodes) {
-                ie.Process = !ie.Process;
+            foreach (InfoEntry ie in InfoEntryManager.Instance) {
+                ie.ProcessingRequested = !ie.ProcessingRequested;
             }
             SyncAllItems(false);
         }
@@ -2035,13 +947,9 @@ namespace Renamer
             int sum = 0;
             int count = 0;
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                try {
-                    int s = 0;
-                    Int32.TryParse(Info.Episodes[(int)lvi.Tag].Season, out s);
-                    sum += s;
+                if (InfoEntryManager.Instance[(int)lvi.Tag].Season != -1) {
+                    sum += InfoEntryManager.Instance[(int)lvi.Tag].Season;
                     count++;
-                }
-                catch (Exception) {
                 }
             }
             int EstimatedSeason = (int)Math.Round(((float)sum / (float)count));
@@ -2052,11 +960,11 @@ namespace Renamer
                 bool UseSeasonDir = (Helper.ReadInt(Config.UseSeasonSubDir) > 0);
                 foreach (ListViewItem lvi in lstFiles.SelectedItems) {
                     int season = es.season;
-                    Info.Episodes[(int)lvi.Tag].Season = season.ToString();
+                    InfoEntryManager.Instance[(int)lvi.Tag].Season = season;
                     //SetupRelation((int)lvi.Tag);
-                    //SetDestinationPath(Info.Episodes[(int)lvi.Tag], basepath, createdirectorystructure, UseSeasonDir);
-                    if (Info.Episodes[(int)lvi.Tag].Destination != "") {
-                        Info.Episodes[(int)lvi.Tag].Process = true;
+                    //SetDestinationPath(InfoEntryManager.Instance[(int)lvi.Tag], basepath, createdirectorystructure, UseSeasonDir);
+                    if (InfoEntryManager.Instance[(int)lvi.Tag].Destination != "") {
+                        InfoEntryManager.Instance[(int)lvi.Tag].ProcessingRequested = true;
                     }
                 }
                 FillListView();
@@ -2068,7 +976,7 @@ namespace Renamer
             SetEpisodes se = new SetEpisodes(lstFiles.SelectedIndices.Count);
             if (se.ShowDialog() == DialogResult.OK) {
                 for (int i = 0; i < lstFiles.SelectedIndices.Count; i++) {
-                    Info.Episodes[((int)lstFiles.SelectedItems[i].Tag)].Episode = (i + se.From).ToString();
+                    InfoEntryManager.Instance[((int)lstFiles.SelectedItems[i].Tag)].Episode = (i + se.From);
                     lstFiles.SelectedItems[i].SubItems[3].Text = (i + se.From).ToString();
                 }
             }
@@ -2088,12 +996,12 @@ namespace Renamer
                 return;
             List<InfoEntry> lie = new List<InfoEntry>();
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                lie.Add(Info.Episodes[(int)lvi.Tag]);
+                lie.Add(InfoEntryManager.Instance[(int)lvi.Tag]);
             }
             foreach (InfoEntry ie in lie) {
                 try {
-                    File.Delete(ie.Path + Path.DirectorySeparatorChar + ie.Filename);
-                    Info.Episodes.Remove(ie);
+                    File.Delete(ie.Filepath + Path.DirectorySeparatorChar + ie.Filename);
+                    InfoEntryManager.Instance.Remove(ie);
                 }
                 catch (Exception ex) {
                     Logger.Instance.LogMessage("Error deleting file: " + ex.Message, LogLevel.ERROR);
@@ -2104,8 +1012,8 @@ namespace Renamer
 
         //Open file
         private void viewToolStripMenuItem_Click(object sender, EventArgs e) {
-            InfoEntry ie = info.GetVideo(Info.Episodes[(int)lstFiles.SelectedItems[0].Tag]);
-            string VideoPath = ie.Path + Path.DirectorySeparatorChar + ie.Filename;
+            InfoEntry ie = InfoEntryManager.Instance.GetVideo(InfoEntryManager.Instance[(int)lstFiles.SelectedItems[0].Tag]);
+            string VideoPath = ie.Filepath + Path.DirectorySeparatorChar + ie.Filename;
             try {
                 Process myProc = Process.Start(VideoPath);
             }
@@ -2116,13 +1024,13 @@ namespace Renamer
 
         //Edit subtitle
         private void editSubtitleToolStripMenuItem_Click(object sender, EventArgs e) {
-            InfoEntry sub = info.GetSubtitle(Info.Episodes[((int)lstFiles.SelectedItems[0].Tag)]);
-            InfoEntry video = info.GetVideo(Info.Episodes[((int)lstFiles.SelectedItems[0].Tag)]);
+            InfoEntry sub = InfoEntryManager.Instance.GetSubtitle(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)]);
+            InfoEntry video = InfoEntryManager.Instance.GetVideo(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)]);
             if (sub != null) {
-                string path = sub.Path + Path.DirectorySeparatorChar + sub.Filename;
+                string path = sub.Filepath + Path.DirectorySeparatorChar + sub.Filename;
                 string videopath = "";
                 if (video != null) {
-                    videopath = video.Path + Path.DirectorySeparatorChar + video.Filename;
+                    videopath = video.Filepath + Path.DirectorySeparatorChar + video.Filename;
                 }
                 EditSubtitles es = new EditSubtitles(path, videopath);
                 es.ShowDialog();
@@ -2135,7 +1043,7 @@ namespace Renamer
             if (ib.ShowDialog(this) == DialogResult.OK) {
                 foreach (ListViewItem lvi in lstFiles.SelectedItems) {
                     string destination = ib.input;
-                    Info.Episodes[(int)lvi.Tag].Destination = destination;
+                    InfoEntryManager.Instance[(int)lvi.Tag].Destination = destination;
                     lvi.SubItems[6].Text = destination;
                 }
             }
@@ -2143,147 +1051,10 @@ namespace Renamer
         #endregion
         #region misc
 
-        /// <summary>
-        /// Decides which files should be marked for processing
-        /// </summary>
-        /// <param name="Basepath">basepath, as always</param>
-        /// <param name="Showname">user entered showname</param>
-        public void SelectSimilarFilesForProcessing(string Basepath, string Showname) {
-            List<InfoEntry> matches = Helper.FindSimilarByName(Info.Episodes, Showname);
-            foreach (InfoEntry ie in Info.Episodes) {
-                if (matches.Contains(ie)&&ie.Showname.ToLower()!="sample") {
-                    ie.Process = true;
-                    ie.Movie = false;
-                }
-                else {
-                    ie.Process = false;
-                }
-            }
-            return;
-        }
 
-        /// <summary>
-        /// Sets new title to some files and takes care of storing it properly (last [TitleHistorySize] Titles are stored)
-        /// </summary>
-        /// <param name="files">files to which this title should be set to</param>
-        /// <param name="title">name to be set</param>
-        public void SetNewTitle(List<InfoEntry> files, string title) {
-            string[] LastTitlesOld = Helper.ReadProperties(Config.LastTitles);
-            foreach (InfoEntry ie in files) {
-                if (ie.Showname != title) {
-                    ie.Showname = title;
-                }
-            }
-
-            //check if list of titles contains new title
-            int Index = -1;
-            for (int i = 0; i < LastTitlesOld.Length; i++) {
-                string str = LastTitlesOld[i];
-                if (str == title) {
-                    Index = i;
-                    break;
-                }
-            }
-
-            //if the title is new
-            if (Index == -1) {
-                List<string> LastTitlesNew = new List<string>();
-                LastTitlesNew.Add(title);
-                foreach (string s in LastTitlesOld) {
-                    LastTitlesNew.Add(s);
-                }
-                int size = Helper.ReadInt(Config.TitleHistorySize);
-                Helper.WriteProperties(Config.LastTitles, LastTitlesNew.GetRange(0, Math.Min(LastTitlesNew.Count, size)).ToArray());
-            }
-            //if the title is in the list already, bring it to the front
-            else {
-                List<string> items = new List<string>(LastTitlesOld);
-                items.RemoveAt(Index);
-                items.Insert(0, title);
-                Helper.WriteProperties(Config.LastTitles, items.ToArray());
-            }
-        }
+      
 
 
-        /// <summary>
-        /// Sets a new path for the list view
-        /// </summary>
-        /// <param name="path">Path to be set</param>
-        public void SetPath(string path) {
-            DateTime dt = DateTime.Now;
-            Info.timecreatenewname = 0;
-            Info.timeextractname = 0;
-            Info.timesetpath = 0;
-            Info.timesetuprelation = 0;
-            Info.timeextractnumbers = 0;
-            if (path == null || path == "" || !Directory.Exists(path))
-                return;
-
-            if (path.Length == 2) {
-                if (char.IsLetter(path[0]) && path[1] == ':') {
-                    path = path + Path.DirectorySeparatorChar;
-                }
-            }
-            DirectoryInfo currentpath = new DirectoryInfo(path);
-
-            //fix casing of the path if user entered it
-            string fixedpath = "";
-            while (currentpath.Parent != null) {
-                fixedpath = currentpath.Parent.GetDirectories(currentpath.Name)[0].Name + Path.DirectorySeparatorChar + fixedpath;
-                currentpath = currentpath.Parent;
-            }
-            fixedpath = currentpath.Name.ToUpper() + fixedpath;
-            fixedpath = fixedpath.TrimEnd(new char[] { Path.DirectorySeparatorChar });
-            if (fixedpath.Length == 2) {
-                if (char.IsLetter(fixedpath[0]) && fixedpath[1] == ':') {
-                    fixedpath = fixedpath + Path.DirectorySeparatorChar;
-                }
-            }
-            path = fixedpath;
-            //Same path, ignore
-            if (Helper.ReadProperty(Config.LastDirectory) == path) {
-                txtPath.Text = path;
-                return;
-            }
-            else {
-                Helper.WriteProperty(Config.LastDirectory, path);
-                txtPath.Text = path;
-                Environment.CurrentDirectory = path;
-                UpdateList(true);
-            }
-            Info.timeloadfolder = (DateTime.Now - dt).TotalSeconds;
-            Logger.Instance.LogMessage("Time for loading folder: " + Info.timeloadfolder + " Seconds", LogLevel.INFO);
-            Logger.Instance.LogMessage("Time for extracting names: " + Info.timeextractname + " Seconds", LogLevel.INFO);
-            Logger.Instance.LogMessage("Time for creating paths: " + Info.timesetpath + " Seconds", LogLevel.INFO);
-            Logger.Instance.LogMessage("Time for creating filenames: " + Info.timecreatenewname + " Seconds", LogLevel.INFO);
-            Logger.Instance.LogMessage("Time for assigning relations: " + Info.timesetuprelation + " Seconds", LogLevel.INFO);
-            Logger.Instance.LogMessage("Time for extracting numbers: " + Info.timeextractnumbers + " Seconds", LogLevel.INFO);
-        }
-        /// <summary>
-        /// Extracts season from directory name
-        /// </summary>
-        /// <param name="path">path from which to extract the data (NO FILEPATH, JUST FOLDER)</param>
-        /// <returns>recognized season, -1 if not recognized</returns>
-        public int ExtractSeasonFromDirectory(string path) {
-            string[] patterns = Helper.ReadProperties(Config.Extract);
-            string[] folders = path.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = patterns.Length - 1; i >= 0; i--) {
-                string pattern = patterns[i];
-                pattern = pattern.Replace("%T", "*.?");
-                pattern = pattern.Replace("%S", "(?<Season>\\d)");
-                Match m = Regex.Match(folders[folders.Length - 1], pattern, RegexOptions.IgnoreCase);
-
-                if (m.Success) {
-                    try {
-                        return Int32.Parse(m.Groups["Season"].Value);
-                    }
-                    catch (Exception) {
-                        return -1;
-                    }
-                }
-            }
-            return -1;
-        }
 
         /// <summary>
         /// Deletes all empty folders recursively, ignoring files from IgnoredFiles list
@@ -2339,28 +1110,39 @@ namespace Renamer
                 Logger.Instance.LogMessage("Synching between data and gui failed because item doesn't exist in GUI.", LogLevel.ERROR);
                 return;
             }
-            InfoEntry ie = Info.Episodes[item];
+            InfoEntry ie = InfoEntryManager.Instance[item];
             if (direction == false) {
                 lvi.SubItems[0].Text = ie.Filename;
-                lvi.SubItems[1].Text = ie.Path;
-                lvi.SubItems[2].Text = ie.Season;
-                lvi.SubItems[3].Text = ie.Episode;
+                lvi.SubItems[1].Text = ie.Filepath;
+                lvi.SubItems[2].Text = ie.Season.ToString();
+                lvi.SubItems[3].Text = ie.Episode.ToString();
                 lvi.SubItems[4].Text = ie.Name;
                 lvi.SubItems[5].Text = ie.NewFileName;
                 lvi.SubItems[6].Text = ie.Destination;
                 lvi.SubItems[7].Text = ie.Showname;
-                lvi.Checked = ie.Process;
+                lvi.Checked = ie.ProcessingRequested;
             }
             else {
                 ie.Filename = lvi.SubItems[0].Text;
-                ie.Path = lvi.SubItems[1].Text;
-                ie.Season = lvi.SubItems[2].Text;
-                ie.Episode = lvi.SubItems[3].Text;
+                ie.Filepath = lvi.SubItems[1].Text;
+                try {
+                    ie.Season = Int32.Parse(lvi.SubItems[2].Text);
+                }
+                catch {
+                    ie.Season = -1;
+                }
+                try {
+                    ie.Episode = Int32.Parse(lvi.SubItems[3].Text);
+                }
+                catch {
+                    ie.Episode = -1;
+                }
+
                 ie.Name = lvi.SubItems[4].Text;
                 ie.NewFileName = lvi.SubItems[5].Text;
                 ie.Destination = lvi.SubItems[6].Text;
                 ie.Showname = lvi.SubItems[7].Text;
-                ie.Process = lvi.Checked;
+                ie.ProcessingRequested = lvi.Checked;
             }
 
             Colorize(lvi);
@@ -2372,18 +1154,18 @@ namespace Renamer
         private void FillListView() {
             // TODO: show at least a progressbar while adding items, user can't see anything but processor utilization will be very high
             lstFiles.Items.Clear();
-            for (int i = 0; i < Info.Episodes.Count; i++) {
-                InfoEntry ie = Info.Episodes[i];
+            for (int i = 0; i < InfoEntryManager.Instance.Count; i++) {
+                InfoEntry ie = InfoEntryManager.Instance[i];
                 ListViewItem lvi = new ListViewItem(ie.Filename);
                 lvi.Tag = i;
-                lvi.SubItems.Add(ie.Path);
-                lvi.SubItems.Add(ie.Season);
-                lvi.SubItems.Add(ie.Episode);
+                lvi.SubItems.Add(ie.Filepath);
+                lvi.SubItems.Add(ie.Season.ToString());
+                lvi.SubItems.Add(ie.Episode.ToString());
                 lvi.SubItems.Add(ie.Name);
                 lvi.SubItems.Add(ie.NewFileName);
                 lvi.SubItems.Add(ie.Destination);
                 lvi.SubItems.Add(ie.Showname);
-                lvi.Checked = ie.Process;
+                lvi.Checked = ie.ProcessingRequested;
                 lstFiles.Items.Add(lvi);
             }
             Colorize();
@@ -2470,7 +1252,7 @@ namespace Renamer
         private void originalNameToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                clipboard += Info.Episodes[((int)lvi.Tag)].Filename + Environment.NewLine;
+                clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].Filename + Environment.NewLine;
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
@@ -2480,7 +1262,7 @@ namespace Renamer
         private void pathOrigNameToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                clipboard += Info.Episodes[((int)lvi.Tag)].Path + Path.DirectorySeparatorChar + Info.Episodes[((int)lvi.Tag)].Filename + Environment.NewLine;
+                clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].Filepath + Path.DirectorySeparatorChar + InfoEntryManager.Instance[((int)lvi.Tag)].Filename + Environment.NewLine;
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
@@ -2490,7 +1272,7 @@ namespace Renamer
         private void titleToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                clipboard += Info.Episodes[((int)lvi.Tag)].Name + Environment.NewLine;
+                clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].Name + Environment.NewLine;
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
@@ -2500,7 +1282,7 @@ namespace Renamer
         private void newFileNameToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                clipboard += Info.Episodes[((int)lvi.Tag)].NewFileName + Environment.NewLine;
+                clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].NewFileName + Environment.NewLine;
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
@@ -2510,8 +1292,8 @@ namespace Renamer
         private void destinationNewFileNameToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                if (Info.Episodes[((int)lvi.Tag)].Destination != "" && Info.Episodes[((int)lvi.Tag)].NewFileName != "") {
-                    clipboard += Info.Episodes[((int)lvi.Tag)].Destination + Path.DirectorySeparatorChar + Info.Episodes[((int)lvi.Tag)].NewFileName + Environment.NewLine;
+                if (InfoEntryManager.Instance[((int)lvi.Tag)].Destination != "" && InfoEntryManager.Instance[((int)lvi.Tag)].NewFileName != "") {
+                    clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].Destination + Path.DirectorySeparatorChar + InfoEntryManager.Instance[((int)lvi.Tag)].NewFileName + Environment.NewLine;
                 }
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
@@ -2522,7 +1304,7 @@ namespace Renamer
         private void operationToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntry ie = Info.Episodes[((int)lvi.Tag)];
+                InfoEntry ie = InfoEntryManager.Instance[((int)lvi.Tag)];
                 if (ie.Destination != "") {
                     clipboard += ie.Filename + " --> " + ie.Destination + Path.DirectorySeparatorChar + ie.NewFileName + Environment.NewLine;
                 }
@@ -2544,7 +1326,7 @@ namespace Renamer
         private void lstFiles_DragDrop(object sender, DragEventArgs e) {
             string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
             if (s.Length == 1 && Directory.Exists(s[0])) {
-                SetPath(s[0]);
+                InfoEntryManager.Instance.SetPath(s[0]);
             }
         }
 
@@ -2596,7 +1378,7 @@ namespace Renamer
             if (Source.Contains("Path"))
                 destination = "Path";
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntry ie = Info.Episodes[(int)lvi.Tag];
+                InfoEntry ie = InfoEntryManager.Instance[(int)lvi.Tag];
                 string source = "";
 
                 string LocalSearchString = SearchString;
@@ -2607,7 +1389,7 @@ namespace Renamer
                         source = ie.Filename;
                         break;
                     case "Original Path":
-                        source = ie.Path;
+                        source = ie.Filepath;
                         break;
                     case "Destination Filename":
                         source = ie.NewFileName;
@@ -2619,27 +1401,23 @@ namespace Renamer
                 //Insert parameter values
                 LocalSearchString = LocalSearchString.Replace("%OF", ie.Filename);
                 LocalSearchString = LocalSearchString.Replace("%DF", ie.NewFileName);
-                LocalSearchString = LocalSearchString.Replace("%OP", ie.Path);
+                LocalSearchString = LocalSearchString.Replace("%OP", ie.Filepath);
                 LocalSearchString = LocalSearchString.Replace("%DP", ie.Destination);
                 LocalSearchString = LocalSearchString.Replace("%T", title);
                 LocalSearchString = LocalSearchString.Replace("%N", ie.Name);
-                LocalSearchString = LocalSearchString.Replace("%E", ie.Episode);
-                LocalSearchString = LocalSearchString.Replace("%s", ie.Season);
+                LocalSearchString = LocalSearchString.Replace("%E", ie.Episode.ToString());
+                LocalSearchString = LocalSearchString.Replace("%s", ie.Season.ToString());
                 LocalSearchString = LocalSearchString.Replace("%BD", basedir);
-                string LongSeason = ie.Season;
-                if (LongSeason.Length == 1) {
-                    LongSeason = "0" + LongSeason;
-                }
-                LocalSearchString = LocalSearchString.Replace("%S", LongSeason);
+                LocalSearchString = LocalSearchString.Replace("%S", ie.Season.ToString("00"));
                 LocalReplaceString = LocalReplaceString.Replace("%OF", ie.Filename);
                 LocalReplaceString = LocalReplaceString.Replace("%DF", ie.NewFileName);
-                LocalReplaceString = LocalReplaceString.Replace("%OP", ie.Path);
+                LocalReplaceString = LocalReplaceString.Replace("%OP", ie.Filepath);
                 LocalReplaceString = LocalReplaceString.Replace("%DP", ie.Destination);
                 LocalReplaceString = LocalReplaceString.Replace("%T", title);
                 LocalReplaceString = LocalReplaceString.Replace("%N", ie.Name);
-                LocalReplaceString = LocalReplaceString.Replace("%E", ie.Episode);
-                LocalReplaceString = LocalReplaceString.Replace("%s", ie.Season);
-                LocalReplaceString = LocalReplaceString.Replace("%S", LongSeason);
+                LocalReplaceString = LocalReplaceString.Replace("%E", ie.Episode.ToString());
+                LocalReplaceString = LocalReplaceString.Replace("%s", ie.Season.ToString());
+                LocalReplaceString = LocalReplaceString.Replace("%S", ie.Season.ToString("00"));
 
                 //see if replace will be done for count var
                 if (source.Contains(SearchString))
@@ -2654,7 +1432,7 @@ namespace Renamer
                 }
 
                 //mark files for processing
-                ie.Process = true;
+                ie.ProcessingRequested = true;
                 SyncItem((int)lvi.Tag, false);
             }
             if (count > 0) {
@@ -2668,17 +1446,17 @@ namespace Renamer
         private void byNameToolStripMenuItem_Click(object sender, EventArgs e) {
             List<string> names = new List<string>();
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                string Showname = Info.Episodes[(int)lvi.Tag].Showname;
+                string Showname = InfoEntryManager.Instance[(int)lvi.Tag].Showname;
                 if (!names.Contains(Showname)) {
                     names.Add(Showname);
                 }
             }
             List<InfoEntry> similar = new List<InfoEntry>();
             foreach (string str in names) {
-                similar.AddRange(Helper.FindSimilarByName(Info.Episodes, str));
+                similar.AddRange(InfoEntryManager.Instance.FindSimilarByName(str));
             }
             foreach (ListViewItem lvi in lstFiles.Items) {
-                if (similar.Contains(Info.Episodes[(int)lvi.Tag])) {
+                if (similar.Contains(InfoEntryManager.Instance[(int)lvi.Tag])) {
                     lvi.Selected = true;
                 }
                 else {
@@ -2690,17 +1468,17 @@ namespace Renamer
         private void byPathToolStripMenuItem_Click(object sender, EventArgs e) {
             List<string> paths = new List<string>();
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                string path = Info.Episodes[(int)lvi.Tag].Path;
+                string path = InfoEntryManager.Instance[(int)lvi.Tag].Filepath;
                 if (!paths.Contains(path)) {
                     paths.Add(path);
                 }
             }
             List<InfoEntry> similar = new List<InfoEntry>();
             foreach (string str in paths) {
-                similar.AddRange(Helper.FindSimilarByPath(Info.Episodes, str));
+                similar.AddRange(InfoEntryManager.Instance.FindSimilarByName(str));
             }
             foreach (ListViewItem lvi in lstFiles.Items) {
-                if (similar.Contains(Info.Episodes[(int)lvi.Tag])) {
+                if (similar.Contains(InfoEntryManager.Instance[(int)lvi.Tag])) {
                     lvi.Selected = true;
                 }
                 else {
@@ -2711,7 +1489,7 @@ namespace Renamer
 
         private void createDirectoryStructureToolStripMenuItem1_Click(object sender, EventArgs e) {
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                Info.Episodes[(int)lvi.Tag].CreateDirectoryStructure = InfoEntry.DirectoryStructure.CreateDirectoryStructure;
+                InfoEntryManager.Instance[(int)lvi.Tag].CreateDirectoryStructure = InfoEntry.DirectoryStructure.CreateDirectoryStructure;
                 SyncItem((int)lvi.Tag, false);
             }
             ((ToolStripMenuItem)sender).Checked = true;
@@ -2720,7 +1498,7 @@ namespace Renamer
 
         private void dontCreateDirectoryStructureToolStripMenuItem_Click(object sender, EventArgs e) {
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                Info.Episodes[(int)lvi.Tag].CreateDirectoryStructure = InfoEntry.DirectoryStructure.NoDirectoryStructure;
+                InfoEntryManager.Instance[(int)lvi.Tag].CreateDirectoryStructure = InfoEntry.DirectoryStructure.NoDirectoryStructure;
                 SyncItem((int)lvi.Tag, false);
             }
             ((ToolStripMenuItem)sender).Checked = true;
@@ -2729,7 +1507,7 @@ namespace Renamer
 
         private void useUmlautsToolStripMenuItem1_Click(object sender, EventArgs e) {
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                Info.Episodes[(int)lvi.Tag].UmlautUsage = InfoEntry.UmlautAction.Use;
+                InfoEntryManager.Instance[(int)lvi.Tag].UmlautUsage = InfoEntry.UmlautAction.Use;
                 SyncItem((int)lvi.Tag, false);
             }
             ((ToolStripMenuItem)sender).Checked = true;
@@ -2739,7 +1517,7 @@ namespace Renamer
 
         private void dontUseUmlautsToolStripMenuItem_Click(object sender, EventArgs e) {
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                Info.Episodes[(int)lvi.Tag].UmlautUsage = InfoEntry.UmlautAction.Dont_Use;
+                InfoEntryManager.Instance[(int)lvi.Tag].UmlautUsage = InfoEntry.UmlautAction.Dont_Use;
                 SyncItem((int)lvi.Tag, false);
             }
             ((ToolStripMenuItem)sender).Checked = true;
@@ -2749,7 +1527,7 @@ namespace Renamer
 
         private void useProvidedNamesToolStripMenuItem_Click(object sender, EventArgs e) {
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                Info.Episodes[(int)lvi.Tag].UmlautUsage = InfoEntry.UmlautAction.Ignore;
+                InfoEntryManager.Instance[(int)lvi.Tag].UmlautUsage = InfoEntry.UmlautAction.Ignore;
                 SyncItem((int)lvi.Tag, false);
             }
             ((ToolStripMenuItem)sender).Checked = true;
@@ -2759,7 +1537,7 @@ namespace Renamer
 
         private void largeToolStripMenuItem_Click(object sender, EventArgs e) {
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                Info.Episodes[(int)lvi.Tag].Casing = InfoEntry.Case.Large;
+                InfoEntryManager.Instance[(int)lvi.Tag].Casing = InfoEntry.Case.Large;
                 SyncItem((int)lvi.Tag, false);
             }
             ((ToolStripMenuItem)sender).Checked = true;
@@ -2770,7 +1548,7 @@ namespace Renamer
 
         private void smallToolStripMenuItem_Click(object sender, EventArgs e) {
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                Info.Episodes[(int)lvi.Tag].Casing = InfoEntry.Case.small;
+                InfoEntryManager.Instance[(int)lvi.Tag].Casing = InfoEntry.Case.small;
                 SyncItem((int)lvi.Tag, false);
             }
             ((ToolStripMenuItem)sender).Checked = true;
@@ -2781,7 +1559,7 @@ namespace Renamer
 
         private void igNorEToolStripMenuItem_Click(object sender, EventArgs e) {
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                Info.Episodes[(int)lvi.Tag].Casing = InfoEntry.Case.Ignore;
+                InfoEntryManager.Instance[(int)lvi.Tag].Casing = InfoEntry.Case.Ignore;
                 SyncItem((int)lvi.Tag, false);
             }
             ((ToolStripMenuItem)sender).Checked = true;
@@ -2792,7 +1570,7 @@ namespace Renamer
 
         private void cAPSLOCKToolStripMenuItem_Click(object sender, EventArgs e) {
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                Info.Episodes[(int)lvi.Tag].Casing = InfoEntry.Case.CAPSLOCK;
+                InfoEntryManager.Instance[(int)lvi.Tag].Casing = InfoEntry.Case.CAPSLOCK;
                 SyncItem((int)lvi.Tag, false);
             }
             ((ToolStripMenuItem)sender).Checked = true;
@@ -2804,11 +1582,11 @@ namespace Renamer
         private void setShownameToolStripMenuItem_Click(object sender, EventArgs e) {
             Dictionary<string, int> ht = new Dictionary<string, int>();
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                if (!ht.ContainsKey(Info.Episodes[(int)lvi.Tag].Showname)) {
-                    ht.Add(Info.Episodes[(int)lvi.Tag].Showname, 1);
+                if (!ht.ContainsKey(InfoEntryManager.Instance[(int)lvi.Tag].Showname)) {
+                    ht.Add(InfoEntryManager.Instance[(int)lvi.Tag].Showname, 1);
                 }
                 else {
-                    ht[Info.Episodes[(int)lvi.Tag].Showname] += 1;
+                    ht[InfoEntryManager.Instance[(int)lvi.Tag].Showname] += 1;
                 }
             }
             int max = 0;
@@ -2821,7 +1599,7 @@ namespace Renamer
             EnterShowname es = new EnterShowname(Showname);
             if (es.ShowDialog() == DialogResult.OK) {
                 foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                    Info.Episodes[(int)lvi.Tag].Showname = es.SelectedName;
+                    InfoEntryManager.Instance[(int)lvi.Tag].Showname = es.SelectedName;
                     SyncItem((int)lvi.Tag, false);
                 }
             }
@@ -2831,6 +1609,27 @@ namespace Renamer
             RegexTester rt = new RegexTester();
             rt.Show();
         }
+
+
+
+        #region Functioncs remaining in Form1
+        private void UpdateList(bool clear) {
+            DataGenerator.UpdateList(clear);
+            FillListView();
+
+            //also update some gui elements for the sake of it
+            txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
+            txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
+            string LastProvider = Helper.ReadProperty(Config.LastProvider);
+            if (LastProvider == null)
+                LastProvider = "";
+            cbProviders.SelectedIndex = Math.Max(0, cbProviders.Items.IndexOf(LastProvider));
+            string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
+            if (LastSubProvider == null)
+                LastSubProvider = "";
+            cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
+        }
+        #endregion
     }
 }
 

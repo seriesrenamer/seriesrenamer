@@ -201,5 +201,15 @@ namespace Renamer.Classes.Configuration.Keywords
         /// Automatically resize columns to fit window size
         /// </summary>
         public const string ResizeColumns = "ResizeColumns";
+
+
+        public static class RegexMarker
+        {
+
+            public const string Title = "%T";
+            public const string Season = "%S";
+            public const string Episode = "%E";
+
+        }
     }
 }

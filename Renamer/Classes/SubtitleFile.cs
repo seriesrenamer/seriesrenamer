@@ -31,11 +31,11 @@ namespace Renamer.Classes
         /// <summary>
         /// collective season value
         /// </summary>
-        public string Season = "";
+        public int Season = -1;
 
         /// <summary>
         /// Collective episode value
         /// </summary>
-        public string Episode = "";
+        public int Episode = -1;
     }
 }
