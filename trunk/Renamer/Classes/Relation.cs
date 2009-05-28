@@ -22,17 +22,17 @@ namespace Renamer.Classes
     /// <summary>
     /// A season/episode&lt;-&gt;name relation
     /// </summary>
-    class Relation
+    public class Relation
     {
         /// <summary>
         /// Season
         /// </summary>
-        public string Season = "";
+        public int Season = -1;
 
         /// <summary>
         /// Episode
         /// </summary>
-        public string Episode = "";
+        public int Episode = -1;
 
         /// <summary>
         /// Name
@@ -45,7 +45,7 @@ namespace Renamer.Classes
         /// <param name="season">Season</param>
         /// <param name="episode">Episode</param>
         /// <param name="name">Name</param>
-        public Relation(string season, string episode, string name)
+        public Relation(int season, int episode, string name)
         {
             Season = season;
             Episode = episode;

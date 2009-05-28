@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Renamer.Classes.Configuration.Keywords;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace Renamer.Classes
 {
@@ -72,7 +73,7 @@ namespace Renamer.Classes
         }
 
         private void extractNameFromSeasonsFolder() {
-            if (!String.IsNullOrEmpty(name)) {
+            if (!String.IsNullOrEmpty(name) || folders.Length == 0) {
                 return;
             }
             string logname = name;
@@ -129,7 +130,7 @@ namespace Renamer.Classes
         }
 
         private void fallbackFolderNames() {
-            if (!String.IsNullOrEmpty(name)) {
+            if (!String.IsNullOrEmpty(name) || folders.Length == 0) {
                 return;
             }
             name = folders[folders.Length - 1];
@@ -169,10 +170,38 @@ namespace Renamer.Classes
 
             extractNameFromSeasonsFolder();
             extractNameFromString(filename);
-            extractNameFromString(folders[folders.Length - 1]);
+            if (folders.Length != 0) {
+                extractNameFromString(folders[folders.Length - 1]);
+            }
             fallbackFolderNames();
             postprocessing();
             return name;
+        }
+
+
+
+        /// <summary>
+        /// Extracts season from directory name
+        /// </summary>
+        /// <param name="path">path from which to extract the data (NO FILEPATH, JUST FOLDER)</param>
+        /// <returns>recognized season, -1 if not recognized</returns>
+        public int ExtractSeasonFromDirectory(string path) {
+            string[] patterns = Helper.ReadProperties(Config.Extract);
+            string[] folders = path.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = patterns.Length - 1; i >= 0; i--) {
+                string pattern = RegexConverter.toRegex(patterns[i]);
+                Match m = Regex.Match(folders[folders.Length - 1], pattern, RegexOptions.IgnoreCase);
+
+                if (m.Success) {
+                    try {
+                        return Int32.Parse(m.Groups["Season"].Value);
+                    }
+                    catch (Exception) {
+                        return -1;
+                    }
+                }
+            }
+            return -1;
         }
     }
 

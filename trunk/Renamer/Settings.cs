@@ -38,11 +38,13 @@ namespace Renamer
         /// Get the instance of Settings, create the settings, if required
         /// </summary>
         /// <returns>actual Settings</returns>
-        public static Settings getInstance() {
-            if (instance == null) {
-                instance = new Settings();
+        public static Settings Instance {
+            get {
+                if (instance == null) {
+                    instance = new Settings();
+                }
+                return instance;
             }
-            return instance;
         }
 
         /// <summary>

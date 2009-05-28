@@ -146,58 +146,13 @@ namespace Renamer
         public static List<InfoEntry> FindSimilarByPath(List<InfoEntry> source, string Basepath) {
             List<InfoEntry> matches = new List<InfoEntry>();
             foreach (InfoEntry ie in source) {
-                if (ie.Path.StartsWith(Basepath)) {
+                if (ie.Filepath.StartsWith(Basepath)) {
                     matches.Add(ie);
                 }
             }
             return matches;
         }
-        /// <summary>
-        /// Finds similar files by looking at the filename and comparing it to a showname
-        /// </summary>
-        /// <param name="Basepath">basepath of the show</param>
-        /// <param name="Showname">name of the show to filter</param>
-        /// <param name="source">source files</param>
-        /// <returns>a list of matches</returns>
-        public static List<InfoEntry> FindSimilarByName(List<InfoEntry> source, string Showname) {
-            List<InfoEntry> matches = new List<InfoEntry>();
-            Showname = Showname.ToLower();
-            //whatever, just check path and filename if it contains the showname
-            foreach (InfoEntry ie in source) {
-                string[] folders = ie.Path.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
-                string processed = ie.Filename.ToLower();
 
-                //try to extract the name from a shortcut, i.e. sga for Stargate Atlantis
-                string pattern = "[^\\w]";
-                Match m = Regex.Match(processed, pattern, RegexOptions.IgnoreCase);
-                if (m != null && m.Success) {
-                    string abbreviation = processed.Substring(0, m.Index);
-                    if (abbreviation.Length > 0 && Helper.ContainsLetters(abbreviation, Showname)) {
-                        matches.Add(ie);
-                        continue;
-                    }
-                }
-
-                //now check if whole showname is in the filename
-                string CleanupRegex = Helper.ReadProperty(Config.CleanupRegex);
-                processed = Regex.Replace(processed, CleanupRegex, " ");
-                if (processed.Contains(Showname)) {
-                    matches.Add(ie);
-                    continue;
-                }
-
-                //or in some top folder
-                foreach (string str in folders) {
-                    processed = str.ToLower();
-                    processed = Regex.Replace(processed, CleanupRegex, " ");
-                    if (processed.Contains(Showname)) {
-                        matches.Add(ie);
-                        break;
-                    }
-                }
-            }
-            return matches;
-        }
         public static bool ReadBool(string identifier, string filename) {
             string result = ReadProperty(identifier, filename);
             return StringToBool(result);
@@ -258,7 +213,7 @@ namespace Renamer
         /// </summary>
         /// <param name="variable">variable to turn into a string</param>
         /// <returns></returns>
-        private static string MakeConfigString(object variable) {
+        private static string MakeConfigString(object variable, bool toLower) {
             if (variable == null) {
                 return "";
             }
@@ -269,11 +224,11 @@ namespace Renamer
                 }
                 string value = "";
                 foreach (string s in ((string[])variable)) {
-                    value += s + Helper.ReadProperty(Config.Delimiter);
+                    value += (toLower? s.ToLower():s) + ConfigFile.Delimiter;
                 }
-                return value.Substring(0, value.Length - 1);
+                return value.Substring(0, value.Length - ConfigFile.Delimiter.Length);
             }
-            return (string)variable;
+            return (toLower ? ((string)variable).ToLower() : ((string)variable));
         }
 
         /// <summary>
@@ -281,15 +236,20 @@ namespace Renamer
         /// </summary>
         /// <param name="variable">variable to turn into a string array</param>
         /// <returns></returns>
-        private static string[] MakeConfigStringArray(object variable) {
+        private static string[] MakeConfigStringArray(object variable, bool toLower) {
             if (variable == null) {
                 return new string[0];
             }
             //note: if this is an array really but this function is called, return it in one string form
             if (variable is string[]) {
+                if (toLower) {
+                    for (int i = 0; i < ((string[])variable).Length; i++) {
+                        ((string[])variable)[i] = ((string[])variable)[i].ToLower();
+                    }
+                }
                 return (string[])variable;
             }
-            return new string[] { (string)variable };
+            return new string[] { (toLower ? ((string)variable).ToLower() : (string)variable) };
         }
 
         /// <summary>
@@ -299,13 +259,22 @@ namespace Renamer
         /// <param name="FilePath">Path of the config file</param>
         /// <returns>value of the property, or null</returns>
         public static string ReadProperty(string Identifier, string FilePath) {
-            Settings settings = Settings.getInstance();
+            return ReadProperty(Identifier, false, FilePath);
+        }
+        /// <summary>
+        /// reads a property from cache or from a file
+        /// </summary>
+        /// <param name="Identifier">Name of the property</param>
+        /// <param name="FilePath">Path of the config file</param>
+        /// <returns>value of the property, or null</returns>
+        public static string ReadProperty(string Identifier, bool toLower, string FilePath) {
+            Settings settings = Settings.Instance;
 
             ConfigFile config = settings[FilePath];
             if (config == null) {
                 return null;
             }
-            return (string)MakeConfigString(config[Identifier]).Clone();
+            return (string)MakeConfigString(config[Identifier], toLower).Clone();
         }
 
         /// <summary>
@@ -314,7 +283,16 @@ namespace Renamer
         /// <param name="Identifier">Name of the property</param>
         /// <returns>value of the property, or null</returns>
         public static string ReadProperty(string Identifier) {
-            return ReadProperty(Identifier, DefaultConfigFile());
+            return ReadProperty(Identifier, false, DefaultConfigFile());
+        }
+
+        /// <summary>
+        /// reads a property from main config cache/file
+        /// </summary>
+        /// <param name="Identifier">Name of the property</param>
+        /// <returns>value of the property, or null</returns>
+        public static string ReadProperty(string Identifier, bool toLower) {
+            return ReadProperty(Identifier, toLower, DefaultConfigFile());
         }
 
         /// <summary>
@@ -331,14 +309,23 @@ namespace Renamer
         /// <param name="Identifier">Name of the property</param>
         /// <param name="FilePath">Path of the config file</param>
         /// <returns>string[] Array containing values, or null</returns>
-        public static string[] ReadProperties(string Identifier, string FilePath) {
-            Settings settings = Settings.getInstance();
+        public static string[] ReadProperties(string Identifier, bool toLower, string FilePath) {
+            Settings settings = Settings.Instance;
 
             ConfigFile config = settings[FilePath];
             if (config == null) {
                 return null;
             }
-            return (string[])MakeConfigStringArray(config[Identifier]).Clone();
+            return (string[])MakeConfigStringArray(config[Identifier], toLower).Clone();
+        }
+        /// <summary>
+        /// reads a property that consists of more than one value from a file
+        /// </summary>
+        /// <param name="Identifier">Name of the property</param>
+        /// <param name="FilePath">Path of the config file</param>
+        /// <returns>string[] Array containing values, or null</returns>
+        public static string[] ReadProperties(string Identifier, string FilePath) {
+            return ReadProperties(Identifier, false, FilePath);
         }
 
         /// <summary>
@@ -347,7 +334,16 @@ namespace Renamer
         /// <param name="Identifier">Name of the property</param>
         /// <returns>string[] Array containing values, or null</returns>
         public static string[] ReadProperties(string Identifier) {
-            return ReadProperties(Identifier, DefaultConfigFile());
+            return ReadProperties(Identifier, false, DefaultConfigFile());
+        }
+
+        /// <summary>
+        /// reads a property that consists of more than one value from default config file
+        /// </summary>
+        /// <param name="Identifier">Name of the property</param>
+        /// <returns>string[] Array containing values, or null</returns>
+        public static string[] ReadProperties(string Identifier, bool toLower) {
+            return ReadProperties(Identifier, toLower, DefaultConfigFile());
         }
 
         /// <summary>
@@ -357,7 +353,7 @@ namespace Renamer
         /// <param name="Value">Value to write</param>
         /// <param name="FilePath">Path of the config file</param>
         public static void WriteProperty(string Identifier, string Value, string FilePath) {
-            Settings settings = Settings.getInstance();
+            Settings settings = Settings.Instance;
 
             ConfigFile config = settings[FilePath];
             if (config == null) {
@@ -382,7 +378,7 @@ namespace Renamer
         /// <param name="Value">string[] containing values to write</param>
         /// <param name="FilePath">Path of the config file</param>
         public static void WriteProperties(string Identifier, string[] Value, string FilePath) {
-            Settings settings = Settings.getInstance();
+            Settings settings = Settings.Instance;
 
             ConfigFile config = settings[FilePath];
             if (config == null) {
@@ -464,6 +460,8 @@ namespace Renamer
             }
             return files;
         }
-
+        public static string[] splitFilePath(string path) {
+            return path.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+        }
     }
 }

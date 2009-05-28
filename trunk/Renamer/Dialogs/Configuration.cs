@@ -202,7 +202,7 @@ namespace Renamer.Dialogs
         /// <param name="e"></param>
         private void btnDefaults_Click(object sender, EventArgs e) {
             if (MessageBox.Show("Reset to defaults?", "Reset", MessageBoxButtons.YesNo) == DialogResult.Yes) {
-                Settings settings = Settings.getInstance();
+                Settings settings = Settings.Instance;
                 //find config file, delete in memory, overwrite physical file and reload it. Then, refresh this dialog
                 settings[Helper.DefaultConfigFile()].LoadDefaults();
                 settings[Helper.DefaultConfigFile()].Flush();

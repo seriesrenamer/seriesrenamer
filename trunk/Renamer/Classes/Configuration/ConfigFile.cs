@@ -32,6 +32,7 @@ namespace Renamer.Classes.Configuration
         /// File extension of config files
         /// </summary>
         public static string filePattern = "*.cfg";
+        public static string Delimiter = "^";
 
         /// <summary>
         /// Path of the file, is empty for internal defaults
@@ -93,7 +94,7 @@ namespace Renamer.Classes.Configuration
             /// </summary>
             /// <param name="config">ConfigFile the parser should store the data of the config file.</param>
             public ConfigFileParser(ConfigFile config) {
-                this.settings = Settings.getInstance();
+                this.settings = Settings.Instance;
                 line = null;
                 lineCounter = 0;
                 this.config = config;
@@ -209,7 +210,7 @@ namespace Renamer.Classes.Configuration
             /// </summary>
             /// <param name="config">ConfigFile the writer should read the data from.</param>
             public ConfigFileWriter(ConfigFile config) {
-                this.settings = Settings.getInstance();
+                this.settings = Settings.Instance;
                 this.line = null;
                 this.lineCounter = 0;
                 this.config = config;
@@ -388,7 +389,7 @@ namespace Renamer.Classes.Configuration
         /// <returns>The variable</returns>
         public object this[string key] {
             get {
-                Settings settings = Settings.getInstance();
+                Settings settings = Settings.Instance;
                 if (this.containsVariable(key)) {
                     return this.variables[key];
                 }
@@ -429,7 +430,7 @@ namespace Renamer.Classes.Configuration
         /// Loads default settings to this config file
         /// </summary>
         public void LoadDefaults() {
-            Settings settings = Settings.getInstance();
+            Settings settings = Settings.Instance;
             this.variables = (Hashtable)settings.Defaults.variables.Clone();
         }
 
