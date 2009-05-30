@@ -1634,7 +1634,8 @@ namespace Renamer
                 LastSubProvider = "";
             cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
         }
-        #endregion
+        #endregion        
+        
     }
 }
 
