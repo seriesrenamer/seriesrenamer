@@ -89,8 +89,6 @@ namespace Renamer
             this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectByKeywordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectSimilarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.byNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.byPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uncheckAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -393,7 +391,7 @@ namespace Renamer
             this.regexTesterToolStripMenuItem});
             this.contextFiles.Name = "contextFiles";
             this.contextFiles.ShowImageMargin = false;
-            this.contextFiles.Size = new System.Drawing.Size(241, 330);
+            this.contextFiles.Size = new System.Drawing.Size(241, 352);
             this.contextFiles.Opening += new System.ComponentModel.CancelEventHandler(this.contextFiles_Opening);
             // 
             // viewToolStripMenuItem
@@ -549,7 +547,8 @@ namespace Renamer
             // 
             this.invertSelectionToolStripMenuItem.Name = "invertSelectionToolStripMenuItem";
             this.invertSelectionToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
-            this.invertSelectionToolStripMenuItem.Text = "Invert Selection";
+            this.invertSelectionToolStripMenuItem.Text = "Invert selection";
+            this.invertSelectionToolStripMenuItem.Click += new System.EventHandler(this.invertSelectionToolStripMenuItem_Click);
             // 
             // selectAllToolStripMenuItem
             // 
@@ -557,6 +556,7 @@ namespace Renamer
             this.selectAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
             this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
             this.selectAllToolStripMenuItem.Text = "Select all";
+            this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
             // 
             // selectByKeywordToolStripMenuItem
             // 
@@ -564,29 +564,14 @@ namespace Renamer
             this.selectByKeywordToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
             this.selectByKeywordToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
             this.selectByKeywordToolStripMenuItem.Text = "Select by keyword";
+            this.selectByKeywordToolStripMenuItem.Click += new System.EventHandler(this.selectByKeywordToolStripMenuItem_Click);
             // 
             // selectSimilarToolStripMenuItem
             // 
-            this.selectSimilarToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.byNameToolStripMenuItem,
-            this.byPathToolStripMenuItem});
             this.selectSimilarToolStripMenuItem.Name = "selectSimilarToolStripMenuItem";
             this.selectSimilarToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
-            this.selectSimilarToolStripMenuItem.Text = "Select Similar";
-            // 
-            // byNameToolStripMenuItem
-            // 
-            this.byNameToolStripMenuItem.Name = "byNameToolStripMenuItem";
-            this.byNameToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
-            this.byNameToolStripMenuItem.Text = "By Name";
-            this.byNameToolStripMenuItem.Click += new System.EventHandler(this.byNameToolStripMenuItem_Click);
-            // 
-            // byPathToolStripMenuItem
-            // 
-            this.byPathToolStripMenuItem.Name = "byPathToolStripMenuItem";
-            this.byPathToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
-            this.byPathToolStripMenuItem.Text = "By Path";
-            this.byPathToolStripMenuItem.Click += new System.EventHandler(this.byPathToolStripMenuItem_Click);
+            this.selectSimilarToolStripMenuItem.Text = "Select similar by name";
+            this.selectSimilarToolStripMenuItem.Click += new System.EventHandler(this.byNameToolStripMenuItem_Click);
             // 
             // checkToolStripMenuItem
             // 
@@ -601,20 +586,23 @@ namespace Renamer
             // checkAllToolStripMenuItem
             // 
             this.checkAllToolStripMenuItem.Name = "checkAllToolStripMenuItem";
-            this.checkAllToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.checkAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.checkAllToolStripMenuItem.Text = "Check all";
+            this.checkAllToolStripMenuItem.Click += new System.EventHandler(this.checkAllToolStripMenuItem_Click);
             // 
             // uncheckAllToolStripMenuItem
             // 
             this.uncheckAllToolStripMenuItem.Name = "uncheckAllToolStripMenuItem";
-            this.uncheckAllToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.uncheckAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.uncheckAllToolStripMenuItem.Text = "Uncheck all";
+            this.uncheckAllToolStripMenuItem.Click += new System.EventHandler(this.uncheckAllToolStripMenuItem_Click);
             // 
             // invertCheckToolStripMenuItem
             // 
             this.invertCheckToolStripMenuItem.Name = "invertCheckToolStripMenuItem";
-            this.invertCheckToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.invertCheckToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.invertCheckToolStripMenuItem.Text = "Invert Check";
+            this.invertCheckToolStripMenuItem.Click += new System.EventHandler(this.invertCheckToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
@@ -927,8 +915,6 @@ namespace Renamer
         private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem selectByKeywordToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem selectSimilarToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem byNameToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem byPathToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem uncheckAllToolStripMenuItem;
