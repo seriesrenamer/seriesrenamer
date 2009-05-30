@@ -692,7 +692,12 @@ namespace Renamer
         //Enter = Change current directory
         private void txtPath_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
-                InfoEntryManager.Instance.SetPath(txtPath.Text);
+                //need to update the displayed path because it might be changed (tailing backlashes are removed, and added for drives ("C:\" instead of "C:"))
+                string path = txtPath.Text;
+                InfoEntryManager.Instance.SetPath(ref path);
+                txtPath.Text = path;
+                txtPath.SelectionStart = txtPath.Text.Length;
+                UpdateList(true);
             }
             else if (e.KeyCode == Keys.Escape) {
                 txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
