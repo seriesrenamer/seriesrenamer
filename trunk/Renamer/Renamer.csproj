@@ -132,6 +132,12 @@
     <Compile Include="Dialogs\RegexTester.Designer.cs">
       <DependentUpon>RegexTester.cs</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\ShownameSearch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\ShownameSearch.Designer.cs">
+      <DependentUpon>ShownameSearch.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -205,6 +211,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\RegexTester.resx">
       <DependentUpon>RegexTester.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ShownameSearch.resx">
+      <DependentUpon>ShownameSearch.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

@@ -26,7 +26,7 @@ namespace Renamer.Classes.Provider
     /// A season/episode&lt;-&gt;name relations provider
     /// This class keeps track of all providers available
     /// </summary>
-    class RelationProvider : Provider
+    public class RelationProvider : Provider
     {
         private const string location = "/Databases/Titles";
 

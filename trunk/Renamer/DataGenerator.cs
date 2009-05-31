@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Text;
 using Renamer.Classes;
 using Renamer.Logging;
@@ -15,7 +16,7 @@ using Renamer.Classes.Provider;
 
 namespace Renamer
 {
-    class DataGenerator
+    public class DataGenerator
     {
         public static void GetAllTitles() {
             //make a list of shownames
@@ -25,11 +26,123 @@ namespace Renamer
                     shownames.Add(ie.Showname);
                 }
             }
+            List<ParsedSearch> SearchResults = new List<ParsedSearch>();
             // get titles for the entire list generated before
             foreach (string showname in shownames) {
-                GetTitles(showname);
+                SearchResults.Add(Search(RelationProvider.GetCurrentProvider(), showname, showname));
+                //GetTitles(showname);
             }
+            ShownameSearch ss = new ShownameSearch(SearchResults);
+            ss.ShowDialog();
         }
+
+        public struct ParsedSearch{
+            public string SearchString;
+            public string Showname;
+            public RelationProvider provider;
+            public Hashtable Results;
+        }
+        public static ParsedSearch Search(RelationProvider provider, string SearchString, string Showname){
+            ParsedSearch ps = new ParsedSearch();
+            //once
+            for (int a = 0; a < 1; a++) {
+                // request
+                if (provider == null) {
+                    Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
+                    return ps;
+                }
+                /*
+                //get rid of old relations
+                RelationManager.Instance.RemoveRelationCollection(Showname);
+                foreach (InfoEntry ie in InfoEntryManager.Instance) {
+                    if (ie.Showname == Showname && ie.ProcessingRequested) {
+                        ie.Name = "";
+                        ie.NewFileName = "";
+                        ie.Language = provider.Language;
+                    }
+                }*/
+                string url = provider.SearchUrl;
+                Logger.Instance.LogMessage("Search URL: " + url, LogLevel.DEBUG);
+                if (url == null || url == "") {
+                    Logger.Instance.LogMessage("Can't search because no search URL is specified for this provider", LogLevel.ERROR);
+                    break;
+                }
+                url = url.Replace("%T", SearchString);
+                url = System.Web.HttpUtility.UrlPathEncode(url);
+                Logger.Instance.LogMessage("Encoded Search URL: " + url, LogLevel.DEBUG);
+                HttpWebRequest requestHtml = null;
+                try {
+                    requestHtml = (HttpWebRequest)(HttpWebRequest.Create(url));
+                }
+                catch (Exception ex) {
+                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
+                    if (requestHtml != null)
+                        requestHtml.Abort();
+                    break;
+                }
+                //SetProxy(requestHtml, url);
+                Logger.Instance.LogMessage("Searching at " + url.Replace(" ", "%20"), LogLevel.INFO);
+                requestHtml.Timeout = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
+                // get response
+                HttpWebResponse responseHtml = null;
+                try {
+                    responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
+                }
+                catch (Exception ex) {
+                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
+                    if (responseHtml != null)
+                        responseHtml.Close();
+                    if (requestHtml != null)
+                        requestHtml.Abort();
+                    break;
+                }
+                Logger.Instance.LogMessage("Search Results URL: " + responseHtml.ResponseUri.AbsoluteUri, LogLevel.DEBUG);
+                //if search engine directs us straight to the result page, skip parsing search results
+                string seriesURL = provider.SeriesUrl;
+                if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL)) {
+                    Logger.Instance.LogMessage("Search Results URL contains Series URL: " + seriesURL, LogLevel.DEBUG);
+                    Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesUrl.Replace(" ", "%20"), LogLevel.INFO);
+                    ps.provider = provider;
+                    ps.Results = new Hashtable();
+                    ps.Results.Add(Showname,responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesUrl);
+                    ps.SearchString = SearchString;
+                    ps.Showname = Showname;
+                    return ps;
+                }
+                else {
+                    Logger.Instance.LogMessage("Search Results URL doesn't contain Series URL: " + seriesURL + ", this is a proper search results page", LogLevel.DEBUG);
+                    // and download
+                    StreamReader r = null;
+                    try {
+                        r = new StreamReader(responseHtml.GetResponseStream());
+                    }
+                    catch (Exception ex) {
+                        if (r != null)
+                            r.Close();
+                        if (responseHtml != null) {
+                            responseHtml.Close();
+                        }
+                        if (requestHtml != null) {
+                            requestHtml.Abort();
+                        }
+                        Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
+                        break;
+                    }
+                    string source = r.ReadToEnd();
+                    r.Close();
+
+                    //Source cropping
+                    source = source.Substring(Math.Max(source.IndexOf(provider.SearchStart), 0));
+                    source = source.Substring(0, Math.Max(source.LastIndexOf(provider.SearchEnd), source.Length - 1));
+                    ps = ParseSearch(ref source, responseHtml.ResponseUri.AbsoluteUri, Showname, SearchString, provider);
+                }
+
+                responseHtml.Close();
+            }
+            return ps;
+        }
+
+        /*
         /// <summary>
         /// gets titles, by using database search feature and parsing results, after that, show them in gui
         /// </summary>
@@ -120,13 +233,13 @@ namespace Renamer
                     //Source cropping
                     source = source.Substring(Math.Max(source.IndexOf(provider.SearchStart), 0));
                     source = source.Substring(0, Math.Max(source.LastIndexOf(provider.SearchEnd), source.Length - 1));
-                    ParseSearch(ref source, responseHtml.ResponseUri.AbsoluteUri, Showname);
+                    ParseSearch(ref source, responseHtml.ResponseUri.AbsoluteUri, Showname, provider);
                 }
 
                 responseHtml.Close();
             }
         }
-
+        */
         public static void SetProxy(HttpWebRequest client, string url) {
             // Comment out foreach statement to use normal System.Net proxy detection 
             foreach (
@@ -137,20 +250,21 @@ namespace Renamer
             }
         }
 
+        
         /// <summary>
         /// Parses search results from a series search
         /// </summary>
         /// <param name="source">Source code of the search results page</param>
         /// <param name="Showname">Showname</param>
         /// <param name="SourceURL">URL of the page source</param>
-        public static void ParseSearch(ref string source, string SourceURL, string Showname) {
+        public static ParsedSearch ParseSearch(ref string source, string SourceURL, string Showname, string SearchString, RelationProvider provider) {
             if (String.IsNullOrEmpty(source)){
-                return;
+                return new ParsedSearch();
             }
-            RelationProvider provider = RelationProvider.GetCurrentProvider();
+            
             if (provider == null) {
                 Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
-                return;
+                return new ParsedSearch();
             }
 
             Logger.Instance.LogMessage("Trying to match source at " + SourceURL + " with " + provider.SearchRegExp, LogLevel.DEBUG);
@@ -163,6 +277,7 @@ namespace Renamer
 
             if (mc.Count == 0) {
                 Logger.Instance.LogMessage("No results found", LogLevel.INFO);
+                return new ParsedSearch();
             }
             else if (mc.Count == 1) {
                 string url = provider.RelationsPage;
@@ -170,14 +285,37 @@ namespace Renamer
                 url = url.Replace("%L", mc[0].Groups["link"].Value);
                 url = System.Web.HttpUtility.HtmlDecode(url);
                 Logger.Instance.LogMessage("Search engine found one result: " + url.Replace(" ", "%20"), LogLevel.INFO);
-                GetRelations(url, Showname);
+                ParsedSearch ps = new ParsedSearch();
+                ps.provider = provider;
+                ps.Results = new Hashtable();
+                ps.Results.Add(Showname, url);
+                ps.SearchString = SearchString;
+                ps.Showname = Showname;
+                return ps;
+                //GetRelations(url, Showname);
             }
             else {
                 Logger.Instance.LogMessage("Search engine found multiple results at " + SourceURL.Replace(" ", "%20"), LogLevel.INFO);
+                ParsedSearch ps = new ParsedSearch();
+                ps.provider = provider;
+                ps.Results = new Hashtable();
+                foreach (Match m in mc)
+                {
+                    string url = provider.RelationsPage;
+                    url = url.Replace("%L", m.Groups["link"].Value);
+                    url = System.Web.HttpUtility.HtmlDecode(url);
+                    string name=System.Web.HttpUtility.HtmlDecode(m.Groups["name"].Value + " " + m.Groups["year"].Value);
+                    //temporary fix, this should be externalized in the provider configs
+                    if(name.ToLower().Contains("poster")) continue;
+                    ps.Results.Add(name, url);
+                }
+                ps.SearchString = SearchString;
+                ps.Showname = Showname;
+                return ps;
+                /*
                 SelectResult sr = new SelectResult(mc, provider, false);
                 if (sr.ShowDialog() == DialogResult.Cancel || sr.url == "")
                     return;
-
                 //Apply language of selected result to matching episodes
                 if (provider.Language == Helper.Languages.None) {
                     foreach (InfoEntry ie in InfoEntryManager.Instance) {
@@ -186,11 +324,12 @@ namespace Renamer
                         }
                     }
                 }
+                
                 string url = provider.RelationsPage;
                 Logger.Instance.LogMessage("User selected " + provider.RelationsPage + "with %L=" + sr.url, LogLevel.DEBUG);
                 url = url.Replace("%L", sr.url);
                 url = System.Web.HttpUtility.HtmlDecode(url);
-                GetRelations(url, Showname);
+                GetRelations(url, Showname);*/
             }
         }
 
