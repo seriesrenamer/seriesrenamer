@@ -34,16 +34,31 @@ namespace Renamer
             }
             ShownameSearch ss = new ShownameSearch(SearchResults);
             ss.ShowDialog();
+            if (ss.DialogResult == DialogResult.OK)
+            {
+                SearchResults = ss.Results;
+                foreach (ParsedSearch ps in SearchResults)
+                {
+                    if (ps.Results != null)
+                    {
+                        GetRelations((string)ps.Results[ps.SelectedResult], ps.Showname,ps.provider);
+                    }
+                }
+            }
         }
 
-        public struct ParsedSearch{
+        public class ParsedSearch{
             public string SearchString;
             public string Showname;
             public RelationProvider provider;
             public Hashtable Results;
+            public string SelectedResult = "";
         }
         public static ParsedSearch Search(RelationProvider provider, string SearchString, string Showname){
             ParsedSearch ps = new ParsedSearch();
+            ps.provider = provider;
+            ps.SearchString = SearchString;
+            ps.Showname = Showname;
             //once
             for (int a = 0; a < 1; a++) {
                 // request
@@ -102,11 +117,8 @@ namespace Renamer
                 if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL)) {
                     Logger.Instance.LogMessage("Search Results URL contains Series URL: " + seriesURL, LogLevel.DEBUG);
                     Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesUrl.Replace(" ", "%20"), LogLevel.INFO);
-                    ps.provider = provider;
                     ps.Results = new Hashtable();
                     ps.Results.Add(Showname,responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesUrl);
-                    ps.SearchString = SearchString;
-                    ps.Showname = Showname;
                     return ps;
                 }
                 else {
@@ -258,13 +270,17 @@ namespace Renamer
         /// <param name="Showname">Showname</param>
         /// <param name="SourceURL">URL of the page source</param>
         public static ParsedSearch ParseSearch(ref string source, string SourceURL, string Showname, string SearchString, RelationProvider provider) {
+            ParsedSearch ps = new ParsedSearch();
+            ps.Showname = Showname;
+            ps.SearchString = SearchString;
+            ps.provider = provider;
             if (String.IsNullOrEmpty(source)){
-                return new ParsedSearch();
+                return ps;
             }
             
             if (provider == null) {
                 Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
-                return new ParsedSearch();
+                return ps;
             }
 
             Logger.Instance.LogMessage("Trying to match source at " + SourceURL + " with " + provider.SearchRegExp, LogLevel.DEBUG);
@@ -277,7 +293,7 @@ namespace Renamer
 
             if (mc.Count == 0) {
                 Logger.Instance.LogMessage("No results found", LogLevel.INFO);
-                return new ParsedSearch();
+                return ps;
             }
             else if (mc.Count == 1) {
                 string url = provider.RelationsPage;
@@ -285,19 +301,13 @@ namespace Renamer
                 url = url.Replace("%L", mc[0].Groups["link"].Value);
                 url = System.Web.HttpUtility.HtmlDecode(url);
                 Logger.Instance.LogMessage("Search engine found one result: " + url.Replace(" ", "%20"), LogLevel.INFO);
-                ParsedSearch ps = new ParsedSearch();
-                ps.provider = provider;
                 ps.Results = new Hashtable();
                 ps.Results.Add(Showname, url);
-                ps.SearchString = SearchString;
-                ps.Showname = Showname;
                 return ps;
                 //GetRelations(url, Showname);
             }
             else {
                 Logger.Instance.LogMessage("Search engine found multiple results at " + SourceURL.Replace(" ", "%20"), LogLevel.INFO);
-                ParsedSearch ps = new ParsedSearch();
-                ps.provider = provider;
                 ps.Results = new Hashtable();
                 foreach (Match m in mc)
                 {
@@ -309,8 +319,6 @@ namespace Renamer
                     if(name.ToLower().Contains("poster")) continue;
                     ps.Results.Add(name, url);
                 }
-                ps.SearchString = SearchString;
-                ps.Showname = Showname;
                 return ps;
                 /*
                 SelectResult sr = new SelectResult(mc, provider, false);
@@ -339,8 +347,7 @@ namespace Renamer
         /// </summary>
         /// <param name="url">URL of the page to parse</param>
         /// <param name="Showname">Showname</param>
-        private static void GetRelations(string url, string Showname) {
-            RelationProvider provider = RelationProvider.GetCurrentProvider();
+        private static void GetRelations(string url, string Showname, RelationProvider provider) {
             if (provider == null) {
                 Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
                 return;
