@@ -21,34 +21,36 @@ namespace Renamer.Dialogs
             {
                 DataGenerator.ParsedSearch ps = Results[i];
                 tableLayoutPanel1.RowCount++;
+                tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.AutoSize));
                 Label lbl=new Label();
                 lbl.Text=ps.Showname;
                 lbl.Name="Label "+i;
-                lbl.Anchor = AnchorStyles.Left | AnchorStyles.Right|AnchorStyles.Top;
+                lbl.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
                 tableLayoutPanel1.Controls.Add(lbl, 0 , i+1);
                 TextBox tb = new TextBox();
                 tb.Text = ps.Showname;
                 tb.Name = "TextBox " + i;
-                tb.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+                tb.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+                tb.KeyDown += new KeyEventHandler(SearchBoxKeyDown);
                 tableLayoutPanel1.Controls.Add(tb, 1, i + 1);                
                 ComboBox cbProviders = new ComboBox();
                 cbProviders.DropDownStyle = ComboBoxStyle.DropDownList;
                 cbProviders.Name = "ComboBox Providers " + i;
                 cbProviders.Items.AddRange(RelationProvider.ProviderNames);
-                cbProviders.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+                cbProviders.Anchor = AnchorStyles.Left | AnchorStyles.Right;
                 RelationProvider provider = RelationProvider.GetCurrentProvider();
                 cbProviders.SelectedItem = provider.Name;
                 tableLayoutPanel1.Controls.Add(cbProviders, 2, i + 1);
                 Button btn = new Button();
                 btn.Text = "Search";
                 btn.Name = "Button " + i;
-                btn.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+                btn.Anchor = AnchorStyles.Left | AnchorStyles.Right;
                 btn.Click += new EventHandler(SearchButtonClicked);
                 tableLayoutPanel1.Controls.Add(btn, 3, i + 1);
                 ComboBox cb = new ComboBox();
                 cb.DropDownStyle = ComboBoxStyle.DropDownList;
                 cb.Name = "ComboBox " + i;
-                if (ps.Results != null)
+                if (ps.Results != null && ps.Results.Count!=0)
                 {
                     foreach (string key in ps.Results.Keys)
                     {
@@ -60,11 +62,25 @@ namespace Renamer.Dialogs
                     cb.Items.Add("No results found");
                 }
                 cb.SelectedIndex = 0;
-                cb.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+                cb.Anchor = AnchorStyles.Left | AnchorStyles.Right;
                 tableLayoutPanel1.Controls.Add(cb, 4, i + 1);
             }
+            
+            //add one more because of stretching
+            tableLayoutPanel1.RowCount++;
         }
-        public void SearchButtonClicked(object sender, EventArgs ea){
+
+        public void SearchBoxKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                int row = Int32.Parse(((Control)sender).Name.Substring(((Control)sender).Name.Length - 2));
+                Button SearchButton = (Button)tableLayoutPanel1.Controls["Button " + row];
+                SearchButton.PerformClick();
+            }
+        }
+
+        public void SearchButtonClicked(object sender, EventArgs e){
             //note: this starts at 0, even though the gui placement starts at 1
             int row = Int32.Parse(((Control)sender).Name.Substring(((Control)sender).Name.Length - 2));
             TextBox SearchBox=(TextBox)tableLayoutPanel1.Controls["TextBox "+row];
@@ -73,7 +89,7 @@ namespace Renamer.Dialogs
             DataGenerator.ParsedSearch Search=DataGenerator.Search(RelationProvider.GetProviderByName(ProviderBox.SelectedItem.ToString()), SearchBox.Text, ShownameLabel.Text);
             ComboBox cbResults = (ComboBox)tableLayoutPanel1.Controls["ComboBox " + row];
             cbResults.Items.Clear();
-            if (Search.Results != null)
+            if (Search.Results != null && Search.Results.Count!=0)
             {
                 foreach (string s in Search.Results.Keys)
                 {

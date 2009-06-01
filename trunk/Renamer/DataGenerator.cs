@@ -41,7 +41,18 @@ namespace Renamer
                 {
                     if (ps.Results != null)
                     {
-                        GetRelations((string)ps.Results[ps.SelectedResult], ps.Showname,ps.provider);
+                        //get rid of old relations
+                        RelationManager.Instance.RemoveRelationCollection(ps.Showname);
+                        foreach (InfoEntry ie in InfoEntryManager.Instance)
+                        {
+                            if (ie.Showname == ps.Showname && ie.ProcessingRequested)
+                            {
+                                ie.Name = "";
+                                ie.NewFileName = "";
+                                ie.Language = ps.provider.Language;
+                            }
+                        }
+                        GetRelations((string)ps.Results[ps.SelectedResult], ps.Showname,ps.provider);                        
                     }
                 }
             }
@@ -116,9 +127,12 @@ namespace Renamer
                 string seriesURL = provider.SeriesUrl;
                 if (responseHtml.ResponseUri.AbsoluteUri.Contains(seriesURL)) {
                     Logger.Instance.LogMessage("Search Results URL contains Series URL: " + seriesURL, LogLevel.DEBUG);
-                    Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesUrl.Replace(" ", "%20"), LogLevel.INFO);
                     ps.Results = new Hashtable();
-                    ps.Results.Add(Showname,responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesUrl);
+                    string CleanedName=CleanSearchResultName(Showname,provider);
+                    if(!Regex.Match(CleanedName,provider.SearchResultsBlacklist).Success){
+                        ps.Results.Add(CleanedName, responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesUrl);
+                        Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesUrl.Replace(" ", "%20"), LogLevel.INFO);
+                    }
                     return ps;
                 }
                 else {
@@ -154,6 +168,13 @@ namespace Renamer
             return ps;
         }
 
+        public static string CleanSearchResultName(string SearchResult, RelationProvider provider) {
+            foreach (string pattern in provider.SearchRemove)
+            {
+                SearchResult = Regex.Replace(SearchResult, pattern, "");
+            }
+            return SearchResult;
+        }
         /*
         /// <summary>
         /// gets titles, by using database search feature and parsing results, after that, show them in gui
@@ -300,9 +321,12 @@ namespace Renamer
                 Logger.Instance.LogMessage("One result found on search page, going to " + url.Replace(" ", "%20") + " with %L=" + mc[0].Groups["link"].Value, LogLevel.DEBUG);
                 url = url.Replace("%L", mc[0].Groups["link"].Value);
                 url = System.Web.HttpUtility.HtmlDecode(url);
-                Logger.Instance.LogMessage("Search engine found one result: " + url.Replace(" ", "%20"), LogLevel.INFO);
                 ps.Results = new Hashtable();
-                ps.Results.Add(Showname, url);
+                string CleanedName=CleanSearchResultName(Showname,provider);
+                if(!Regex.Match(CleanedName, provider.SearchResultsBlacklist).Success){
+                    ps.Results.Add(CleanedName, url);
+                    Logger.Instance.LogMessage("Search engine found one result: " + url.Replace(" ", "%20"), LogLevel.INFO);
+                }
                 return ps;
                 //GetRelations(url, Showname);
             }
@@ -317,7 +341,15 @@ namespace Renamer
                     string name=System.Web.HttpUtility.HtmlDecode(m.Groups["name"].Value + " " + m.Groups["year"].Value);
                     //temporary fix, this should be externalized in the provider configs
                     if(name.ToLower().Contains("poster")) continue;
-                    ps.Results.Add(name, url);
+                    string CleanedName = CleanSearchResultName(name, provider);
+                    try
+                    {
+                        ps.Results.Add(CleanedName, url);
+                    }
+                    catch (Exception)
+                    {
+                        Logger.Instance.LogMessage("Can't add " + CleanedName + " to search results because an entry of same name already exists", LogLevel.ERROR);
+                    }
                 }
                 return ps;
                 /*

@@ -29,6 +29,11 @@ namespace Renamer.Classes.Configuration.Keywords
         public const string Name = "Name";
 
         /// <summary>
+        /// Regex used to filter out unwanted search results
+        /// </summary>
+        public const string SearchResultsBlacklist = "SearchResultsBlacklist";
+
+        /// <summary>
         /// Search URL, %T is a placeholder for the search title
         /// </summary>
         public const string SearchURL = "SearchURL";
