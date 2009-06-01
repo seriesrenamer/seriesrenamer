@@ -44,7 +44,7 @@ namespace Renamer.Classes.Provider
         private string searchEnd = "";
         private string notFoundUrl = "";
         private Helper.Languages language; //Helper.Languages.None
-
+        private string searchResultsBlacklist = "";
         public Provider() {
         }
         public Provider(string filename) {
@@ -61,12 +61,16 @@ namespace Renamer.Classes.Provider
             this.Encoding = Helper.ReadProperty(ProviderConfig.Encoding, filename);
             this.Language = Helper.ReadEnum<Helper.Languages>(ProviderConfig.Language, filename);
             this.SearchRightToLeft = Helper.ReadBool(ProviderConfig.SearchRightToLeft, filename);
+            this.SearchResultsBlacklist = Helper.ReadProperty(ProviderConfig.SearchResultsBlacklist, filename);
         }
 
 
         protected static string[] getFiles(string location){
             return Directory.GetFiles(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + location, ConfigFile.filePattern);
         }
+
+
+        
 
         /// <summary>
         /// Name of the provider
@@ -76,6 +80,12 @@ namespace Renamer.Classes.Provider
             set { name = value; }
         }
 
+        //Blacklist used to filter out unwanted search results
+        public string SearchResultsBlacklist
+        {
+            get { return searchResultsBlacklist; }
+            set { searchResultsBlacklist = value; }
+        }
 
         /// <summary>
         /// Search URL, %T is a placeholder for the search title
