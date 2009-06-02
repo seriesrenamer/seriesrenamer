@@ -1617,7 +1617,7 @@ namespace Renamer
 
 
 
-        #region Functioncs remaining in Form1
+        #region Functions remaining in Form1
         private void UpdateList(bool clear) {
             DataGenerator.UpdateList(clear);
             FillListView();

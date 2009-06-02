@@ -107,7 +107,10 @@ namespace Renamer.Classes
                 return this.Relations[id];
             }
         }
-
+        public string ToString()
+        {
+            return Showname;
+        }
         #region IEnumerable Member
 
         public IEnumerator GetEnumerator() {

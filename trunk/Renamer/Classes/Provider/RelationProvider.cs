@@ -115,6 +115,10 @@ namespace Renamer.Classes.Provider
             }
         }
 
+        public string ToString()
+        {
+            return Name;
+        }
         private string relationsPage = "";
         private string relationsRegExp = "";
         private bool relationsRightToLeft = false;
