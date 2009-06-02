@@ -102,8 +102,12 @@ namespace Renamer.Classes
             set {
                 if (filename != value) {
                     filename = value;
-                    ExtractName();
+                    if (Filepath != "" && Filename != "" && Extension != "")
+                    {
+                        ExtractName();
+                    }
                 }
+                
             }
         }
         /// <summary>
@@ -115,7 +119,10 @@ namespace Renamer.Classes
                 if (extension != value) {
                     extension = value;
                     CheckExtension();
-                    ExtractName();
+                    if (Filepath != "" && Filename != "" && Extension != "")
+                    {
+                        ExtractName();
+                    }
                 }
             }
         }
@@ -127,7 +134,10 @@ namespace Renamer.Classes
             set {
                 if (filepath != value) {
                     filepath = value;
-                    ExtractName(); 
+                    if (Filepath != "" && Filename != "" && Extension != "")
+                    {
+                        ExtractName();
+                    }
                 }
             }
         }
@@ -140,6 +150,7 @@ namespace Renamer.Classes
                 if (showname != value) {
                     if (value == null) value = "";
                     showname = value;
+                    CreateNewName();
                     SetPath();
                 }
             }
@@ -178,6 +189,7 @@ namespace Renamer.Classes
             set {
                 if (name != value) {
                     name = value;
+                    CreateNewName();
                     if (Movie == true) {
                         SetPath();
                     }
@@ -204,9 +216,7 @@ namespace Renamer.Classes
                 if (isMovie != value) {
                     isMovie = value;
                     CreateNewName();
-                    if (Movie == true) {
-                        SetPath();
-                    }
+                    SetPath();
                 }
             }
         }
