@@ -717,6 +717,11 @@ namespace Renamer.Classes
                 }
             }
         }
+
+        public string ToString()
+        {
+            return Filename;
+        }
         #endregion
     }
 }

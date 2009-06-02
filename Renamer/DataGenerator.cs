@@ -39,7 +39,7 @@ namespace Renamer
                 SearchResults = ss.Results;
                 foreach (ParsedSearch ps in SearchResults)
                 {
-                    if (ps.Results != null)
+                    if (ps.Results != null && ps.Results.Count>0)
                     {
                         //get rid of old relations
                         RelationManager.Instance.RemoveRelationCollection(ps.Showname);
@@ -64,6 +64,10 @@ namespace Renamer
             public RelationProvider provider;
             public Hashtable Results;
             public string SelectedResult = "";
+            public string ToString()
+            {
+                return SelectedResult;
+            }
         }
         public static ParsedSearch Search(RelationProvider provider, string SearchString, string Showname){
             ParsedSearch ps = new ParsedSearch();
@@ -538,7 +542,7 @@ namespace Renamer
                 infoManager.RemoveMissingFileEntries();
             }
 
-            // read path from config && remove traling slashes
+            // read path from config && remove tailing slashes
             string path = Helper.ReadProperty(Config.LastDirectory);
             path = path.TrimEnd(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
 
