@@ -69,7 +69,7 @@ namespace Renamer
             InfoEntryManager manager = InfoEntryManager.Instance;
             List<InfoEntry> infoEntryList = manager.GetVideos(rc.Showname);
             foreach (InfoEntry ie in infoEntryList) {
-                ie.SetupRelation(rc);
+                ie.findEpisodeName(rc);
             }
         }
         public void Clear() {

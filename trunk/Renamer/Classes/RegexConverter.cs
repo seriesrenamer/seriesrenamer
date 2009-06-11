@@ -23,5 +23,12 @@ namespace Renamer.Classes
         public static string toEasyRegex(string regex) {
             return null;
         }
+
+        public static string replaceSeriesnameAndSeason(string regex, string showname, string season) {
+            return regex.Replace("%S", season).Replace("%T", showname);
+        }
+        public static string replaceSeason(string regex, string season) {
+            return regex.Replace("%S", season);
+        }
     }
 }

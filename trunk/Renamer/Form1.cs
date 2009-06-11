@@ -843,7 +843,7 @@ namespace Renamer
                 else if (CreateDirectoryStructure == InfoEntry.DirectoryStructure.NoDirectoryStructure) {
                     dontCreateDirectoryStructureToolStripMenuItem.Checked = true;
                 }
-                if (Case == InfoEntry.Case.Large) {
+                if (Case == InfoEntry.Case.UpperFirst) {
                     largeToolStripMenuItem.Checked = true;
                 }
                 else if (Case == InfoEntry.Case.small) {
@@ -1542,7 +1542,7 @@ namespace Renamer
 
         private void largeToolStripMenuItem_Click(object sender, EventArgs e) {
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntryManager.Instance[(int)lvi.Tag].Casing = InfoEntry.Case.Large;
+                InfoEntryManager.Instance[(int)lvi.Tag].Casing = InfoEntry.Case.UpperFirst;
                 SyncItem((int)lvi.Tag, false);
             }
             ((ToolStripMenuItem)sender).Checked = true;

@@ -159,6 +159,10 @@ namespace Renamer.Classes
             name = name.Trim();
         }
 
+
+        internal string ExtractSeriesName(Filepath filepath) {
+            return this.ExtractSeriesName(filepath.Filename, filepath.Path);
+        }
         public string ExtractSeriesName(string file, string path) {
             reset();
             // Read plain filename

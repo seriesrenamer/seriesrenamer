@@ -41,7 +41,7 @@ namespace Renamer.Classes
         /// <summary>
         /// what to do with casing of filenames
         /// </summary>
-        public enum Case : int { Unset, Ignore, small, Large, CAPSLOCK };
+        public enum Case : int { Unset, Ignore, small, UpperFirst, CAPSLOCK };
 
         /// <summary>
         /// if file should be moved
@@ -51,26 +51,24 @@ namespace Renamer.Classes
 
 
         #region members
-        private string filename = "";
-        private string extension = "";
-        private string filepath = "";
-        private string newFileName = "";
-        private string destination = "";
-        private string showname = "";
-        private string name = "";
+        private Filepath source;
+        private Filepath destination;
 
-        private int season = -1;
-        private int episode = -1;
-        
+        private string nameOfSeries;
+        private string nameOfEpisode;
+
+        private int season;
+        private int episode;
+
         private bool isVideofile;
         private bool isSubtitle;
-        private bool processingRequested = true;
-        private bool isMovie = false;
-        
-        private UmlautAction umlautUsage = UmlautAction.Unset;
-        private Case casing = Case.Unset;
-        private DirectoryStructure createDirectoryStructure = DirectoryStructure.Unset;
-        private Helper.Languages language = Helper.Languages.None;
+        private bool processingRequested;
+        private bool isMovie;
+
+        private UmlautAction umlautUsage;
+        private Case casing;
+        private DirectoryStructure createDirectoryStructure;
+        private Helper.Languages language;
         #endregion
 
         #region Static Members
@@ -84,45 +82,38 @@ namespace Renamer.Classes
         /// destination directory
         /// </summary>
         public string Destination {
-            get { return destination; }
-            set { destination = value; }
+            get { return destination.Path; }
+            set { destination.Path = value; }
         }
         /// <summary>
         /// new filename with extension
         /// </summary>
         public string NewFileName {
-            get { return this.newFileName; }
-            set { this.newFileName = value; }
+            get { return this.destination.Filename; }
+            set { this.destination.Filename = value; }
         }
         /// <summary>
         /// Old filename with extension
         /// </summary>
         public string Filename {
-            get { return filename; }
+            get { return source.Name; }
             set {
-                if (filename != value) {
-                    filename = value;
-                    if (Filepath != "" && Filename != "" && Extension != "")
-                    {
-                        ExtractName();
-                    }
+                if (source.Name != value) {
+                    source.Filename = value;
+                    ExtractName();
                 }
-                
             }
         }
         /// <summary>
         /// Extension of the file without dot, i.e. "avi" or "srt"
         /// </summary>
         public string Extension {
-            get { return extension; }
+            get { return source.Extension; }
             set {
-                if (extension != value) {
-                    extension = value;
+                if (source.Extension != value) {
+                    source.Extension = value;
                     CheckExtension();
-                    if (Filepath != "" && Filename != "" && Extension != "")
-                    {
-                        ExtractName();
-                    }
+                    ExtractName();
                 }
             }
         }
@@ -130,26 +121,31 @@ namespace Renamer.Classes
         /// Path of the file
         /// </summary>
         public string Filepath {
-            get { return filepath; }
+            get { return source.Name; }
             set {
-                if (filepath != value) {
-                    filepath = value;
-                    if (Filepath != "" && Filename != "" && Extension != "")
-                    {
-                        ExtractName();
-                    }
+                if (source.Name != value) {
+                    source.Path = value;
                 }
+            }
+        }
+        /// <summary>
+        /// Path of the file
+        /// </summary>
+        public Filepath Filepath1 {
+            get { return source; }
+            set {
+                source = value;
             }
         }
         /// <summary>
         /// Name of the show this file belongs to.
         /// </summary>
         public string Showname {
-            get { return showname; }
+            get { return nameOfSeries; }
             set {
-                if (showname != value) {
+                if (nameOfSeries != value) {
                     if (value == null) value = "";
-                    showname = value;
+                    nameOfSeries = value;
                     CreateNewName();
                     SetPath();
                 }
@@ -185,14 +181,11 @@ namespace Renamer.Classes
         /// name of the episode
         /// </summary>
         public string Name {
-            get { return name; }
+            get { return nameOfEpisode; }
             set {
-                if (name != value) {
-                    name = value;
-                    CreateNewName();
-                    if (Movie == true) {
-                        SetPath();
-                    }
+                if (nameOfEpisode != value) {
+                    nameOfEpisode = value;
+                    SetPath();
                 }
             }
         }
@@ -269,222 +262,247 @@ namespace Renamer.Classes
             set {
                 if (language != value) {
                     language = value;
-                    if (filepath != "") SetPath();
+                    if (source.Name != "") SetPath();
                     if (NewFileName != "") CreateNewName();
                 }
             }
         }
         #endregion
 
-        #region private Methods
-        /// <summary>
-        /// Extracts the name from a file and sets it as title
-        /// </summary>
-        /// <returns>extracted name or null</returns>
-        private void ExtractName() {
-            if (filepath == "" && filename == "" && extension == "") {
-                return;
-            }
-            System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
-            stopWatch.Start();
+        #region Private properties
 
-            Showname = SeriesNameExtractor.Instance.ExtractSeriesName(filename, filepath);
-            stopWatch.Stop();
+        private bool isMultiFileMovie {
+            get {
+                return Regex.Match(nameOfEpisode, "CD\\d", RegexOptions.IgnoreCase).Success;
+            }
+        }
+
+        #endregion
+
+        #region private Methods
+        private void initMembers() {
+            source = new Filepath();
+            destination = new Filepath();
+
+            nameOfSeries = "";
+            nameOfEpisode = "";
+
+            season = -1;
+            episode = -1;
+
+            isVideofile = false;
+            isSubtitle = false;
+            processingRequested = true;
+            isMovie = false;
+
+            umlautUsage = UmlautAction.Unset;
+            casing = Case.Unset;
+            createDirectoryStructure = DirectoryStructure.Unset;
+            language = Helper.Languages.None;
+        }
+
+
+        /// <summary>
+        /// Extracts the showname of the filename
+        /// </summary>
+        private void ExtractName() {
+            if (!source.isEmpty) {
+                Showname = SeriesNameExtractor.Instance.ExtractSeriesName(source);
+            }
         }
 
         /// <summary>
-        /// Checks the Extension
+        /// set Properties depending on the Extension of the file
         /// </summary>
         private void CheckExtension() {
-            this.isVideofile = (new List<string>(Helper.ReadProperties(Config.Extensions, true))).Contains(this.extension);
-            this.isSubtitle = (new List<string>(Helper.ReadProperties(Config.SubtitleExtensions, true))).Contains(this.extension);
+            this.isVideofile = (new List<string>(Helper.ReadProperties(Config.Extensions, true))).Contains(this.source.Extension);
+            this.isSubtitle = (new List<string>(Helper.ReadProperties(Config.SubtitleExtensions, true))).Contains(this.source.Extension);
         }
+
+
+        private void SetMoviesPath() {
+            if (Helper.ReadBool(Config.CreateDirectoryStructure)) {
+                Destination = "";
+                if (isMultiFileMovie) {
+                    Destination = getMoviesDestinationPath();
+                }
+            }
+        }
+
+        private string getMoviesDestinationPath() {
+            return this.destination.Path + nameOfEpisodeWithoutPart(); ;
+        }
+        private string nameOfEpisodeWithoutPart() {
+            return nameOfEpisode.Substring(0, nameOfEpisode.Length - 3);
+        }
+
+
+        // TODO: function is still tooooooo large
+        private void SetSeriesPath() {
+            string basepath = Helper.ReadProperty(Config.LastDirectory);
+            //for placing files in directory structure, figure out if selected directory is show name, otherwise create one
+            string[] dirs = this.source.Folders;
+            bool InSeriesDir = false;
+            bool InSeasonDir = false;
+            bool UseSeasonSubDirs = Helper.ReadBool(Config.UseSeasonSubDir);
+            //figure out if we are in a season dir
+            string[] seasondirs = Helper.ReadProperties(Config.Extract);
+
+            string seasondir = "";
+            //loop backwards so first entry is used if nothing is recognized and folder has to be created
+            for (int i = seasondirs.Length - 1; i >= 0; i--) {
+                seasondir = RegexConverter.replaceSeriesnameAndSeason(seasondir, nameOfSeries, season.ToString());
+
+                if (dirs.Length > 0 && dirs[dirs.Length - 1] == nameOfSeries) {
+                    InSeriesDir = true;
+                    break;
+                }
+                else if (dirs.Length > 1 && Regex.Match(dirs[dirs.Length - 1], seasondir).Success) {
+                    InSeasonDir = true;
+                    break;
+                }
+            }
+            getCreateDirectory();
+            if (createDirectoryStructure != DirectoryStructure.CreateDirectoryStructure || !isSeasonValid()) {
+                Destination = "";
+                return;
+            }
+            if (InSeasonDir) {
+                basepath = addSeriesDir(getParentsParentDir(Filepath));
+            }
+            else if(!InSeriesDir) {
+                basepath = addSeriesDir(basepath);
+            }
+            Destination = addSeasonsDirIfDesired(basepath);
+        }
+        private void getCreateDirectory() {
+            if (createDirectoryStructure != DirectoryStructure.Unset)
+                return;
+            loadSettingCreateDirectory();
+        }
+
+        private void loadSettingCreateDirectory() {
+            createDirectoryStructure = (Helper.ReadBool(Config.CreateDirectoryStructure)) ? DirectoryStructure.CreateDirectoryStructure : DirectoryStructure.NoDirectoryStructure;
+        }
+     
+        private bool isSeasonValid() {
+            return this.season >= 0;
+        }
+
+        private string getParentsParentDir(string directory){
+            return Directory.GetParent(Directory.GetParent(directory).FullName).FullName;
+        }
+
+        private string addSeriesDir(string path){
+            return path + System.IO.Path.DirectorySeparatorChar + nameOfSeries;
+        }
+        
+        private string addSeasonsDirIfDesired(string path) {
+            return path + ((useSeasonSubDirs())?seasonsSubDir():"");
+        }
+ 
+        private bool useSeasonSubDirs() {
+            return Helper.ReadBool(Config.UseSeasonSubDir);
+        }
+
+        private string seasonsSubDir() {
+            string seasondir = RegexConverter.replaceSeriesnameAndSeason(Helper.ReadProperties(Config.Extract)[0], nameOfSeries, season.ToString());
+            return System.IO.Path.DirectorySeparatorChar + seasondir;
+        }
+
+
         #endregion
         #region public Methods
+        public InfoEntry() {
+            initMembers();
+        }
 
+        /// <summary>
+        /// Generates the file and directory name the file should be stored
+        /// </summary>
         public void SetPath() {
-            string basepath = Helper.ReadProperty(Config.LastDirectory);
-            DateTime dt = DateTime.Now;
-            if (showname == null || showname == "") {
+            if (String.IsNullOrEmpty(nameOfSeries)) {
                 Destination = "";
             }
             if (!isMovie) {
-                //for placing files in directory structure, figure out if selected directory is show name, otherwise create one
-                string[] dirs = Filepath.Split(new char[] { System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
-                bool InShowDir = false;
-                bool InSeasonDir = false;
-                string tmpshowname = showname;
-                bool UseSeasonSubDirs = Helper.ReadProperty(Config.UseSeasonSubDir) == "1";
-                //fix invalid paths
-                if (tmpshowname.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) >= 0) {
-                    string pattern = "[" + Regex.Escape(new string(System.IO.Path.GetInvalidFileNameChars())) + "]";
-                    string replace = Helper.ReadProperty(Config.InvalidCharReplace);
-                    tmpshowname = Regex.Replace(tmpshowname, pattern, replace);
-                }
-                //figure out if we are in a season dir
-                string[] seasondirs = Helper.ReadProperties(Config.Extract);
-
-                string seasondir = "";
-                //loop backwards so first entry is used if nothing is recognized and folder has to be created
-                for (int i = seasondirs.Length - 1; i >= 0; i--) {
-                    seasondir = seasondirs[i].Replace("%S", season.ToString());
-                    seasondir = seasondir.Replace("%T", tmpshowname);
-
-                    if (dirs.Length > 0 && dirs[dirs.Length - 1] == tmpshowname) {
-                        InShowDir = true;
-                        seasondir = seasondirs[0].Replace("%S", season.ToString());
-                        seasondir = seasondir.Replace("%T", tmpshowname);
-                        break;
-                    }
-                    else if (dirs.Length > 1 && Regex.Match(dirs[dirs.Length - 1], seasondir).Success) {
-                        InSeasonDir = true;
-                        break;
-                    }
-                }
-                //if we want to move the files to a directory structure, set destination property to it here, otherwise use same dir
-                DirectoryStructure ds = createDirectoryStructure;
-                if (ds == DirectoryStructure.Unset) {
-                    bool cds = Helper.ReadProperty(Config.CreateDirectoryStructure) == "1";
-                    if (cds) {
-                        ds = DirectoryStructure.CreateDirectoryStructure;
-                    }
-                    else {
-                        ds = DirectoryStructure.NoDirectoryStructure;
-                    }
-                }
-                if (ds == DirectoryStructure.CreateDirectoryStructure) {
-                    //if there is a valid season, add season dir
-                    if (season >= 0) {
-                        if (InShowDir) {
-                            if (UseSeasonSubDirs) {
-                                Destination = basepath + System.IO.Path.DirectorySeparatorChar + seasondir;
-                            }
-                            else {
-                                Destination = basepath;
-                            }
-                        }
-                        else if (InSeasonDir) {
-                            if (UseSeasonSubDirs) {
-                                //Go up two dirs and add proper show and season dir
-                                Destination = Directory.GetParent(Directory.GetParent(Filepath).FullName).FullName + System.IO.Path.DirectorySeparatorChar + tmpshowname + System.IO.Path.DirectorySeparatorChar + seasondir;
-                            }
-                            else {
-                                Destination = Directory.GetParent(Directory.GetParent(Filepath).FullName).FullName + System.IO.Path.DirectorySeparatorChar + tmpshowname;
-                            }
-                        }
-                        else {
-                            if (UseSeasonSubDirs) {
-                                Destination = basepath + System.IO.Path.DirectorySeparatorChar + tmpshowname + System.IO.Path.DirectorySeparatorChar + seasondir;
-                            }
-                            else {
-                                Destination = basepath + System.IO.Path.DirectorySeparatorChar + tmpshowname;
-                            }
-                        }
-                    }
-                    //no valid season found, this could be a movie or so and probably shouldn't be moved
-                    else {
-                        Destination = Filepath;
-                    }
-                }
-                //We don't want to move anything at all, so lets just leave it where it is
-                else {
-                    Destination = Filepath;
-                }
-                if (Destination == Filepath) {
-                    Destination = "";
-                }
+                SetSeriesPath();
             }
-            //if this is a movie
             else {
-                if (Helper.ReadInt(Config.CreateDirectoryStructure) > 0) {
-                    //Multiple file version, own folder
-                    if (Regex.Match(name, "CD\\d", RegexOptions.IgnoreCase).Success) {
-                        if (Filepath != "") {
-                            Destination = Filepath + System.IO.Path.DirectorySeparatorChar + name.Substring(0, name.Length - 3);
-                        }
-                        else {
-                            Destination = name.Substring(0, name.Length - 3);
-                        }
-                    }
-                    else {
-                        Destination = "";
-                    }
-                }
+                SetMoviesPath();
             }
         }
-        
+
         /// <summary>
         /// This function tries to find an episode name which matches the showname, episode and season number by looking at previously downloaded relations
         /// </summary>
         public void SetupRelation() {
-            SetupRelation(RelationManager.Instance.GetRelationCollection(this.Showname));
+            findEpisodeName(RelationManager.Instance.GetRelationCollection(this.Showname));
         }
-        /// <summary>
-        /// This function tries to find an episode name which matches the showname, episode and season number by looking at previously downloaded relations
-        /// </summary>
-        public void SetupRelation(RelationCollection rc) {
-            int seasonmatch = -1;
-            int epmatch = -1;
-            //Clear old name
-            Name = "";
-            //if there is no data available, don't do anything
-            if (rc == null) return;
+
+        public void findEpisodeName(RelationCollection rc) {
+            resetName();
+            if (rc == null)
+                return;
+
             for (int i = 0; i < rc.Count; i++) {
-                string name = rc[i].Name;
-                if (rc[i].Season == season && rc[i].Episode == episode) {
-                    Name = name;
-                    seasonmatch = i;
-                    epmatch = i;
+                if (isValidRelation(rc[i])) {
+                    Name = rc[i].Name;
                     break;
                 }
-                //if there is none or invalid episode info, try to match by season
-                if (rc[i].Season == season && episode == -1) seasonmatch = i;
-                //if there is none or invalid season info, try to match by episode
-                if (rc[i].Episode == episode && season == -1) epmatch = i;
-            }
-            //episode match, but no season match
-            if (seasonmatch == -1 && epmatch != -1) {
-                Name = rc[epmatch].Name;
-
-            }
-            else if (seasonmatch != -1 && epmatch == -1) {
-                Name = rc[seasonmatch].Name;
+                if (isInValidSeason(rc[i]) || isInValidEpisode(rc[i]))
+                    Name = rc[i].Name;
             }
         }
 
-        public string AdjustSpelling(string input, bool extension) {
-            //treat umlaute and case
+        private bool isValidRelation(Relation relation) {
+            return relation.Season == season && relation.Episode == episode;
+        }
+
+        private bool isInValidEpisode(Relation relation) {
+            return relation.Season == season && episode == -1;
+        }
+
+        private bool isInValidSeason(Relation relation) {
+            return relation.Episode == episode && season == -1;
+        }
+
+        private void resetName() {
+            this.Name = "";
+        }
+
+        public string adjustSpelling(string input, bool extension) {
+            input = adjustUmlauts(input);
+            input = adjustCasing(input, extension);
+            return input;
+        }
+
+        private string adjustUmlauts(string input) {
             UmlautAction ua = umlautUsage;
             if (ua == UmlautAction.Unset) {
-                ua = (UmlautAction)Enum.Parse(typeof(UmlautAction), Helper.ReadProperty(Config.Umlaute), true);
-                //Fallback default value
-                if (ua == UmlautAction.Unset) ua = UmlautAction.Ignore;
-            }
-            Case c = casing;
-            if (c == Case.Unset) {
-                c = (Case)Enum.Parse(typeof(Case), Helper.ReadProperty(Config.Case), true);
-                //Fallback default value
-                if (c == Case.Unset) c = Case.Ignore;
+                ua = Helper.ReadEnum<UmlautAction>(Config.Umlaute);
+                if (ua == UmlautAction.Unset)
+                    ua = UmlautAction.Ignore;
             }
 
             if (ua == UmlautAction.Use && language == Helper.Languages.German) {
-                input = input.Replace("ae", "ä");
-                input = input.Replace("Ae", "Ä");
-                input = input.Replace("oe", "ö");
-                input = input.Replace("Oe", "Ö");
-                input = input.Replace("ue", "ü");
-                input = input.Replace("Ue", "Ü");
-                input = input.Replace("eü", "eue");
+                input = transformDoubleLetterToUmalauts(input);
             }
             else if (ua == UmlautAction.Dont_Use) {
-                for (int index = 0; index < toBeReplaced.Length; index++) {
-                    input.Replace(toBeReplaced[index], toBeReplacedWith[index]);
-                }
+                input = replaceUmlautsAndSpecialChars(input);
             }
-            if (c == Case.small) {
+            return input;
+        }
+
+        private string adjustCasing(string input, bool extension) {
+            if (casing == Case.Unset) {
+                casing = Helper.ReadEnum<Case>(Config.Case);
+                if (casing == Case.Unset)
+                    casing = Case.Ignore;
+            }
+            if (casing == Case.small) {
                 input = input.ToLower();
             }
-            else if (c == Case.Large) {
+            else if (casing == Case.UpperFirst) {
                 if (!extension) {
                     Regex r = new Regex(@"\b(\w)(\w+)?\b", RegexOptions.Multiline | RegexOptions.IgnoreCase);
                     input = Helper.UpperEveryFirst(input);
@@ -493,26 +511,45 @@ namespace Renamer.Classes
                     input = input.ToLower();
                 }
             }
-            else if (c == Case.CAPSLOCK) {
+            else if (casing == Case.CAPSLOCK) {
                 input = input.ToUpper();
             }
             return input;
         }
+
+        private string replaceUmlautsAndSpecialChars(string input) {
+            for (int index = 0; index < toBeReplaced.Length; index++) {
+                input = input.Replace(toBeReplaced[index], toBeReplacedWith[index]);
+            }
+            return input;
+        }
+        private string transformDoubleLetterToUmalauts(string input) {
+            input = input.Replace("ae", "ä");
+            input = input.Replace("Ae", "Ä");
+            input = input.Replace("oe", "ö");
+            input = input.Replace("Oe", "Ö");
+            input = input.Replace("ue", "ü");
+            input = input.Replace("Ue", "Ü");
+            input = input.Replace("eü", "eue");
+            return input;
+        }
+     
+        
         /// <summary>
         /// This function generates a new filename from the Target Pattern, episode, season, title, showname,... values
         /// </summary>
         public void CreateNewName() {
             DateTime dt = DateTime.Now;
-            if (name == "") {
+            if (nameOfEpisode == "") {
                 NewFileName = "";
             }
-            else if (name != "") {
+            else if (nameOfEpisode != "") {
                 //Target Filename format
                 string tmpname;
 
                 //Those 3 strings need case/Umlaut processing
-                string epname = this.name;
-                string seriesname = showname;
+                string epname = this.nameOfEpisode;
+                string seriesname = nameOfSeries;
                 string extension = Extension;
 
                 if (!isMovie) {
@@ -526,9 +563,9 @@ namespace Renamer.Classes
                     tmpname = "%N";
                 }
 
-                AdjustSpelling(epname, false);
-                AdjustSpelling(seriesname, false);
-                AdjustSpelling(extension, true);
+                adjustSpelling(epname, false);
+                adjustSpelling(seriesname, false);
+                adjustSpelling(extension, true);
 
                 //Now that series title, episode title and extension are properly processed, add them to the filename
 
@@ -545,7 +582,7 @@ namespace Renamer.Classes
                 List<string> to = new List<string>();
                 foreach (string s in replace) {
                     if (!s.StartsWith(Settings.Instance.Comment)) {
-                        string[] replacement = s.Split(new string[]{"->"}, StringSplitOptions.RemoveEmptyEntries);
+                        string[] replacement = s.Split(new string[] { "->" }, StringSplitOptions.RemoveEmptyEntries);
                         if (replacement != null && replacement.Length == 2) {
                             tmpname = Regex.Replace(tmpname, replacement[0], replacement[1], RegexOptions.IgnoreCase);
                         }
@@ -723,13 +760,11 @@ namespace Renamer.Classes
                         Logger.Instance.LogMessage("Skipping " + this.Filename + " beacause " + ex.Message, LogLevel.WARNING);
                         return;
                     }
-                    
+
                 }
             }
         }
-
-        public string ToString()
-        {
+        public string ToString() {
             return Filename;
         }
         #endregion

@@ -179,8 +179,8 @@ namespace Renamer
             defaults[Config.LastSubProvider] = "";
             defaults[Config.Timeout] = "10000";
             defaults[Config.InvalidFilenameAction] = "Ask";
-            defaults[Config.Umlaute] = "Dont_Use";
-            defaults[Config.Case] = "Large";
+            defaults[Config.Umlaute] = Renamer.Classes.InfoEntry.UmlautAction.Dont_Use.ToString();
+            defaults[Config.Case] = Renamer.Classes.InfoEntry.Case.UpperFirst.ToString();
             defaults[Config.Extract] = new List<string>(new string[] { "Season %S", "Season_%S", "Season%S", "Staffel %S", "Staffel_%S", "Staffel%S" });
             defaults[Config.CreateDirectoryStructure] = "1";
             defaults[Config.DeleteEmptyFolders] = "1";
