@@ -186,6 +186,7 @@ namespace Renamer.Classes
                 if (nameOfEpisode != value) {
                     nameOfEpisode = value;
                     SetPath();
+                    CreateNewName();
                 }
             }
         }
