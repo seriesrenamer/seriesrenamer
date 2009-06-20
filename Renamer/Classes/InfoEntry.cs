@@ -478,13 +478,7 @@ namespace Renamer.Classes
         }
 
         private string adjustUmlauts(string input) {
-            UmlautAction ua = umlautUsage;
-            if (ua == UmlautAction.Unset) {
-                ua = Helper.ReadEnum<UmlautAction>(Config.Umlaute);
-                if (ua == UmlautAction.Unset)
-                    ua = UmlautAction.Ignore;
-            }
-
+            UmlautAction ua = readUmlautUsage();
             if (ua == UmlautAction.Use && language == Helper.Languages.German) {
                 input = transformDoubleLetterToUmalauts(input);
             }
@@ -492,6 +486,16 @@ namespace Renamer.Classes
                 input = replaceUmlautsAndSpecialChars(input);
             }
             return input;
+        }
+
+        private UmlautAction readUmlautUsage() {
+            UmlautAction ua = umlautUsage;
+            if (ua == UmlautAction.Unset) {
+                ua = Helper.ReadEnum<UmlautAction>(Config.Umlaute);
+                if (ua == UmlautAction.Unset)
+                    ua = UmlautAction.Ignore;
+            }
+            return ua;
         }
 
         private string adjustCasing(string input, bool extension) {
@@ -540,7 +544,6 @@ namespace Renamer.Classes
         /// This function generates a new filename from the Target Pattern, episode, season, title, showname,... values
         /// </summary>
         public void CreateNewName() {
-            DateTime dt = DateTime.Now;
             if (nameOfEpisode == "") {
                 NewFileName = "";
             }
