@@ -122,10 +122,6 @@ namespace Renamer.Classes
             }
         }
 
-        /// <summary>
-        /// Downloads all collected subtitle links in a temp directory
-        /// </summary>
-        /// <returns></returns>
         private int DownloadSubtitles() {
             //find empty temp dir
             int i = 0;

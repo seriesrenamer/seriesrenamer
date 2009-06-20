@@ -79,10 +79,10 @@ namespace Renamer.Classes
             return filename.Substring(getExtensionStartPosition());
         }
         private void removeExtension() {
-            this.filename = this.filename.Substring(0, getExtensionStartPosition());
+            this.filename = this.filename.Substring(0, Math.Max(0, getExtensionStartPosition()-1));
         }
         private int getExtensionStartPosition() {
-            return this.filename.LastIndexOf(EXTENSION_SEPERATOR);
+            return this.filename.LastIndexOf(EXTENSION_SEPERATOR)+1;
         }
 
 
@@ -131,7 +131,7 @@ namespace Renamer.Classes
             this.path = this.path.Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar);
         }
         private void trailingSlashCheck() {
-            if(pathHasTrailingSlash())
+            if(!pathHasTrailingSlash())
                 this.addTrailingSlash();
         }
 
