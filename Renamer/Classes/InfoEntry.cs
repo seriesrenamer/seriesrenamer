@@ -174,6 +174,7 @@ namespace Renamer.Classes
                 if (episode != value) {
                     episode = value;
                     SetupRelation();
+                    CreateNewName();
                 }
             }
         }
