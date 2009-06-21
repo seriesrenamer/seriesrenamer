@@ -78,6 +78,14 @@ namespace Renamer.Classes
             }
             string logname = name;
             Match m;
+            foreach (string s in folders)
+            {
+                if (s.ToLower().Contains("sample"))
+                {
+                    name = "Sample";
+                    return;
+                }
+            }
             foreach (string pattern in extractPatterns) {
                 m = Regex.Match(folders[folders.Length - 1], pattern, RegexOptions.IgnoreCase);
                 if (m.Success && pattern.Contains("(?<pos>.*?)") && m.Groups["pos"].Value != "") {
@@ -100,6 +108,10 @@ namespace Renamer.Classes
 
         private void extractNameFromString(string str) {
             if (!String.IsNullOrEmpty(name)) {
+                return;
+            }
+            if(str.ToLower().Contains("sample")){
+                name="Sample";
                 return;
             }
             if (seriesNameFromDirectory == false) {
