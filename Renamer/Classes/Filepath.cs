@@ -190,7 +190,7 @@ namespace Renamer.Classes
 
         public string Fullfilename {
             get {
-                return this.Path + this.Filename;
+                return this.Path + System.IO.Path.DirectorySeparatorChar + this.Filename;
             }
         }
 

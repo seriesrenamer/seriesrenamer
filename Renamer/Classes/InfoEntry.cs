@@ -96,9 +96,9 @@ namespace Renamer.Classes
         /// Old filename with extension
         /// </summary>
         public string Filename {
-            get { return source.Name+"."+source.Extension; }
+            get { return source.Filename; }
             set {
-                if (source.Name != value) {
+                if (source.Filename != value) {
                     source.Filename = value;
                     if(source.Filename!=""&&source.Path!=""){
                         ExtractName();
