@@ -107,9 +107,19 @@ namespace Renamer.Classes
                 return;
             
             this.replaceAltDirectorySeperator();
-            this.trailingSlashCheck();
+            if (this.path.Length == 2)
+            {
+                this.trailingSlashCheck();
+            }
+            replaceDoubleSlashes();
         }
-
+        private void replaceDoubleSlashes()
+        {
+            while (this.path.IndexOf(System.IO.Path.DirectorySeparatorChar.ToString() + System.IO.Path.DirectorySeparatorChar.ToString()) != -1)
+            {
+                this.path = this.path.Replace(System.IO.Path.DirectorySeparatorChar.ToString() + System.IO.Path.DirectorySeparatorChar.ToString(), System.IO.Path.DirectorySeparatorChar.ToString());
+            }
+        }
         private void replaceInvalidCharsInPath() {
             this.path = replaceInvalidChars(this.path);
         }
@@ -186,7 +196,18 @@ namespace Renamer.Classes
 
         public string Filename {
             get {
-                return this.filename + EXTENSION_SEPERATOR + this.extension;
+                if (this.filename != "" && this.extension != "")
+                {
+                    return this.filename + EXTENSION_SEPERATOR + this.extension;
+                }
+                else if (this.filename != "" || this.extension != "")
+                {
+                    return "Invalid Filename";
+                }
+                else
+                {
+                    return "";
+                }
             }
             set {
                 value = handleNullValue(value);

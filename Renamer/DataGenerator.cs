@@ -22,7 +22,7 @@ namespace Renamer
             //make a list of shownames
             List<string> shownames = new List<string>();
             foreach (InfoEntry ie in InfoEntryManager.Instance) {
-                if (ie.ProcessingRequested && !shownames.Contains(ie.Showname)) {
+                if (ie.ProcessingRequested && !shownames.Contains(ie.Showname) &&ie.Showname!="") {
                     shownames.Add(ie.Showname);
                 }
             }
