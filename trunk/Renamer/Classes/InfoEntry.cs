@@ -96,11 +96,13 @@ namespace Renamer.Classes
         /// Old filename with extension
         /// </summary>
         public string Filename {
-            get { return source.Name; }
+            get { return source.Name+"."+source.Extension; }
             set {
                 if (source.Name != value) {
                     source.Filename = value;
-                    ExtractName();
+                    if(source.Filename!=""&&source.Path!=""){
+                        ExtractName();
+                    }
                 }
             }
         }
@@ -112,6 +114,7 @@ namespace Renamer.Classes
             set {
                 if (source.Extension != value) {
                     source.Extension = value;
+                    destination.Extension = value;
                     CheckExtension();
                     ExtractName();
                 }
@@ -121,10 +124,14 @@ namespace Renamer.Classes
         /// Path of the file
         /// </summary>
         public string Filepath {
-            get { return source.Name; }
+            get { return source.Path; }
             set {
-                if (source.Name != value) {
+                if (source.Path != value) {
                     source.Path = value;
+                    if (source.Filename != "" && source.Path != "")
+                    {
+                        ExtractName();
+                    }
                 }
             }
         }
@@ -341,6 +348,11 @@ namespace Renamer.Classes
 
         // TODO: function is still tooooooo large
         private void SetSeriesPath() {
+            if (Season == -1)
+            {
+                Destination = "";
+                return;
+            }
             string basepath = Helper.ReadProperty(Config.LastDirectory);
             //for placing files in directory structure, figure out if selected directory is show name, otherwise create one
             string[] dirs = this.source.Folders;
@@ -353,7 +365,7 @@ namespace Renamer.Classes
             string seasondir = "";
             //loop backwards so first entry is used if nothing is recognized and folder has to be created
             for (int i = seasondirs.Length - 1; i >= 0; i--) {
-                seasondir = RegexConverter.replaceSeriesnameAndSeason(seasondir, nameOfSeries, season.ToString());
+                seasondir = RegexConverter.replaceSeriesnameAndSeason(seasondirs[i], nameOfSeries, season.ToString());
 
                 if (dirs.Length > 0 && dirs[dirs.Length - 1] == nameOfSeries) {
                     InSeriesDir = true;
@@ -547,6 +559,7 @@ namespace Renamer.Classes
         public void CreateNewName() {
             if (nameOfEpisode == "") {
                 NewFileName = "";
+                return;
             }
             else if (nameOfEpisode != "") {
                 //Target Filename format

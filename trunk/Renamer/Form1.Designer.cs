@@ -348,7 +348,7 @@ namespace Renamer
             // cTitle
             // 
             this.cTitle.DisplayIndex = 5;
-            this.cTitle.Text = "Title";
+            this.cTitle.Text = "Episode Title";
             this.cTitle.Width = 140;
             // 
             // cNewName
@@ -391,7 +391,7 @@ namespace Renamer
             this.regexTesterToolStripMenuItem});
             this.contextFiles.Name = "contextFiles";
             this.contextFiles.ShowImageMargin = false;
-            this.contextFiles.Size = new System.Drawing.Size(241, 352);
+            this.contextFiles.Size = new System.Drawing.Size(241, 330);
             this.contextFiles.Opening += new System.ComponentModel.CancelEventHandler(this.contextFiles_Opening);
             // 
             // viewToolStripMenuItem
@@ -586,21 +586,21 @@ namespace Renamer
             // checkAllToolStripMenuItem
             // 
             this.checkAllToolStripMenuItem.Name = "checkAllToolStripMenuItem";
-            this.checkAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.checkAllToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.checkAllToolStripMenuItem.Text = "Check all";
             this.checkAllToolStripMenuItem.Click += new System.EventHandler(this.checkAllToolStripMenuItem_Click);
             // 
             // uncheckAllToolStripMenuItem
             // 
             this.uncheckAllToolStripMenuItem.Name = "uncheckAllToolStripMenuItem";
-            this.uncheckAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.uncheckAllToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.uncheckAllToolStripMenuItem.Text = "Uncheck all";
             this.uncheckAllToolStripMenuItem.Click += new System.EventHandler(this.uncheckAllToolStripMenuItem_Click);
             // 
             // invertCheckToolStripMenuItem
             // 
             this.invertCheckToolStripMenuItem.Name = "invertCheckToolStripMenuItem";
-            this.invertCheckToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.invertCheckToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.invertCheckToolStripMenuItem.Text = "Invert Check";
             this.invertCheckToolStripMenuItem.Click += new System.EventHandler(this.invertCheckToolStripMenuItem_Click);
             // 
