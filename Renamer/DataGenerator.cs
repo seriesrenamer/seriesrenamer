@@ -676,6 +676,7 @@ namespace Renamer
             }
 
             Logger.Instance.LogMessage("Found " + InfoEntryManager.Instance.Count + " Files", LogLevel.INFO);
+            FindMissingEpisodes();
             /*
             FillListView();
 
@@ -691,6 +692,53 @@ namespace Renamer
                 LastSubProvider = "";
             cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
             */
+        }
+        class EpisodeCollection
+        {
+            public int maxEpisode = 0;
+            public List<InfoEntry> entries = new List<InfoEntry>();
+        }
+        private static void FindMissingEpisodes()
+        {            
+            Hashtable paths = new Hashtable();
+
+            foreach (InfoEntry ie in InfoEntryManager.Instance)
+            {
+                if (paths.ContainsKey(ie.Filepath))
+                {
+                    if (((EpisodeCollection)paths[ie.Filepath]).maxEpisode < ie.Episode)
+                    {
+                        ((EpisodeCollection)paths[ie.Filepath]).maxEpisode = ie.Episode;
+                    }
+                    ((EpisodeCollection)paths[ie.Filepath]).entries.Add(ie);
+                }
+                else
+                {
+                    EpisodeCollection ec=new EpisodeCollection();
+                    ec.maxEpisode=ie.Episode;
+                    ec.entries.Add(ie);
+                    paths.Add(ie.Filepath, ec);
+                }
+            }
+            foreach (string key in paths.Keys)
+            {
+                for (int i = 1; i <= ((EpisodeCollection)paths[key]).maxEpisode; i++)
+                {
+                    bool found=false;
+                    foreach (InfoEntry ie in ((EpisodeCollection)paths[key]).entries)
+                    {
+                        if (ie.Episode == i)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        Logger.Instance.LogMessage("Missing episode: " + ((EpisodeCollection)paths[key]).entries[0].Showname + " - S" + ((EpisodeCollection)paths[key]).entries[0].Season + "E" + i, LogLevel.INFO);
+                    }
+                }
+            }
         }
         private static void SelectRecognizedFilesForProcessing() {
             foreach (InfoEntry ie in InfoEntryManager.Instance) {
