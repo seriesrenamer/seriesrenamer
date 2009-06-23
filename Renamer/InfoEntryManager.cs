@@ -73,6 +73,10 @@ namespace Renamer
                 this.episodes[i].CreateNewName();
             }
         }
+        public InfoEntry GetByListViewItem(ListViewItem lvi)
+        {
+            return episodes[(int)lvi.Tag];
+        }
 
         /// <summary>
         /// Gets video files matching season and episode number

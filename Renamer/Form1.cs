@@ -294,6 +294,7 @@ namespace Renamer
             bool CreateDirectoryStructure = Helper.ReadInt(Config.CreateDirectoryStructure) == 1;
             bool UseSeasonSubdirs = Helper.ReadInt(Config.UseSeasonSubDir) == 1;
             int tmp = -1;
+            InfoEntry ie = InfoEntryManager.Instance.GetByListViewItem(e.Item);
             //add lots of stuff here
             switch (e.SubItem) {
                 //season
@@ -304,12 +305,12 @@ namespace Renamer
                     catch (Exception ex){
                         Logger.Instance.LogMessage("Cannot parse '" + e.DisplayText + "' to an integer", LogLevel.WARNING);
                     }
-                    InfoEntryManager.Instance[(int)e.Item.Tag].Season = tmp;
+                    ie.Season = tmp;
                     if (e.DisplayText == "") {
-                        InfoEntryManager.Instance[(int)e.Item.Tag].Movie = true;
+                        ie.Movie = true;
                     }
                     else {
-                        InfoEntryManager.Instance[(int)e.Item.Tag].Movie = false;
+                        ie.Movie = false;
                     }
                     //SetupRelation((int)e.Item.Tag);
                     //foreach (InfoEntry ie in InfoEntryManager.Episodes)
@@ -325,20 +326,20 @@ namespace Renamer
                     catch (Exception ex) {
                         Logger.Instance.LogMessage("Cannot parse '" + e.DisplayText + "' to an integer", LogLevel.WARNING);
                     }
-                    InfoEntryManager.Instance[(int)e.Item.Tag].Episode = tmp;
+                    ie.Episode = tmp;
                     if (e.DisplayText == "") {
-                        InfoEntryManager.Instance[(int)e.Item.Tag].Movie = true;
+                        ie.Movie = true;
                     }
                     else {
-                        InfoEntryManager.Instance[(int)e.Item.Tag].Movie = false;
+                        ie.Movie = false;
                     }
                     //SetupRelation((int)e.Item.Tag);                    
-                    //SetDestinationPath(InfoEntryManager.Instance[(int)e.Item.Tag], dir, CreateDirectoryStructure, UseSeasonSubdirs);
+                    //SetDestinationPath(ie, dir, CreateDirectoryStructure, UseSeasonSubdirs);
                     break;
                 //name
                 case 4:
                     //backtrack to see if entered text matches a season/episode
-                    RelationCollection rc = RelationManager.Instance.GetRelationCollection(InfoEntryManager.Instance[(int)e.Item.Tag].Showname);
+                    RelationCollection rc = RelationManager.Instance.GetRelationCollection(ie.Showname);
                     if (rc != null) {
                         foreach (Relation rel in rc) {
                             //if found, set season and episode in gui and sync back to data
@@ -348,24 +349,34 @@ namespace Renamer
                             }
                         }
                     }
-                    InfoEntryManager.Instance[(int)e.Item.Tag].Name = e.DisplayText;
+                    ie.Name = e.DisplayText;
                     break;
                 //Filename
                 case 5:
-                    InfoEntryManager.Instance[(int)e.Item.Tag].NewFileName = e.DisplayText;
+                    ie.NewFileName = e.DisplayText;
+                    if (ie.NewFileName != e.DisplayText)
+                    {
+                        e.Cancel = true;
+                        Logger.Instance.LogMessage("Changed entered Text from " + e.DisplayText + " to " + ie.NewFileName + " because of invalid filename characters.", LogLevel.INFO);
+                    }
                     break;
                 //Destination
                 case 6:
                     try {
                         Path.GetDirectoryName(e.DisplayText);
-                        InfoEntryManager.Instance[(int)e.Item.Tag].Destination = e.DisplayText;
+                        ie.Destination = e.DisplayText;
+                        if (ie.Destination != e.DisplayText)
+                        {
+                            e.Cancel = true;
+                            Logger.Instance.LogMessage("Changed entered Text from " + e.DisplayText + " to " + ie.Destination + " because of invalid path characters.", LogLevel.INFO);
+                        }
                     }
                     catch (Exception) {
                         e.Cancel = true;
                     }
                     break;
                 case 7:
-                    InfoEntryManager.Instance[(int)e.Item.Tag].Showname = e.DisplayText;
+                    ie.Showname = e.DisplayText;
                     break;
                 default:
                     throw new Exception("Unreachable code");
@@ -1192,28 +1203,36 @@ namespace Renamer
         /// </summary>
         /// <param name="lvi">List item to be colorized</param>
         private void Colorize(ListViewItem lvi) {
-            if ((lvi.SubItems[5].Text == "" && lvi.SubItems[1].Text == lvi.SubItems[6].Text && lvi.SubItems[6].Text != "") || !lvi.Checked) {
+            InfoEntry ie = InfoEntryManager.Instance.GetByListViewItem(lvi);
+            if ((ie.NewFileName==""&&(ie.Destination==""||ie.Destination==ie.Filepath))||!ie.ProcessingRequested){
                 lvi.ForeColor = Color.Gray;
             }
             else {
                 lvi.ForeColor = Color.Black;
-            }
-            if (lvi.SubItems[5].Text.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) {
-                lvi.BackColor = Color.Yellow;
-            }
-            else {
-                lvi.BackColor = Color.White;
-            }
-            foreach (ListViewItem lvi2 in lstFiles.Items) {
-                if (lvi != lvi2) {
-                    if (lvi.SubItems[1].Text == lvi2.SubItems[1].Text && lvi.SubItems[5].Text == lvi2.SubItems[5].Text && lvi.SubItems[5].Text != "") {
-                        lvi.BackColor = Color.IndianRed;
-                    }
-                    else if (lvi.BackColor != Color.Yellow) {
-                        lvi.BackColor = Color.White;
+                if (ie.NewFileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || ie.Destination.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+                {
+                    lvi.BackColor = Color.Yellow;
+                }
+                else
+                {
+                    lvi.BackColor = Color.White;
+                }
+                foreach (ListViewItem lvi2 in lstFiles.Items)
+                {
+                    if (lvi != lvi2)
+                    {
+                        InfoEntry ie2 = InfoEntryManager.Instance.GetByListViewItem(lvi2);
+                        if (ie.Destination == ie2.Destination && ie.NewFileName == ie2.NewFileName)
+                        {
+                            lvi.BackColor = Color.IndianRed;
+                        }
+                        else if (lvi.BackColor != Color.Yellow)
+                        {
+                            lvi.BackColor = Color.White;
+                        }
                     }
                 }
-            }
+            }            
         }
 
         /// <summary>

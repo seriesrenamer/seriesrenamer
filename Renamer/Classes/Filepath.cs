@@ -202,7 +202,7 @@ namespace Renamer.Classes
                 }
                 else if (this.filename != "" || this.extension != "")
                 {
-                    return "Invalid Filename";
+                    return "";
                 }
                 else
                 {
