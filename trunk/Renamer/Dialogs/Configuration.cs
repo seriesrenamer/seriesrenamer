@@ -93,7 +93,6 @@ namespace Renamer.Dialogs
                 txtExtract.Text = txtExtract.Text.Substring(0, txtExtract.Text.Length - Environment.NewLine.Length);
 
             //Get some enums
-
             cbLogfile.SelectedIndex = (int)(Helper.ReadEnum<Logging.LogLevel>(Config.LogFileLevel));
             cbLogwindow.SelectedIndex = (int)(Helper.ReadEnum<Logging.LogLevel>(Config.LogTextBoxLevel));
             cbLogmessagebox.SelectedIndex = (int)(Helper.ReadEnum<Logging.LogLevel>(Config.LogMessageBoxLevel));
@@ -103,14 +102,15 @@ namespace Renamer.Dialogs
             cbCase.SelectedIndex = (int)Helper.ReadEnum<InfoEntry.Case>(Config.Case) - 1;
 
             //Get some ints
-            nudTimeout.Value = Convert.ToInt32(Helper.ReadProperty(Config.Timeout));
+            nudTimeout.Value = Helper.ReadInt(Config.Timeout);
 
             //Get some bools
-            chkCreateDirectoryStructure.Checked = Helper.StringToBool(Helper.ReadProperty(Config.CreateDirectoryStructure));
-            chkDeleteEmptyFolders.Checked = Helper.StringToBool(Helper.ReadProperty(Config.DeleteEmptyFolders));
-            chkDeleteAllEmptyFolders.Checked = Helper.StringToBool(Helper.ReadProperty(Config.DeleteAllEmptyFolders));
-            chkUseSeasonSubdirs.Checked = Helper.StringToBool(Helper.ReadProperty(Config.UseSeasonSubDir));
-            chkResize.Checked = Helper.StringToBool(Helper.ReadProperty(Config.ResizeColumns));
+            chkCreateDirectoryStructure.Checked = Helper.ReadBool(Config.CreateDirectoryStructure);
+            chkDeleteEmptyFolders.Checked = Helper.ReadBool(Config.DeleteEmptyFolders);
+            chkDeleteAllEmptyFolders.Checked = Helper.ReadBool(Config.DeleteAllEmptyFolders);
+            chkUseSeasonSubdirs.Checked = Helper.ReadBool(Config.UseSeasonSubDir);
+            chkResize.Checked = Helper.ReadBool(Config.ResizeColumns);
+            chkFindMissingEpisodes.Checked = Helper.ReadBool(Config.FindMissingEpisodes);
         }
 
         /// <summary>
@@ -159,36 +159,14 @@ namespace Renamer.Dialogs
             Helper.WriteProperties(Config.Replace, replace);
             string[] tags = txtTags.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             Helper.WriteProperties(Config.Tags, tags);
-            if (chkCreateDirectoryStructure.Checked) {
-                Helper.WriteProperty(Config.CreateDirectoryStructure, "1");
-            }
-            else {
-                Helper.WriteProperty(Config.CreateDirectoryStructure, "0");
-            }
-            if (chkDeleteEmptyFolders.Checked) {
-                Helper.WriteProperty(Config.DeleteEmptyFolders, "1");
-            }
-            else {
-                Helper.WriteProperty(Config.DeleteEmptyFolders, "0");
-            }
-            if (chkDeleteAllEmptyFolders.Checked) {
-                Helper.WriteProperty(Config.DeleteAllEmptyFolders, "1");
-            }
-            else {
-                Helper.WriteProperty(Config.DeleteAllEmptyFolders, "0");
-            }
-            if (chkUseSeasonSubdirs.Checked) {
-                Helper.WriteProperty(Config.UseSeasonSubDir, "1");
-            }
-            else {
-                Helper.WriteProperty(Config.UseSeasonSubDir, "0");
-            }
-            if (chkResize.Checked) {
-                Helper.WriteProperty(Config.ResizeColumns, "1");
-            }
-            else {
-                Helper.WriteProperty(Config.ResizeColumns, "0");
-            }
+            
+            Helper.WriteBool(Config.CreateDirectoryStructure, chkCreateDirectoryStructure.Checked);
+            Helper.WriteBool(Config.DeleteEmptyFolders, chkDeleteEmptyFolders.Checked);
+            Helper.WriteBool(Config.DeleteAllEmptyFolders, chkDeleteAllEmptyFolders.Checked);
+            Helper.WriteBool(Config.UseSeasonSubDir, chkUseSeasonSubdirs.Checked);
+            Helper.WriteBool(Config.ResizeColumns, chkResize.Checked);
+            Helper.WriteBool(Config.FindMissingEpisodes, chkFindMissingEpisodes.Checked);
+
             Helper.WriteProperties(Config.IgnoreFiles, txtIgnoreFiles.Text);
 
             DialogResult = DialogResult.OK;

@@ -202,6 +202,7 @@ namespace Renamer.Classes.Configuration.Keywords
         /// </summary>
         public const string ResizeColumns = "ResizeColumns";
 
+        public const string FindMissingEpisodes = "FindMissingEpisodes";
 
         public static class RegexMarker
         {

@@ -133,7 +133,7 @@ namespace Renamer
                     Logger.Instance.LogMessage("Search Results URL contains Series URL: " + seriesURL, LogLevel.DEBUG);
                     ps.Results = new Hashtable();
                     string CleanedName=CleanSearchResultName(Showname,provider);
-                    if(!Regex.Match(CleanedName,provider.SearchResultsBlacklist).Success){
+                    if(provider.SearchResultsBlacklist=="" || !Regex.Match(CleanedName,provider.SearchResultsBlacklist).Success){
                         ps.Results.Add(CleanedName, responseHtml.ResponseUri.AbsoluteUri + provider.EpisodesUrl);
                         Logger.Instance.LogMessage("Search engine forwarded directly to single result: " + responseHtml.ResponseUri.AbsoluteUri.Replace(" ", "%20") + provider.EpisodesUrl.Replace(" ", "%20"), LogLevel.INFO);
                     }
@@ -468,20 +468,22 @@ namespace Renamer
                     ro |= RegexOptions.RightToLeft;
                 MatchCollection mc = Regex.Matches(source, pattern, ro);
 
+                string CleanupRegex = provider.RelationsRemove;
                 for (int i = 0; i < mc.Count; i++) {
                     Match m = mc[i];
+                    string result = Regex.Replace(System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), CleanupRegex, "");
                     //if we are iterating through season pages, take season from page url directly
                     //parse season and episode numbers
                     int s, e;
                     Int32.TryParse(m.Groups["Season"].Value, out s);
                     Int32.TryParse(m.Groups["Episode"].Value, out e);
                     if (url != url2) {
-                        rc.AddRelation(new Relation(season, e, System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                        Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), LogLevel.DEBUG);
+                        rc.AddRelation(new Relation(season, e, result));
+                        Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + result, LogLevel.DEBUG);
                     }
                     else {
-                        rc.AddRelation(new Relation(s, e, System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value)));
-                        Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), LogLevel.DEBUG);
+                        rc.AddRelation(new Relation(s, e, result));
+                        Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + result, LogLevel.DEBUG);
                     }
                 }
                 RelationManager.Instance.AddRelationCollection(rc);
@@ -676,7 +678,10 @@ namespace Renamer
             }
 
             Logger.Instance.LogMessage("Found " + InfoEntryManager.Instance.Count + " Files", LogLevel.INFO);
-            FindMissingEpisodes();
+            if (Helper.ReadBool(Config.FindMissingEpisodes))
+            {
+                FindMissingEpisodes();
+            }
             /*
             FillListView();
 
@@ -693,11 +698,13 @@ namespace Renamer
             cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
             */
         }
+
         class EpisodeCollection
         {
             public int maxEpisode = 0;
             public List<InfoEntry> entries = new List<InfoEntry>();
         }
+
         private static void FindMissingEpisodes()
         {            
             Hashtable paths = new Hashtable();

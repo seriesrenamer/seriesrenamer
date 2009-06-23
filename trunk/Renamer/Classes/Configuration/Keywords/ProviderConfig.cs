@@ -88,6 +88,7 @@ namespace Renamer.Classes.Configuration.Keywords
         /// </summary>
         public const string Language = "Language";
 
+        public const string RelationsRemove = "RelationsRemove";
 
         /// <summary>
         /// Helper class containing property names used in subtitle provider files

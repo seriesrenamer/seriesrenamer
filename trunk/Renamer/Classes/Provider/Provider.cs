@@ -45,6 +45,7 @@ namespace Renamer.Classes.Provider
         private string notFoundUrl = "";
         private Helper.Languages language; //Helper.Languages.None
         private string searchResultsBlacklist = "";
+        private string relationsRemove = "";
         public Provider() {
         }
         public Provider(string filename) {
@@ -62,6 +63,7 @@ namespace Renamer.Classes.Provider
             this.Language = Helper.ReadEnum<Helper.Languages>(ProviderConfig.Language, filename);
             this.SearchRightToLeft = Helper.ReadBool(ProviderConfig.SearchRightToLeft, filename);
             this.SearchResultsBlacklist = Helper.ReadProperty(ProviderConfig.SearchResultsBlacklist, filename);
+            this.RelationsRemove = Helper.ReadProperty(ProviderConfig.RelationsRemove, filename);
         }
 
 
@@ -127,7 +129,11 @@ namespace Renamer.Classes.Provider
             set { searchRemove = value; }
         }
 
-
+        public string RelationsRemove
+        {
+            get { return relationsRemove; }
+            set { relationsRemove = value; }
+        }
         /// <summary>
         /// start regex for search pages from end of file
         /// </summary>
