@@ -197,6 +197,7 @@ namespace Renamer
             defaults[Config.Tags] = new List<string>(new string[] { "Xvid", "DivX", "R5", "R3", "GERMAN", "DVD", "INTERNAL", "PROPER", "TELECINE", "LINE", "LD", "MD", "AC3", "SVCD", "XSVCD", "VCD", "Dubbed", "HD", "720P", "720", "SCREENER", "RSVCD", "\\d\\d\\d\\d", "TS", "GER" });
             defaults[Config.ResizeColumns] = "1";
             defaults[Config.ShownameBlacklist] = "Season^Staffel";
+            defaults[Config.FindMissingEpisodes] = "1";
         }
 
         public bool fileLoaded(string filePath) {

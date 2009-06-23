@@ -416,6 +416,18 @@ namespace Renamer
             WriteProperties(Identifier, Value.Split(new string[] { Helper.ReadProperty(Config.Delimiter) }, StringSplitOptions.RemoveEmptyEntries), FilePath);
         }
 
+        public static void WriteBool(string Identifier, bool value)
+        {
+            if (value)
+            {
+                WriteProperty(Identifier, "1");
+            }
+            else
+            {
+                WriteProperty(Identifier, "0");
+            }
+        }
+
         /// <summary>
         /// gets all files recursively from subdirectories using MaxDepth property
         /// </summary>
