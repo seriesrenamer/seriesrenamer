@@ -51,7 +51,17 @@ namespace Renamer
         public void Remove(InfoEntry ie) {
             this.episodes.Remove(ie);
         }
-
+        public int IndexOf(InfoEntry ie)
+        {
+            for (int i = 0; i < episodes.Count; i++)
+            {
+                if (episodes[i] == ie)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
         public void RemoveMissingFileEntries() {
             //scan for files which got deleted so we can remove them
             InfoEntry ie;
