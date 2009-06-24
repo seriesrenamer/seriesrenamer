@@ -64,6 +64,8 @@ namespace Renamer.Classes
         private bool isSubtitle;
         private bool processingRequested;
         private bool isMovie;
+        private bool isSample;
+        private bool markedForDeletion;
 
         private UmlautAction umlautUsage;
         private Case casing;
@@ -89,7 +91,16 @@ namespace Renamer.Classes
         /// new filename with extension
         /// </summary>
         public string NewFileName {
-            get { return this.destination.Filename; }
+            get {
+                if (MarkedForDeletion)
+                {
+                    return "To be deleted";
+                }
+                else
+                {
+                    return this.destination.Filename;
+                }
+            }
             set { this.destination.Filename = value; }
         }
         /// <summary>
@@ -152,6 +163,10 @@ namespace Renamer.Classes
             set {
                 if (nameOfSeries != value) {
                     if (value == null) value = "";
+                    if (value == "Sample" && Helper.ReadBool(Config.DeleteSampleFiles))
+                    {
+                        MarkedForDeletion = true;
+                    }
                     nameOfSeries = value;
                     CreateNewName();
                     SetPath();
@@ -230,6 +245,19 @@ namespace Renamer.Classes
             set { processingRequested = value; }
         }
 
+        public bool Sample
+        {
+            get { return isSample; }
+            set { isSample = value; }
+        }
+        /// <summary>
+        /// If file is to be deleted
+        /// </summary>
+        public bool MarkedForDeletion
+        {
+            get { return markedForDeletion; }
+            set { markedForDeletion = value; }
+        }
         /// <summary>
         /// Option indicates the using of umlaute
         /// </summary>
@@ -317,6 +345,10 @@ namespace Renamer.Classes
         private void ExtractName() {
             if (!source.isEmpty) {
                 Showname = SeriesNameExtractor.Instance.ExtractSeriesName(source);
+                if (Showname == "Sample")
+                {
+                    Sample = true;
+                }
             }
         }
 

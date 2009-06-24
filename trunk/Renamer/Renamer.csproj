@@ -133,11 +133,6 @@
       <DependentUpon>RegexTester.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\Filepath.cs" />
-
-
-
-
-
     <Compile Include="Dialogs\ShownameSearch.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -86,6 +86,8 @@ namespace Renamer.Dialogs
             this.chkResize = new System.Windows.Forms.CheckBox();
             this.label22 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.chkFindMissingEpisodes = new System.Windows.Forms.CheckBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.chkUseSeasonSubdirs = new System.Windows.Forms.CheckBox();
             this.label19 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
@@ -96,8 +98,8 @@ namespace Renamer.Dialogs
             this.chkDeleteEmptyFolders = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.btnDefaults = new System.Windows.Forms.Button();
-            this.label10 = new System.Windows.Forms.Label();
-            this.chkFindMissingEpisodes = new System.Windows.Forms.CheckBox();
+            this.chkDeleteSampleFiles = new System.Windows.Forms.CheckBox();
+            this.label20 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudTimeout)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSearchDepth)).BeginInit();
             this.tabPage1.SuspendLayout();
@@ -425,7 +427,7 @@ namespace Renamer.Dialogs
             this.txtExtract.Location = new System.Drawing.Point(391, 49);
             this.txtExtract.Multiline = true;
             this.txtExtract.Name = "txtExtract";
-            this.txtExtract.Size = new System.Drawing.Size(163, 109);
+            this.txtExtract.Size = new System.Drawing.Size(163, 89);
             this.txtExtract.TabIndex = 28;
             this.toolTip.SetToolTip(this.txtExtract, "Setting this allows the program to get the show name and the seasons from folder " +
                     "names\r\n%S - Season\r\n%T - Series Title");
@@ -578,6 +580,8 @@ namespace Renamer.Dialogs
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.label20);
+            this.tabPage4.Controls.Add(this.chkDeleteSampleFiles);
             this.tabPage4.Controls.Add(this.chkFindMissingEpisodes);
             this.tabPage4.Controls.Add(this.label10);
             this.tabPage4.Controls.Add(this.chkUseSeasonSubdirs);
@@ -600,6 +604,25 @@ namespace Renamer.Dialogs
             this.tabPage4.Text = "Folder Structure";
             this.toolTip.SetToolTip(this.tabPage4, "Settings related to moving the files, deleting empty folders, ...");
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // chkFindMissingEpisodes
+            // 
+            this.chkFindMissingEpisodes.AutoSize = true;
+            this.chkFindMissingEpisodes.Location = new System.Drawing.Point(539, 164);
+            this.chkFindMissingEpisodes.Name = "chkFindMissingEpisodes";
+            this.chkFindMissingEpisodes.Size = new System.Drawing.Size(15, 14);
+            this.chkFindMissingEpisodes.TabIndex = 40;
+            this.chkFindMissingEpisodes.UseVisualStyleBackColor = true;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(15, 164);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(109, 13);
+            this.label10.TabIndex = 39;
+            this.label10.Text = "Find missing episodes";
+            this.toolTip.SetToolTip(this.label10, "If set, Log messages which indicate missing episodes will be produced");
             // 
             // chkUseSeasonSubdirs
             // 
@@ -704,23 +727,24 @@ namespace Renamer.Dialogs
             this.btnDefaults.UseVisualStyleBackColor = true;
             this.btnDefaults.Click += new System.EventHandler(this.btnDefaults_Click);
             // 
-            // label10
+            // chkDeleteSampleFiles
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(15, 164);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(109, 13);
-            this.label10.TabIndex = 39;
-            this.label10.Text = "Find missing episodes";
+            this.chkDeleteSampleFiles.AutoSize = true;
+            this.chkDeleteSampleFiles.Location = new System.Drawing.Point(539, 144);
+            this.chkDeleteSampleFiles.Name = "chkDeleteSampleFiles";
+            this.chkDeleteSampleFiles.Size = new System.Drawing.Size(15, 14);
+            this.chkDeleteSampleFiles.TabIndex = 41;
+            this.chkDeleteSampleFiles.UseVisualStyleBackColor = true;
             // 
-            // chkFindMissingEpisodes
+            // label20
             // 
-            this.chkFindMissingEpisodes.AutoSize = true;
-            this.chkFindMissingEpisodes.Location = new System.Drawing.Point(539, 164);
-            this.chkFindMissingEpisodes.Name = "chkFindMissingEpisodes";
-            this.chkFindMissingEpisodes.Size = new System.Drawing.Size(15, 14);
-            this.chkFindMissingEpisodes.TabIndex = 40;
-            this.chkFindMissingEpisodes.UseVisualStyleBackColor = true;
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(15, 144);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(100, 13);
+            this.label20.TabIndex = 42;
+            this.label20.Text = "Delete Sample Files";
+            this.toolTip.SetToolTip(this.label20, "If set, files recognized as samples will be deleted in the renaming process");
             // 
             // Configuration
             // 
@@ -813,5 +837,7 @@ namespace Renamer.Dialogs
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox chkFindMissingEpisodes;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.CheckBox chkDeleteSampleFiles;
     }
 }

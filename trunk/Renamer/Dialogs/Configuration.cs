@@ -111,6 +111,7 @@ namespace Renamer.Dialogs
             chkUseSeasonSubdirs.Checked = Helper.ReadBool(Config.UseSeasonSubDir);
             chkResize.Checked = Helper.ReadBool(Config.ResizeColumns);
             chkFindMissingEpisodes.Checked = Helper.ReadBool(Config.FindMissingEpisodes);
+            chkDeleteSampleFiles.Checked = Helper.ReadBool(Config.DeleteSampleFiles);
         }
 
         /// <summary>
@@ -166,6 +167,7 @@ namespace Renamer.Dialogs
             Helper.WriteBool(Config.UseSeasonSubDir, chkUseSeasonSubdirs.Checked);
             Helper.WriteBool(Config.ResizeColumns, chkResize.Checked);
             Helper.WriteBool(Config.FindMissingEpisodes, chkFindMissingEpisodes.Checked);
+            Helper.WriteBool(Config.DeleteSampleFiles, chkDeleteSampleFiles.Checked);
 
             Helper.WriteProperties(Config.IgnoreFiles, txtIgnoreFiles.Text);
 

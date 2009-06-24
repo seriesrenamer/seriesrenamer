@@ -202,7 +202,15 @@ namespace Renamer.Classes.Configuration.Keywords
         /// </summary>
         public const string ResizeColumns = "ResizeColumns";
 
+        /// <summary>
+        /// If Log messages about missing episodes should be shown
+        /// </summary>
         public const string FindMissingEpisodes = "FindMissingEpisodes";
+
+        /// <summary>
+        /// If Sample files should be deleted on processing
+        /// </summary>
+        public const string DeleteSampleFiles = "DeleteSampleFiles";
 
         public static class RegexMarker
         {
