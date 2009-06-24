@@ -475,5 +475,52 @@ namespace Renamer
         public static string[] splitFilePath(string path) {
             return path.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
         }
+
+        /// <summary>
+        /// Deletes all empty folders recursively, ignoring files from IgnoredFiles list
+        /// </summary>
+        /// <param name="path">Path from which to delete folders</param>
+        /// <param name="IgnoredFiletypes">List of extensions(without '.' at start) of filetypes which may be deleted</param>
+        public static void DeleteAllEmptyFolders(string path, List<string> IgnoredFiletypes)
+        {
+            bool delete = true;
+            string[] folders = Directory.GetDirectories(path);
+            if (folders.GetLength(0) > 0)
+            {
+                foreach (string folder in folders)
+                {
+                    DeleteAllEmptyFolders(folder, IgnoredFiletypes);
+                }
+            }
+            folders = Directory.GetDirectories(path);
+            if (folders.Length != 0)
+            {
+                return;
+            }
+            string[] files = Directory.GetFiles(path);
+            if (files.Length != 0)
+            {
+                foreach (string s in files)
+                {
+
+                    if (Path.GetExtension(s) == "" || !IgnoredFiletypes.Contains(Path.GetExtension(s).Substring(1)))
+                    {
+                        delete = false;
+                        break;
+                    }
+                }
+            }
+            if (delete)
+            {
+                try
+                {
+                    Directory.Delete(path, true);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogMessage("Couldn't delete " + path + ": " + ex.Message, LogLevel.ERROR);
+                }
+            }
+        }
     }
 }

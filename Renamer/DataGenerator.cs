@@ -525,7 +525,7 @@ namespace Renamer
             }
         }
 
-
+        
 
         /// <summary>
         /// Updatess list view and do lots of other connected stuff with it
@@ -749,7 +749,7 @@ namespace Renamer
         }
         private static void SelectRecognizedFilesForProcessing() {
             foreach (InfoEntry ie in InfoEntryManager.Instance) {
-                if (ie.Showname.ToLower() == "sample") {
+                if (ie.Sample&&!ie.MarkedForDeletion) {
                     ie.ProcessingRequested = false;
                     ie.Movie = false;
                 }

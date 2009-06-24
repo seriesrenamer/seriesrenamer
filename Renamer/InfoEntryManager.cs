@@ -236,11 +236,25 @@ namespace Renamer
             //Go through all files and do stuff
             for (int i = 0; i < this.episodes.Count; i++) {
                 InfoEntry ie = InfoEntryManager.Instance[i];
+                if (ie.MarkedForDeletion&&ie.ProcessingRequested)
+                {
+                    try
+                    {
+                        File.Delete(ie.Filepath1.Fullfilename);
+                        episodes.Remove(ie);
+                        //Go back so no entry is skipped after removal of current entry
+                        i--;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Instance.LogMessage("Couldn't delete " + ie.Filepath1.Fullfilename + ": " + ex.Message, LogLevel.ERROR);
+                    }
+                }
                 ie.Rename(ref invalidAction, ref replace);
             }
             if (Helper.ReadBool(Config.DeleteEmptyFolders)) {
                 //Delete all empty folders code
-                //DeleteAllEmptyFolders(Helper.ReadProperty(Config.LastDirectory), new List<string>(Helper.ReadProperties(Config.IgnoreFiles)));
+                Helper.DeleteAllEmptyFolders(Helper.ReadProperty(Config.LastDirectory), new List<string>(Helper.ReadProperties(Config.IgnoreFiles)));
             }
             //Get a list of all involved folders
             //FillListView();
