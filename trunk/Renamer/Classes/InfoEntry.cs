@@ -84,7 +84,16 @@ namespace Renamer.Classes
         /// destination directory
         /// </summary>
         public string Destination {
-            get { return destination.Path; }
+            get {
+                if (MarkedForDeletion)
+                {
+                    return "To be deleted";
+                }
+                else
+                {
+                    return destination.Path;
+                }
+            }
             set { destination.Path = value; }
         }
         /// <summary>
@@ -416,6 +425,7 @@ namespace Renamer.Classes
             if (InSeasonDir) {
                 basepath = addSeriesDir(getParentsParentDir(Filepath));
             }
+            //Some Problem here if series dir is deeper nested than in basepath dir!
             else if(!InSeriesDir) {
                 basepath = addSeriesDir(basepath);
             }

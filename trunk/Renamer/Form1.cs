@@ -1178,20 +1178,22 @@ namespace Renamer
                 {
                     lvi.BackColor = Color.White;
                 }
-                foreach (ListViewItem lvi2 in lstFiles.Items)
+                if (!ie.MarkedForDeletion)
                 {
-                    if (lvi != lvi2)
+                    foreach (ListViewItem lvi2 in lstFiles.Items)
                     {
-                        InfoEntry ie2 = InfoEntryManager.Instance.GetByListViewItem(lvi2);
-                        if (ie.Destination == ie2.Destination && ie.NewFileName == ie2.NewFileName)
+                        if (lvi != lvi2)
                         {
-                            lvi.BackColor = Color.IndianRed;
-                            GetListViewItemFromInfoEntry(ie2).BackColor = Color.IndianRed;
-                            break;
-                        }
-                        else if (lvi.BackColor != Color.Yellow)
-                        {
-                            lvi.BackColor = Color.White;
+                            InfoEntry ie2 = InfoEntryManager.Instance.GetByListViewItem(lvi2);
+                            if (ie.Destination == ie2.Destination && ie.NewFileName == ie2.NewFileName && ie.NewFileName != "")
+                            {
+                                lvi.BackColor = Color.IndianRed;
+                                break;
+                            }
+                            else if (lvi.BackColor != Color.Yellow)
+                            {
+                                lvi.BackColor = Color.White;
+                            }
                         }
                     }
                 }
