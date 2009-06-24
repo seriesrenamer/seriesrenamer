@@ -1161,7 +1161,7 @@ namespace Renamer
                 ie.ProcessingRequested = lvi.Checked;
             }
 
-            Colorize(lvi);
+            Colorize();
         }
 
         /// <summary>
@@ -1203,6 +1203,9 @@ namespace Renamer
         /// </summary>
         /// <param name="lvi">List item to be colorized</param>
         private void Colorize(ListViewItem lvi) {
+            //reset colors to make sure they are set properly
+            lvi.BackColor = Color.White;
+            lvi.ForeColor = Color.Black;
             InfoEntry ie = InfoEntryManager.Instance.GetByListViewItem(lvi);
             if ((ie.NewFileName==""&&(ie.Destination==""||ie.Destination==ie.Filepath))||!ie.ProcessingRequested){
                 lvi.ForeColor = Color.Gray;
@@ -1225,6 +1228,8 @@ namespace Renamer
                         if (ie.Destination == ie2.Destination && ie.NewFileName == ie2.NewFileName)
                         {
                             lvi.BackColor = Color.IndianRed;
+                            GetListViewItemFromInfoEntry(ie2).BackColor = Color.IndianRed;
+                            break;
                         }
                         else if (lvi.BackColor != Color.Yellow)
                         {
@@ -1234,7 +1239,18 @@ namespace Renamer
                 }
             }            
         }
-
+        private ListViewItem GetListViewItemFromInfoEntry(InfoEntry ie)
+        {
+            int pos=InfoEntryManager.Instance.IndexOf(ie);
+            foreach (ListViewItem lvi in lstFiles.Items)
+            {
+                if ((int)lvi.Tag == pos)
+                {
+                    return lvi;
+                }
+            }
+            return null;
+        }
         /// <summary>
         /// Gets focussed control
         /// </summary>
