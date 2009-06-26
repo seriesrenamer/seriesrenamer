@@ -7,16 +7,19 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using Renamer.Classes.Provider;
+using Renamer.Logging;
 
 namespace Renamer.Dialogs
 {
     public partial class ShownameSearch : Form
     {
         public List<DataGenerator.ParsedSearch> Results;
+        private int maxHeight = 600;
         public ShownameSearch(List<DataGenerator.ParsedSearch> results)
         {
             InitializeComponent();
             Results = results;
+            KeyPreview = true;
             for (int i=0;i<Results.Count;i++)
             {
                 DataGenerator.ParsedSearch ps = Results[i];
@@ -68,6 +71,15 @@ namespace Renamer.Dialogs
             
             //add one more because of stretching
             tableLayoutPanel1.RowCount++;
+            if (Height > maxHeight)
+            {
+                AutoSize = false;
+                Height = maxHeight;
+                //107 is the height of the dialog minus the table control
+                tableLayoutPanel1.AutoSize = false;
+                tableLayoutPanel1.Height = maxHeight - 107;                
+                
+            }
         }
 
         public void SearchBoxKeyDown(object sender, KeyEventArgs e)
@@ -119,6 +131,23 @@ namespace Renamer.Dialogs
         {
             this.DialogResult = DialogResult.Cancel;            
             Close();
+        }
+
+        private void ShownameSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                Logger.Instance.LogMessage("keydown", LogLevel.INFO);
+                foreach (Control c in tableLayoutPanel1.Controls)
+                {
+                    if (c.Focused && c.GetType() == typeof(TextBox))
+                    {
+                        return;
+                    }
+                }
+                e.Handled = true;
+                btnOK.PerformClick();
+            }
         }
     }
 }

@@ -210,7 +210,9 @@ namespace Renamer
         //Update Coloring when file is checked/unchecked and set process flag
         private void lstFiles_ItemChecked(object sender, ItemCheckedEventArgs e) {
             InfoEntryManager.Instance[(int)e.Item.Tag].ProcessingRequested = e.Item.Checked;
-            Colorize(e.Item);
+            Colorize();
+            btnTitles.Enabled=lstFiles.CheckedItems.Count!=0;
+            btnSubs.Enabled=lstFiles.CheckedItems.Count!=0;
         }
 
         //Since sorting after the last two selected columns is supported, we need some event handling here
@@ -1628,6 +1630,22 @@ namespace Renamer
             if (LastSubProvider == null)
                 LastSubProvider = "";
             cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
+            btnTitles.Enabled = InfoEntryManager.Instance.Count > 0;
+            btnRename.Enabled = InfoEntryManager.Instance.Count > 0;
+            btnSubs.Enabled = InfoEntryManager.Instance.Count > 0;
+            //make sure subtitle button is only enabled if there are video files to get subtitles for
+            if (btnSubs.Enabled)
+            {
+                btnSubs.Enabled = false;
+                foreach (InfoEntry ie in InfoEntryManager.Instance)
+                {
+                    if (ie.IsVideofile)
+                    {
+                        btnSubs.Enabled = true;
+                        break;
+                    }
+                }
+            }
         }
         #endregion        
         
