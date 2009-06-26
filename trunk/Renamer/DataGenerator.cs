@@ -385,7 +385,17 @@ namespace Renamer
         /// <param name="Showname">Showname</param>
         private static void GetRelations(string url, string Showname, RelationProvider provider) {
             if (provider == null) {
-                Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
+                Logger.Instance.LogMessage("GetRelations: No relation provider found/selected", LogLevel.ERROR);
+                return;
+            }
+            if (String.IsNullOrEmpty(url))
+            {
+                Logger.Instance.LogMessage("GetRelations: URL is null or empty", LogLevel.ERROR);
+                return;
+            }
+            if (String.IsNullOrEmpty(Showname))
+            {
+                Logger.Instance.LogMessage("GetRelations: Showname is null or empty", LogLevel.ERROR);
                 return;
             }
             Logger.Instance.LogMessage("Trying to get relations from " + url, LogLevel.DEBUG);
@@ -408,6 +418,7 @@ namespace Renamer
                 try {
                     requestHtml = (HttpWebRequest)(HttpWebRequest.Create(url));
                 }
+                    
                 catch (Exception ex) {
                     Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                     requestHtml.Abort();
@@ -426,7 +437,6 @@ namespace Renamer
                     }
                     return;
                 }
-
                 Logger.Instance.LogMessage("Response URL: " + responseHtml.ResponseUri.AbsoluteUri, LogLevel.DEBUG);
                 //if we get redirected, lets assume this page does not exist
                 if (responseHtml.ResponseUri.AbsoluteUri != url) {
@@ -456,13 +466,16 @@ namespace Renamer
                 responseHtml.Close();
 
 
-
                 //Source cropping
                 source = source.Substring(Math.Max(source.IndexOf(provider.RelationsStart), 0));
                 source = source.Substring(0, Math.Max(source.LastIndexOf(provider.RelationsEnd), 0));
 
                 string pattern = provider.RelationsRegExp;
-                Logger.Instance.LogMessage("Trying to match source from " + responseHtml.ResponseUri.AbsoluteUri + " with " + pattern, LogLevel.DEBUG);
+
+                //for some reason, responseHtml.ResponseUri is null for some providers when running on mono
+                if(!Settings.Instance.IsMonoCompatibilityMode){
+                    Logger.Instance.LogMessage("Trying to match source from " + responseHtml.ResponseUri.AbsoluteUri + " with " + pattern, LogLevel.DEBUG);
+                }
                 RegexOptions ro = RegexOptions.IgnoreCase | RegexOptions.Singleline;
                 if (provider.RelationsRightToLeft)
                     ro |= RegexOptions.RightToLeft;
@@ -475,8 +488,10 @@ namespace Renamer
                     //if we are iterating through season pages, take season from page url directly
                     //parse season and episode numbers
                     int s, e;
+
                     Int32.TryParse(m.Groups["Season"].Value, out s);
                     Int32.TryParse(m.Groups["Episode"].Value, out e);
+                    Logger.Instance.LogMessage("h", LogLevel.LOG);
                     if (url != url2) {
                         rc.AddRelation(new Relation(season, e, result));
                         Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + result, LogLevel.DEBUG);

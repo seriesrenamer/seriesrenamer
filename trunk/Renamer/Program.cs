@@ -48,7 +48,6 @@ namespace Renamer
             }
             
             Console.Out.WriteLine("");
-            Console.Out.WriteLine("Test");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1(args));
