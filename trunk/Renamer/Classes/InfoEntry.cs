@@ -120,8 +120,12 @@ namespace Renamer.Classes
             set {
                 if (source.Filename != value) {
                     source.Filename = value;
-                    if(source.Filename!=""&&source.Path!=""){
-                        ExtractName();
+                    if(source.Filename!=""){
+                        CheckExtension();
+                        if (source.Path != "")
+                        {
+                            ExtractName();
+                        }
                     }
                 }
             }
