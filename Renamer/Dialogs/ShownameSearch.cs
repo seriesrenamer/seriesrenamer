@@ -71,6 +71,11 @@ namespace Renamer.Dialogs
             
             //add one more because of stretching
             tableLayoutPanel1.RowCount++;
+            if (Settings.Instance.IsMonoCompatibilityMode)
+            {
+                AutoSize = false;
+                Height = tableLayoutPanel1.Height + 107;
+            }
             if (Height > maxHeight)
             {
                 AutoSize = false;
