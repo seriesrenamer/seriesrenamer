@@ -48,6 +48,7 @@ namespace Renamer.Dialogs
             txtReplace.Text = Helper.ReadProperty(Config.InvalidCharReplace);
             nudSearchDepth.Text = Helper.ReadProperty(Config.MaxDepth);
             txtIgnoreFiles.Text = Helper.ReadProperty(Config.IgnoreFiles);
+            txtDestination.Text = Helper.ReadProperty(Config.DestinationDirectory);
 
             //Get multiline strings
             txtExtensions.Text = "";
@@ -91,7 +92,7 @@ namespace Renamer.Dialogs
             }
             if (txtExtract.Text.Length > 0)
                 txtExtract.Text = txtExtract.Text.Substring(0, txtExtract.Text.Length - Environment.NewLine.Length);
-
+            
             //Get some enums
             cbLogfile.SelectedIndex = (int)(Helper.ReadEnum<Logging.LogLevel>(Config.LogFileLevel));
             cbLogwindow.SelectedIndex = (int)(Helper.ReadEnum<Logging.LogLevel>(Config.LogTextBoxLevel));
@@ -111,7 +112,7 @@ namespace Renamer.Dialogs
             chkUseSeasonSubdirs.Checked = Helper.ReadBool(Config.UseSeasonSubDir);
             chkResize.Checked = Helper.ReadBool(Config.ResizeColumns);
             chkFindMissingEpisodes.Checked = Helper.ReadBool(Config.FindMissingEpisodes);
-            chkDeleteSampleFiles.Checked = Helper.ReadBool(Config.DeleteSampleFiles);
+            chkDeleteSampleFiles.Checked = Helper.ReadBool(Config.DeleteSampleFiles);            
         }
 
         /// <summary>
@@ -132,6 +133,7 @@ namespace Renamer.Dialogs
             Helper.WriteProperty(Config.Timeout, nudTimeout.Value.ToString());
             Helper.WriteProperty(Config.MaxDepth, nudSearchDepth.Value.ToString());
             Helper.WriteProperty(Config.InvalidCharReplace, txtReplace.Text);
+            Helper.WriteProperty(Config.DestinationDirectory, txtDestination.Text);
             string[] extensions = txtExtensions.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             //Convert to lowercase
             for (int i = 0; i < extensions.GetLength(0); i++) {
@@ -197,6 +199,15 @@ namespace Renamer.Dialogs
             label18.Enabled = chkDeleteEmptyFolders.Checked;
             chkDeleteAllEmptyFolders.Enabled = chkDeleteEmptyFolders.Checked;
             txtIgnoreFiles.Enabled = chkDeleteEmptyFolders.Checked;
+        }
+
+        private void btnDestination_Click(object sender, EventArgs e)
+        {
+            folderBrowserDialog1.SelectedPath = txtDestination.Text;
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                txtDestination.Text = folderBrowserDialog1.SelectedPath;
+            }
         }
 
     }
