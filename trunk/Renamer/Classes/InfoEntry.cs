@@ -415,6 +415,13 @@ namespace Renamer.Classes
                 return;
             }
             string basepath = Helper.ReadProperty(Config.LastDirectory);
+            string DestinationPath = Helper.ReadProperty(Config.DestinationDirectory);
+           
+            if (!Directory.Exists(DestinationPath))
+            {
+                DestinationPath = basepath;
+            }
+            bool DifferentDestinationPath = basepath!=DestinationPath;
             //for placing files in directory structure, figure out if selected directory is show name, otherwise create one
             string[] dirs = this.source.Folders;
             bool InSeriesDir = false;
@@ -442,14 +449,18 @@ namespace Renamer.Classes
                 Destination = "";
                 return;
             }
-            if (InSeasonDir) {
-                basepath = addSeriesDir(getParentsParentDir(Filepath));
+            if (InSeasonDir&&!DifferentDestinationPath) {
+                DestinationPath = addSeriesDir(getParentsParentDir(Filepath));
             }
             //Some Problem here if series dir is deeper nested than in basepath dir!
-            else if(!InSeriesDir) {
-                basepath = addSeriesDir(basepath);
+            else if(!InSeriesDir&&!DifferentDestinationPath) {
+                DestinationPath = addSeriesDir(Filepath);
             }
-            Destination = addSeasonsDirIfDesired(basepath);
+            else if (DifferentDestinationPath)
+            {
+                DestinationPath = addSeriesDir(DestinationPath);
+            }
+            Destination = addSeasonsDirIfDesired(DestinationPath);
         }
         private void getCreateDirectory() {
             if (createDirectoryStructure != DirectoryStructure.Unset)

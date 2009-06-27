@@ -120,6 +120,9 @@
   <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
   <data name="label6.ToolTip" xml:space="preserve">
     <value>Patterns used to identify season and episode number in the filename. They are processed in order, if one doesn't work, next will be used. %E and %S are placeholders for episode and season number. If %E follows %S directly, it is assumed that %S consists of one number only. Those patterns should only be edited if you find that some files aren't recognised properly and you know what you're doing ;)</value>
   </data>
@@ -132,4 +135,7 @@
   <data name="txtIgnoreFiles.ToolTip" xml:space="preserve">
     <value>This option allows to also delete files with extensions on this list. So if there's a folder containing a video and an nfo file, and the video is moved, the folder will get deleted if nfo is on this list</value>
   </data>
+  <metadata name="folderBrowserDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>102, 17</value>
+  </metadata>
 </root>

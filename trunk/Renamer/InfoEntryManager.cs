@@ -259,9 +259,32 @@ namespace Renamer
             }
             //Get a list of all involved folders
             //FillListView();
+            
         }
 
-
+        public void RenameShow(string from, string to)
+        {
+            from = from.ToLower();
+            foreach (InfoEntry ie in episodes)
+            {
+                if (ie.Showname.ToLower() == from)
+                {
+                    ie.Showname = to;
+                }
+            }
+        }
+        public bool ContainsShow(string showname)
+        {
+            showname = showname.ToLower();
+            foreach (InfoEntry ie in episodes)
+            {
+                if (ie.Showname.ToLower() == showname)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         /// <summary>
         /// Decides which files should be marked for processing
         /// </summary>

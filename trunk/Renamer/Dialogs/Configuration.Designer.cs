@@ -86,6 +86,8 @@ namespace Renamer.Dialogs
             this.chkResize = new System.Windows.Forms.CheckBox();
             this.label22 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.label20 = new System.Windows.Forms.Label();
+            this.chkDeleteSampleFiles = new System.Windows.Forms.CheckBox();
             this.chkFindMissingEpisodes = new System.Windows.Forms.CheckBox();
             this.label10 = new System.Windows.Forms.Label();
             this.chkUseSeasonSubdirs = new System.Windows.Forms.CheckBox();
@@ -98,8 +100,10 @@ namespace Renamer.Dialogs
             this.chkDeleteEmptyFolders = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.btnDefaults = new System.Windows.Forms.Button();
-            this.chkDeleteSampleFiles = new System.Windows.Forms.CheckBox();
-            this.label20 = new System.Windows.Forms.Label();
+            this.txtDestination = new System.Windows.Forms.TextBox();
+            this.label23 = new System.Windows.Forms.Label();
+            this.btnDestination = new System.Windows.Forms.Button();
+            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             ((System.ComponentModel.ISupportInitialize)(this.nudTimeout)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSearchDepth)).BeginInit();
             this.tabPage1.SuspendLayout();
@@ -414,7 +418,7 @@ namespace Renamer.Dialogs
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(15, 52);
+            this.label14.Location = new System.Drawing.Point(15, 29);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(347, 13);
             this.label14.TabIndex = 27;
@@ -424,10 +428,10 @@ namespace Renamer.Dialogs
             // 
             // txtExtract
             // 
-            this.txtExtract.Location = new System.Drawing.Point(391, 49);
+            this.txtExtract.Location = new System.Drawing.Point(368, 26);
             this.txtExtract.Multiline = true;
             this.txtExtract.Name = "txtExtract";
-            this.txtExtract.Size = new System.Drawing.Size(163, 89);
+            this.txtExtract.Size = new System.Drawing.Size(186, 86);
             this.txtExtract.TabIndex = 28;
             this.toolTip.SetToolTip(this.txtExtract, "Setting this allows the program to get the show name and the seasons from folder " +
                     "names\r\n%S - Season\r\n%T - Series Title");
@@ -435,7 +439,7 @@ namespace Renamer.Dialogs
             // chkCreateDirectoryStructure
             // 
             this.chkCreateDirectoryStructure.AutoSize = true;
-            this.chkCreateDirectoryStructure.Location = new System.Drawing.Point(539, 6);
+            this.chkCreateDirectoryStructure.Location = new System.Drawing.Point(140, 7);
             this.chkCreateDirectoryStructure.Name = "chkCreateDirectoryStructure";
             this.chkCreateDirectoryStructure.Size = new System.Drawing.Size(15, 14);
             this.chkCreateDirectoryStructure.TabIndex = 29;
@@ -445,7 +449,7 @@ namespace Renamer.Dialogs
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(15, 6);
+            this.label15.Location = new System.Drawing.Point(15, 7);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(125, 13);
             this.label15.TabIndex = 30;
@@ -580,6 +584,9 @@ namespace Renamer.Dialogs
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.btnDestination);
+            this.tabPage4.Controls.Add(this.label23);
+            this.tabPage4.Controls.Add(this.txtDestination);
             this.tabPage4.Controls.Add(this.label20);
             this.tabPage4.Controls.Add(this.chkDeleteSampleFiles);
             this.tabPage4.Controls.Add(this.chkFindMissingEpisodes);
@@ -605,10 +612,29 @@ namespace Renamer.Dialogs
             this.toolTip.SetToolTip(this.tabPage4, "Settings related to moving the files, deleting empty folders, ...");
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(15, 164);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(100, 13);
+            this.label20.TabIndex = 42;
+            this.label20.Text = "Delete Sample Files";
+            this.toolTip.SetToolTip(this.label20, "If set, files recognized as samples will be deleted in the renaming process");
+            // 
+            // chkDeleteSampleFiles
+            // 
+            this.chkDeleteSampleFiles.AutoSize = true;
+            this.chkDeleteSampleFiles.Location = new System.Drawing.Point(539, 164);
+            this.chkDeleteSampleFiles.Name = "chkDeleteSampleFiles";
+            this.chkDeleteSampleFiles.Size = new System.Drawing.Size(15, 14);
+            this.chkDeleteSampleFiles.TabIndex = 41;
+            this.chkDeleteSampleFiles.UseVisualStyleBackColor = true;
+            // 
             // chkFindMissingEpisodes
             // 
             this.chkFindMissingEpisodes.AutoSize = true;
-            this.chkFindMissingEpisodes.Location = new System.Drawing.Point(539, 164);
+            this.chkFindMissingEpisodes.Location = new System.Drawing.Point(539, 144);
             this.chkFindMissingEpisodes.Name = "chkFindMissingEpisodes";
             this.chkFindMissingEpisodes.Size = new System.Drawing.Size(15, 14);
             this.chkFindMissingEpisodes.TabIndex = 40;
@@ -617,7 +643,7 @@ namespace Renamer.Dialogs
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(15, 164);
+            this.label10.Location = new System.Drawing.Point(15, 144);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(109, 13);
             this.label10.TabIndex = 39;
@@ -627,7 +653,7 @@ namespace Renamer.Dialogs
             // chkUseSeasonSubdirs
             // 
             this.chkUseSeasonSubdirs.AutoSize = true;
-            this.chkUseSeasonSubdirs.Location = new System.Drawing.Point(539, 29);
+            this.chkUseSeasonSubdirs.Location = new System.Drawing.Point(307, 7);
             this.chkUseSeasonSubdirs.Name = "chkUseSeasonSubdirs";
             this.chkUseSeasonSubdirs.Size = new System.Drawing.Size(15, 14);
             this.chkUseSeasonSubdirs.TabIndex = 38;
@@ -636,7 +662,7 @@ namespace Renamer.Dialogs
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(15, 29);
+            this.label19.Location = new System.Drawing.Point(161, 7);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(140, 13);
             this.label19.TabIndex = 37;
@@ -676,9 +702,9 @@ namespace Renamer.Dialogs
             // 
             // txtIgnoreFiles
             // 
-            this.txtIgnoreFiles.Location = new System.Drawing.Point(391, 227);
+            this.txtIgnoreFiles.Location = new System.Drawing.Point(368, 227);
             this.txtIgnoreFiles.Name = "txtIgnoreFiles";
-            this.txtIgnoreFiles.Size = new System.Drawing.Size(163, 20);
+            this.txtIgnoreFiles.Size = new System.Drawing.Size(186, 20);
             this.txtIgnoreFiles.TabIndex = 33;
             this.toolTip.SetToolTip(this.txtIgnoreFiles, resources.GetString("txtIgnoreFiles.ToolTip"));
             // 
@@ -727,24 +753,31 @@ namespace Renamer.Dialogs
             this.btnDefaults.UseVisualStyleBackColor = true;
             this.btnDefaults.Click += new System.EventHandler(this.btnDefaults_Click);
             // 
-            // chkDeleteSampleFiles
+            // txtDestination
             // 
-            this.chkDeleteSampleFiles.AutoSize = true;
-            this.chkDeleteSampleFiles.Location = new System.Drawing.Point(539, 144);
-            this.chkDeleteSampleFiles.Name = "chkDeleteSampleFiles";
-            this.chkDeleteSampleFiles.Size = new System.Drawing.Size(15, 14);
-            this.chkDeleteSampleFiles.TabIndex = 41;
-            this.chkDeleteSampleFiles.UseVisualStyleBackColor = true;
+            this.txtDestination.Location = new System.Drawing.Point(368, 118);
+            this.txtDestination.Name = "txtDestination";
+            this.txtDestination.Size = new System.Drawing.Size(154, 20);
+            this.txtDestination.TabIndex = 43;
             // 
-            // label20
+            // label23
             // 
-            this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(15, 144);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(100, 13);
-            this.label20.TabIndex = 42;
-            this.label20.Text = "Delete Sample Files";
-            this.toolTip.SetToolTip(this.label20, "If set, files recognized as samples will be deleted in the renaming process");
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(15, 121);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(142, 13);
+            this.label23.TabIndex = 44;
+            this.label23.Text = "Default Destination Directory";
+            // 
+            // btnDestination
+            // 
+            this.btnDestination.Location = new System.Drawing.Point(528, 116);
+            this.btnDestination.Name = "btnDestination";
+            this.btnDestination.Size = new System.Drawing.Size(26, 23);
+            this.btnDestination.TabIndex = 45;
+            this.btnDestination.Text = "...";
+            this.btnDestination.UseVisualStyleBackColor = true;
+            this.btnDestination.Click += new System.EventHandler(this.btnDestination_Click);
             // 
             // Configuration
             // 
@@ -839,5 +872,9 @@ namespace Renamer.Dialogs
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.CheckBox chkDeleteSampleFiles;
+        private System.Windows.Forms.TextBox txtDestination;
+        private System.Windows.Forms.Button btnDestination;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
     }
 }

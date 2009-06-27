@@ -39,6 +39,13 @@ namespace Renamer
                 SearchResults = ss.Results;
                 foreach (ParsedSearch ps in SearchResults)
                 {
+                    if (ps.SearchString != ps.Showname)
+                    {
+                        if (MessageBox.Show("Rename " + ps.Showname + " to " + ps.SearchString + "?", "Apply new Showname", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        {
+                            InfoEntryManager.Instance.RenameShow(ps.Showname, ps.SearchString);
+                        }
+                    }
                     if (ps.Results != null && ps.Results.Count>0)
                     {
                         //get rid of old relations

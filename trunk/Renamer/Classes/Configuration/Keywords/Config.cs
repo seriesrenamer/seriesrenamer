@@ -212,6 +212,11 @@ namespace Renamer.Classes.Configuration.Keywords
         /// </summary>
         public const string DeleteSampleFiles = "DeleteSampleFiles";
 
+        /// <summary>
+        /// Directory in which files are moved (as basedir)
+        /// </summary>
+        public const string DestinationDirectory = "DestinationDirectory";
+
         public static class RegexMarker
         {
 

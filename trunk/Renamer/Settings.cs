@@ -199,6 +199,7 @@ namespace Renamer
             defaults[Config.ShownameBlacklist] = "Season^Staffel";
             defaults[Config.FindMissingEpisodes] = "1";
             defaults[Config.DeleteSampleFiles] = "1";
+            defaults[Config.DestinationDirectory] = "";
         }
 
         public bool fileLoaded(string filePath) {
