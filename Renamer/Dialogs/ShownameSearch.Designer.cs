@@ -72,7 +72,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(755, 13);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(753, 13);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // label3
@@ -144,7 +144,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(784, 92);
             this.Controls.Add(this.tableLayoutPanel1);
@@ -156,7 +155,9 @@
             this.MaximumSize = new System.Drawing.Size(1024, 800);
             this.MinimizeBox = false;
             this.Name = "ShownameSearch";
+            this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Search for shownames";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ShownameSearch_KeyDown);
             this.tableLayoutPanel1.ResumeLayout(false);

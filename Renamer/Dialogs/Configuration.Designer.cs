@@ -86,6 +86,9 @@ namespace Renamer.Dialogs
             this.chkResize = new System.Windows.Forms.CheckBox();
             this.label22 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.btnDestination = new System.Windows.Forms.Button();
+            this.label23 = new System.Windows.Forms.Label();
+            this.txtDestination = new System.Windows.Forms.TextBox();
             this.label20 = new System.Windows.Forms.Label();
             this.chkDeleteSampleFiles = new System.Windows.Forms.CheckBox();
             this.chkFindMissingEpisodes = new System.Windows.Forms.CheckBox();
@@ -100,10 +103,9 @@ namespace Renamer.Dialogs
             this.chkDeleteEmptyFolders = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.btnDefaults = new System.Windows.Forms.Button();
-            this.txtDestination = new System.Windows.Forms.TextBox();
-            this.label23 = new System.Windows.Forms.Label();
-            this.btnDestination = new System.Windows.Forms.Button();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+            this.cbProviders = new System.Windows.Forms.ComboBox();
+            this.lblTitlesFrom = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudTimeout)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSearchDepth)).BeginInit();
             this.tabPage1.SuspendLayout();
@@ -156,7 +158,7 @@ namespace Renamer.Dialogs
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 66);
+            this.label5.Location = new System.Drawing.Point(12, 93);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(103, 13);
             this.label5.TabIndex = 4;
@@ -166,7 +168,7 @@ namespace Renamer.Dialogs
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(350, 66);
+            this.label6.Location = new System.Drawing.Point(350, 93);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(147, 13);
             this.label6.TabIndex = 5;
@@ -182,14 +184,14 @@ namespace Renamer.Dialogs
             0,
             0,
             0});
-            this.nudTimeout.Location = new System.Drawing.Point(391, 11);
+            this.nudTimeout.Location = new System.Drawing.Point(457, 11);
             this.nudTimeout.Maximum = new decimal(new int[] {
             10000,
             0,
             0,
             0});
             this.nudTimeout.Name = "nudTimeout";
-            this.nudTimeout.Size = new System.Drawing.Size(163, 20);
+            this.nudTimeout.Size = new System.Drawing.Size(97, 20);
             this.nudTimeout.TabIndex = 6;
             this.toolTip.SetToolTip(this.nudTimeout, "Timeout setting for all web related connections");
             // 
@@ -203,27 +205,27 @@ namespace Renamer.Dialogs
             // 
             // nudSearchDepth
             // 
-            this.nudSearchDepth.Location = new System.Drawing.Point(391, 38);
+            this.nudSearchDepth.Location = new System.Drawing.Point(457, 38);
             this.nudSearchDepth.Name = "nudSearchDepth";
-            this.nudSearchDepth.Size = new System.Drawing.Size(163, 20);
+            this.nudSearchDepth.Size = new System.Drawing.Size(97, 20);
             this.nudSearchDepth.TabIndex = 9;
             this.toolTip.SetToolTip(this.nudSearchDepth, "Search depth for scanning subdirectories for files");
             // 
             // txtExtensions
             // 
-            this.txtExtensions.Location = new System.Drawing.Point(15, 82);
+            this.txtExtensions.Location = new System.Drawing.Point(15, 109);
             this.txtExtensions.Multiline = true;
             this.txtExtensions.Name = "txtExtensions";
-            this.txtExtensions.Size = new System.Drawing.Size(163, 161);
+            this.txtExtensions.Size = new System.Drawing.Size(163, 134);
             this.txtExtensions.TabIndex = 10;
             this.toolTip.SetToolTip(this.txtExtensions, "File extensions to include in renaming process");
             // 
             // txtPattern
             // 
-            this.txtPattern.Location = new System.Drawing.Point(353, 83);
+            this.txtPattern.Location = new System.Drawing.Point(353, 109);
             this.txtPattern.Multiline = true;
             this.txtPattern.Name = "txtPattern";
-            this.txtPattern.Size = new System.Drawing.Size(201, 161);
+            this.txtPattern.Size = new System.Drawing.Size(201, 135);
             this.txtPattern.TabIndex = 11;
             this.toolTip.SetToolTip(this.txtPattern, resources.GetString("txtPattern.ToolTip"));
             // 
@@ -351,17 +353,17 @@ namespace Renamer.Dialogs
             // 
             // txtSubs
             // 
-            this.txtSubs.Location = new System.Drawing.Point(184, 83);
+            this.txtSubs.Location = new System.Drawing.Point(184, 109);
             this.txtSubs.Multiline = true;
             this.txtSubs.Name = "txtSubs";
-            this.txtSubs.Size = new System.Drawing.Size(163, 160);
+            this.txtSubs.Size = new System.Drawing.Size(163, 134);
             this.txtSubs.TabIndex = 23;
             this.toolTip.SetToolTip(this.txtSubs, "File extensions used for subtitles");
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(191, 66);
+            this.label11.Location = new System.Drawing.Point(181, 93);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(111, 13);
             this.label11.TabIndex = 24;
@@ -458,6 +460,8 @@ namespace Renamer.Dialogs
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.cbProviders);
+            this.tabPage1.Controls.Add(this.lblTitlesFrom);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.label4);
             this.tabPage1.Controls.Add(this.label5);
@@ -612,6 +616,32 @@ namespace Renamer.Dialogs
             this.toolTip.SetToolTip(this.tabPage4, "Settings related to moving the files, deleting empty folders, ...");
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // btnDestination
+            // 
+            this.btnDestination.Location = new System.Drawing.Point(528, 116);
+            this.btnDestination.Name = "btnDestination";
+            this.btnDestination.Size = new System.Drawing.Size(26, 23);
+            this.btnDestination.TabIndex = 45;
+            this.btnDestination.Text = "...";
+            this.btnDestination.UseVisualStyleBackColor = true;
+            this.btnDestination.Click += new System.EventHandler(this.btnDestination_Click);
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(15, 121);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(142, 13);
+            this.label23.TabIndex = 44;
+            this.label23.Text = "Default Destination Directory";
+            // 
+            // txtDestination
+            // 
+            this.txtDestination.Location = new System.Drawing.Point(368, 118);
+            this.txtDestination.Name = "txtDestination";
+            this.txtDestination.Size = new System.Drawing.Size(154, 20);
+            this.txtDestination.TabIndex = 43;
+            // 
             // label20
             // 
             this.label20.AutoSize = true;
@@ -753,31 +783,23 @@ namespace Renamer.Dialogs
             this.btnDefaults.UseVisualStyleBackColor = true;
             this.btnDefaults.Click += new System.EventHandler(this.btnDefaults_Click);
             // 
-            // txtDestination
+            // cbProviders
             // 
-            this.txtDestination.Location = new System.Drawing.Point(368, 118);
-            this.txtDestination.Name = "txtDestination";
-            this.txtDestination.Size = new System.Drawing.Size(154, 20);
-            this.txtDestination.TabIndex = 43;
+            this.cbProviders.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbProviders.FormattingEnabled = true;
+            this.cbProviders.Location = new System.Drawing.Point(353, 64);
+            this.cbProviders.Name = "cbProviders";
+            this.cbProviders.Size = new System.Drawing.Size(201, 21);
+            this.cbProviders.TabIndex = 26;
             // 
-            // label23
+            // lblTitlesFrom
             // 
-            this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(15, 121);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(142, 13);
-            this.label23.TabIndex = 44;
-            this.label23.Text = "Default Destination Directory";
-            // 
-            // btnDestination
-            // 
-            this.btnDestination.Location = new System.Drawing.Point(528, 116);
-            this.btnDestination.Name = "btnDestination";
-            this.btnDestination.Size = new System.Drawing.Size(26, 23);
-            this.btnDestination.TabIndex = 45;
-            this.btnDestination.Text = "...";
-            this.btnDestination.UseVisualStyleBackColor = true;
-            this.btnDestination.Click += new System.EventHandler(this.btnDestination_Click);
+            this.lblTitlesFrom.AutoSize = true;
+            this.lblTitlesFrom.Location = new System.Drawing.Point(12, 67);
+            this.lblTitlesFrom.Name = "lblTitlesFrom";
+            this.lblTitlesFrom.Size = new System.Drawing.Size(130, 13);
+            this.lblTitlesFrom.TabIndex = 25;
+            this.lblTitlesFrom.Text = "Default title search source";
             // 
             // Configuration
             // 
@@ -876,5 +898,7 @@ namespace Renamer.Dialogs
         private System.Windows.Forms.Button btnDestination;
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
+        private System.Windows.Forms.ComboBox cbProviders;
+        private System.Windows.Forms.Label lblTitlesFrom;
     }
 }

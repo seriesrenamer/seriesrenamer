@@ -50,7 +50,8 @@ namespace Renamer
             Console.Out.WriteLine("");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1(args));
+            Form1.Instance = new Form1(args);
+            Application.Run(Form1.Instance);
         }
     }
 }

@@ -65,7 +65,24 @@ namespace Renamer
         /// </summary>
         private List<string> args;
 
+        protected static Form1 instance;
+        private static object m_lock = new object();
 
+        public static Form1 Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    lock (m_lock) { if (instance == null) instance = new Form1(null); }
+                }
+                return instance;
+            }
+            set
+            {
+                instance = value;
+            }
+        }
         /// <summary>
         /// GUI constructor
         /// </summary>
@@ -436,19 +453,7 @@ namespace Renamer
             lstFiles.ListViewItemSorter = lvwColumnSorter;
             txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
 
-            //relations provider combo box
-            cbProviders.Items.AddRange(RelationProvider.ProviderNames);
-
-            string LastProvider = Helper.ReadProperty(Config.LastProvider);
-            if (LastProvider == null)
-                LastProvider = "";
-            cbProviders.SelectedIndex = Math.Max(0, cbProviders.Items.IndexOf(LastProvider));
-            RelationProvider provider = RelationProvider.GetCurrentProvider();
-            if (provider == null) {
-                Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
-                return;
-            }
-            Helper.WriteProperty(Config.LastProvider, cbProviders.Text);
+            
 
             //subtitle provider combo box
             cbSubs.Items.AddRange(SubtitleProvider.ProviderNames);
@@ -1652,11 +1657,7 @@ namespace Renamer
 
             //also update some gui elements for the sake of it
             txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
-            txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
-            string LastProvider = Helper.ReadProperty(Config.LastProvider);
-            if (LastProvider == null)
-                LastProvider = "";
-            cbProviders.SelectedIndex = Math.Max(0, cbProviders.Items.IndexOf(LastProvider));
+            txtPath.Text = Helper.ReadProperty(Config.LastDirectory);            
             string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
             if (LastSubProvider == null)
                 LastSubProvider = "";
