@@ -145,9 +145,9 @@ namespace Renamer.Classes
             if (!String.IsNullOrEmpty(name) || folders.Length == 0) {
                 return;
             }
-            name = folders[folders.Length - 1];
-            for (int i = 2; i < folders.Length - i; i++) {
-                if (Regex.Match(name, shownameBlacklist, RegexOptions.IgnoreCase).Success) {
+            for (int i = 1; i < folders.Length - 1; i++) {
+                if (!Regex.Match(folders[folders.Length - i], shownameBlacklist, RegexOptions.IgnoreCase).Success)
+                {
                     name = folders[folders.Length - i];
                     break;
                 }
@@ -191,6 +191,7 @@ namespace Renamer.Classes
             }
             fallbackFolderNames();
             postprocessing();
+            if (name == null) return "";
             return name;
         }
 

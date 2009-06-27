@@ -244,6 +244,7 @@ namespace Renamer
                         episodes.Remove(ie);
                         //Go back so no entry is skipped after removal of current entry
                         i--;
+                        continue;
                     }
                     catch (Exception ex)
                     {
