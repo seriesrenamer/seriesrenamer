@@ -23,6 +23,8 @@ using System.Windows.Forms;
 using System.IO;
 using Renamer.Classes.Configuration.Keywords;
 using Renamer.Classes;
+using Renamer.Classes.Provider;
+using Renamer.Logging;
 
 namespace Renamer.Dialogs
 {
@@ -112,7 +114,22 @@ namespace Renamer.Dialogs
             chkUseSeasonSubdirs.Checked = Helper.ReadBool(Config.UseSeasonSubDir);
             chkResize.Checked = Helper.ReadBool(Config.ResizeColumns);
             chkFindMissingEpisodes.Checked = Helper.ReadBool(Config.FindMissingEpisodes);
-            chkDeleteSampleFiles.Checked = Helper.ReadBool(Config.DeleteSampleFiles);            
+            chkDeleteSampleFiles.Checked = Helper.ReadBool(Config.DeleteSampleFiles);         
+   
+            //relation provider combobox
+            cbProviders.Items.AddRange(RelationProvider.ProviderNames);
+
+            string LastProvider = Helper.ReadProperty(Config.LastProvider);
+            if (LastProvider == null)
+                LastProvider = "";
+            cbProviders.SelectedIndex = Math.Max(0, cbProviders.Items.IndexOf(LastProvider));
+            RelationProvider provider = RelationProvider.GetCurrentProvider();
+            if (provider == null)
+            {
+                Logger.Instance.LogMessage("No relation provider found/selected", LogLevel.ERROR);
+                return;
+            }
+            Helper.WriteProperty(Config.LastProvider, cbProviders.Text);
         }
 
         /// <summary>
@@ -172,7 +189,7 @@ namespace Renamer.Dialogs
             Helper.WriteBool(Config.DeleteSampleFiles, chkDeleteSampleFiles.Checked);
 
             Helper.WriteProperties(Config.IgnoreFiles, txtIgnoreFiles.Text);
-
+            Helper.WriteProperty(Config.LastProvider, cbProviders.SelectedItem.ToString());
             DialogResult = DialogResult.OK;
             Close();
         }

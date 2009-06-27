@@ -33,8 +33,7 @@ namespace Renamer
                 //GetTitles(showname);
             }
             ShownameSearch ss = new ShownameSearch(SearchResults);
-            ss.ShowDialog();
-            if (ss.DialogResult == DialogResult.OK)
+            if (ss.ShowDialog(Form1.Instance) == DialogResult.OK)
             {
                 SearchResults = ss.Results;
                 foreach (ParsedSearch ps in SearchResults)

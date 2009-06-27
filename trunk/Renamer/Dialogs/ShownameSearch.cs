@@ -85,6 +85,7 @@ namespace Renamer.Dialogs
                 tableLayoutPanel1.Height = maxHeight - 107;                
                 
             }
+            BringToFront();
         }
 
         public void SearchBoxKeyDown(object sender, KeyEventArgs e)
