@@ -516,7 +516,7 @@ namespace Renamer
 
         //Auto column resize by storing column width ratios at resize start
         private void Form1_ResizeBegin(object sender, EventArgs e) {
-            if (Helper.ReadInt(Config.ResizeColumns) == 1) {
+            if (Helper.ReadBool(Config.ResizeColumns)) {
                 columnsizes = new float[]{
                 (float)(lstFiles.Columns[0].Width)/(float)(lstFiles.ClientRectangle.Width),
                 (float)(lstFiles.Columns[1].Width)/(float)(lstFiles.ClientRectangle.Width),
@@ -524,13 +524,15 @@ namespace Renamer
                 (float)(lstFiles.Columns[3].Width)/(float)(lstFiles.ClientRectangle.Width),
                 (float)(lstFiles.Columns[4].Width)/(float)(lstFiles.ClientRectangle.Width),
                 (float)(lstFiles.Columns[5].Width)/(float)(lstFiles.ClientRectangle.Width),
-                (float)(lstFiles.Columns[6].Width)/(float)(lstFiles.ClientRectangle.Width),};
+                (float)(lstFiles.Columns[6].Width)/(float)(lstFiles.ClientRectangle.Width),
+                (float)(lstFiles.Columns[7].Width)/(float)(lstFiles.ClientRectangle.Width)};
                 float sum = 0;
-                for (int i = 0; i < 7; i++) {
+                for (int i = 0; i < lstFiles.Columns.Count; i++) {
                     sum += columnsizes[i];
                 }
                 //some numeric correction to make ratios:
-                for (int i = 0; i < 7; i++) {
+                for (int i = 0; i < lstFiles.Columns.Count; i++)
+                {
                     columnsizes[i] *= (float)1 / sum;
                 }
             }
@@ -538,15 +540,17 @@ namespace Renamer
 
         //Auto column resize, restore Column width ratios at resize end (to make sure!)
         private void Form1_ResizeEnd(object sender, EventArgs e) {
-            if (Helper.ReadInt(Config.ResizeColumns) == 1) {
-                if (lstFiles != null && lstFiles.Columns.Count == 7 && columnsizes != null) {
+            if (Helper.ReadBool(Config.ResizeColumns)) {
+                if (lstFiles != null && lstFiles.Columns.Count > 0 && columnsizes != null)
+                {
                     lstFiles.Columns[0].Width = (int)(columnsizes[0] * (float)(lstFiles.ClientRectangle.Width));
                     lstFiles.Columns[1].Width = (int)(columnsizes[1] * (float)(lstFiles.ClientRectangle.Width));
                     lstFiles.Columns[2].Width = (int)(columnsizes[2] * (float)(lstFiles.ClientRectangle.Width));
                     lstFiles.Columns[3].Width = (int)(columnsizes[3] * (float)(lstFiles.ClientRectangle.Width));
                     lstFiles.Columns[4].Width = (int)(columnsizes[4] * (float)(lstFiles.ClientRectangle.Width));
                     lstFiles.Columns[5].Width = (int)(columnsizes[5] * (float)(lstFiles.ClientRectangle.Width));
-                    lstFiles.Columns[6].Width = (int)(columnsizes[5] * (float)(lstFiles.ClientRectangle.Width));
+                    lstFiles.Columns[6].Width = (int)(columnsizes[6] * (float)(lstFiles.ClientRectangle.Width));
+                    lstFiles.Columns[7].Width = (int)(columnsizes[7] * (float)(lstFiles.ClientRectangle.Width));
                 }
             }
         }
@@ -554,8 +558,8 @@ namespace Renamer
         //Auto column resize, restore Column width ratios during resize
         private void Form1_Resize(object sender, EventArgs e) {
             if (this.Visible) {
-                if (Helper.ReadInt(Config.ResizeColumns) == 1) {
-                    if (lstFiles != null && lstFiles.Columns.Count == 6 && columnsizes != null) {
+                if (Helper.ReadBool(Config.ResizeColumns)) {
+                    if (lstFiles != null && lstFiles.Columns.Count >0 && columnsizes != null) {
                         lstFiles.Columns[0].Width = (int)(columnsizes[0] * (float)(lstFiles.ClientRectangle.Width));
                         lstFiles.Columns[1].Width = (int)(columnsizes[1] * (float)(lstFiles.ClientRectangle.Width));
                         lstFiles.Columns[2].Width = (int)(columnsizes[2] * (float)(lstFiles.ClientRectangle.Width));
@@ -563,6 +567,7 @@ namespace Renamer
                         lstFiles.Columns[4].Width = (int)(columnsizes[4] * (float)(lstFiles.ClientRectangle.Width));
                         lstFiles.Columns[5].Width = (int)(columnsizes[5] * (float)(lstFiles.ClientRectangle.Width));
                         lstFiles.Columns[6].Width = (int)(columnsizes[6] * (float)(lstFiles.ClientRectangle.Width));
+                        lstFiles.Columns[7].Width = (int)(columnsizes[7] * (float)(lstFiles.ClientRectangle.Width));
                     }
                 }
             }
