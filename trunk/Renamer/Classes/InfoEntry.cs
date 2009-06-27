@@ -76,6 +76,7 @@ namespace Renamer.Classes
         #region Static Members
         private static string[] toBeReplaced = { "ä", "Ä", "ö", "Ö", "ü", "Ü", "ß", "É", "È", "Ê", "Ë", "Á", "À", "Â", "Ã", "Å", "Í", "Ì", "Î", "Ï", "Ú", "Ù", "Û", "Ó", "Ò", "Ô", "Ý", "Ç", "é", "è", "ê", "ë", "á", "à", "â", "ã", "å", "í", "ì", "î", "ï", "ú", "ù", "û", "ó", "ò", "ô", "ý", "ÿ", "ç" };
         private static string[] toBeReplacedWith = { "ae", "Ae", "oe", "Oe", "ue", "Ue", "ss", "E", "E", "E", "E", "A", "A", "A", "A", "A", "I", "I", "I", "I", "U", "U", "U", "O", "O", "O", "Y", "C", "e", "e", "e", "e", "a", "a", "a", "a", "a", "i", "i", "i", "i", "u", "u", "u", "o", "o", "o", "y", "y", "c" };
+        public static string NotRecognized = "Not recognized, please enter manually";
         #endregion
 
         #region Properties
@@ -91,7 +92,14 @@ namespace Renamer.Classes
                 }
                 else
                 {
-                    return destination.Path;
+                    if (String.IsNullOrEmpty(Showname))
+                    {
+                        return "";
+                    }
+                    else
+                    {
+                        return destination.Path;
+                    }
                 }
             }
             set { destination.Path = value; }
@@ -107,7 +115,14 @@ namespace Renamer.Classes
                 }
                 else
                 {
-                    return this.destination.Filename;
+                    if (String.IsNullOrEmpty(Showname))
+                    {
+                        return "";
+                    }
+                    else
+                    {
+                        return this.destination.Filename;
+                    }
                 }
             }
             set { this.destination.Filename = value; }
@@ -174,6 +189,7 @@ namespace Renamer.Classes
         public string Showname {
             get { return nameOfSeries; }
             set {
+                if (value == NotRecognized) value = "";
                 if (nameOfSeries != value) {
                     if (value == null) value = "";
                     if (value == "Sample" && Helper.ReadBool(Config.DeleteSampleFiles))
@@ -412,7 +428,7 @@ namespace Renamer.Classes
             for (int i = seasondirs.Length - 1; i >= 0; i--) {
                 seasondir = RegexConverter.replaceSeriesnameAndSeason(seasondirs[i], nameOfSeries, season.ToString());
 
-                if (dirs.Length > 0 && dirs[dirs.Length - 1] == nameOfSeries) {
+                if (dirs.Length > 0 && dirs[dirs.Length - 1].StartsWith(nameOfSeries)) {
                     InSeriesDir = true;
                     break;
                 }

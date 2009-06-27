@@ -22,7 +22,7 @@ namespace Renamer
             //make a list of shownames
             List<string> shownames = new List<string>();
             foreach (InfoEntry ie in InfoEntryManager.Instance) {
-                if (ie.ProcessingRequested && !shownames.Contains(ie.Showname) &&ie.Showname!="") {
+                if (ie.ProcessingRequested && !shownames.Contains(ie.Showname) &&ie.Showname!="" && !ie.Sample) {
                     shownames.Add(ie.Showname);
                 }
             }
@@ -717,6 +717,7 @@ namespace Renamer
         class EpisodeCollection
         {
             public int maxEpisode = 0;
+            public int minEpisode = Int32.MaxValue;
             public List<InfoEntry> entries = new List<InfoEntry>();
         }
 
@@ -726,26 +727,38 @@ namespace Renamer
 
             foreach (InfoEntry ie in InfoEntryManager.Instance)
             {
-                if (paths.ContainsKey(ie.Filepath))
+                if (!string.IsNullOrEmpty(ie.Showname))
                 {
-                    if (((EpisodeCollection)paths[ie.Filepath]).maxEpisode < ie.Episode)
+                    if (paths.ContainsKey(ie.Showname + ie.Season))
                     {
-                        ((EpisodeCollection)paths[ie.Filepath]).maxEpisode = ie.Episode;
+                        if (((EpisodeCollection)paths[ie.Showname + ie.Season]).maxEpisode < ie.Episode)
+                        {
+                            ((EpisodeCollection)paths[ie.Showname + ie.Season]).maxEpisode = ie.Episode;
+                        }
+                        if (((EpisodeCollection)paths[ie.Showname + ie.Season]).minEpisode > ie.Episode)
+                        {
+                            ((EpisodeCollection)paths[ie.Showname + ie.Season]).minEpisode = ie.Episode;
+                        }
+                        ((EpisodeCollection)paths[ie.Showname + ie.Season]).entries.Add(ie);
                     }
-                    ((EpisodeCollection)paths[ie.Filepath]).entries.Add(ie);
-                }
-                else
-                {
-                    EpisodeCollection ec=new EpisodeCollection();
-                    ec.maxEpisode=ie.Episode;
-                    ec.entries.Add(ie);
-                    paths.Add(ie.Filepath, ec);
+                    else
+                    {
+                        EpisodeCollection ec = new EpisodeCollection();
+                        ec.maxEpisode = ie.Episode;
+                        ec.minEpisode = ie.Episode;
+                        ec.entries.Add(ie);
+                        paths.Add(ie.Showname + ie.Season, ec);
+                    }
                 }
             }
             foreach (string key in paths.Keys)
             {
+                int missing = 0;
+                string message = "Missing episodes in " + ((EpisodeCollection)paths[key]).entries[0].Showname +" Season "+((EpisodeCollection)paths[key]).entries[0].Season+": ";
+                string premessage = "";
+                string postmessage = "";
                 for (int i = 1; i <= ((EpisodeCollection)paths[key]).maxEpisode; i++)
-                {
+                {                    
                     bool found=false;
                     foreach (InfoEntry ie in ((EpisodeCollection)paths[key]).entries)
                     {
@@ -757,7 +770,29 @@ namespace Renamer
                     }
                     if (!found)
                     {
-                        Logger.Instance.LogMessage("Missing episode: " + ((EpisodeCollection)paths[key]).entries[0].Showname + " - S" + ((EpisodeCollection)paths[key]).entries[0].Season + "E" + i, LogLevel.INFO);
+                        if(i<((EpisodeCollection)paths[key]).minEpisode){
+                            premessage+=String.Format("E{0:00}, ",i);
+                        }else{
+                            postmessage+=String.Format("E{0:00}, ",i);
+                        }
+                        missing += 1;
+                    }
+                }
+                
+                if (missing > 0)
+                {
+                    //if not too many missing episodes were found, add the lower missing episodes too
+                    if (missing < ((EpisodeCollection)paths[key]).entries.Count)
+                    {
+                        message += premessage;
+                    }
+                    message += postmessage;
+
+                    //if something is to be reported
+                    if (postmessage != "" || missing < ((EpisodeCollection)paths[key]).entries.Count)
+                    {
+                        message = message.Substring(0, message.Length - 2);
+                        Logger.Instance.LogMessage(message, LogLevel.INFO);
                     }
                 }
             }

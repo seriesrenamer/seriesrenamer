@@ -377,8 +377,13 @@ namespace Renamer
                         e.Cancel = true;
                     }
                     break;
-                case 7:
+                case 7:                   
                     ie.Showname = e.DisplayText;
+                    //Cancel editing since we want to set the subitem manually in SyncItem to a different value
+                    if (ie.Showname == "")
+                    {
+                        e.Cancel = true;
+                    }
                     break;
                 default:
                     throw new Exception("Unreachable code");
@@ -1095,7 +1100,14 @@ namespace Renamer
                 lvi.SubItems[4].Text = ie.Name;
                 lvi.SubItems[5].Text = ie.NewFileName;
                 lvi.SubItems[6].Text = ie.Destination;
-                lvi.SubItems[7].Text = ie.Showname;
+                if (string.IsNullOrEmpty(ie.Showname))
+                {
+                    lvi.SubItems[7].Text = InfoEntry.NotRecognized;
+                }
+                else
+                {
+                    lvi.SubItems[7].Text = ie.Showname;
+                }
                 lvi.Checked = ie.ProcessingRequested;
             }
             else {
@@ -1117,7 +1129,14 @@ namespace Renamer
                 ie.Name = lvi.SubItems[4].Text;
                 ie.NewFileName = lvi.SubItems[5].Text;
                 ie.Destination = lvi.SubItems[6].Text;
-                ie.Showname = lvi.SubItems[7].Text;
+                if (lvi.SubItems[7].Text == InfoEntry.NotRecognized)
+                {
+                    ie.Showname = "";
+                }
+                else
+                {
+                    ie.Showname = lvi.SubItems[7].Text;
+                }
                 ie.ProcessingRequested = lvi.Checked;
             }
 
@@ -1140,7 +1159,14 @@ namespace Renamer
                 lvi.SubItems.Add(ie.Name);
                 lvi.SubItems.Add(ie.NewFileName);
                 lvi.SubItems.Add(ie.Destination);
-                lvi.SubItems.Add(ie.Showname);
+                if (String.IsNullOrEmpty(ie.Showname))
+                {
+                    lvi.SubItems.Add(InfoEntry.NotRecognized);
+                }
+                else
+                {
+                    lvi.SubItems.Add(ie.Showname);
+                }
                 lvi.Checked = ie.ProcessingRequested;
                 lstFiles.Items.Add(lvi);
             }
@@ -1632,6 +1658,20 @@ namespace Renamer
             cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
             btnTitles.Enabled = InfoEntryManager.Instance.Count > 0;
             btnRename.Enabled = InfoEntryManager.Instance.Count > 0;
+            //make sure get titles and rename button are only enabled if there are recognized shownames
+            if(btnTitles.Enabled){
+                btnTitles.Enabled=false;
+                btnRename.Enabled = false;
+                foreach (InfoEntry ie in InfoEntryManager.Instance)
+                {
+                    if (!string.IsNullOrEmpty(ie.Showname))
+                    {
+                        btnTitles.Enabled = true;
+                        btnRename.Enabled = true;
+                        break;
+                    }
+                }
+            }
             btnSubs.Enabled = InfoEntryManager.Instance.Count > 0;
             //make sure subtitle button is only enabled if there are video files to get subtitles for
             if (btnSubs.Enabled)
@@ -1639,7 +1679,7 @@ namespace Renamer
                 btnSubs.Enabled = false;
                 foreach (InfoEntry ie in InfoEntryManager.Instance)
                 {
-                    if (ie.IsVideofile)
+                    if (ie.IsVideofile && !string.IsNullOrEmpty(ie.Showname))
                     {
                         btnSubs.Enabled = true;
                         break;
