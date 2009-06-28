@@ -410,7 +410,10 @@ namespace Renamer
 
         //Double click = Invert process flag
         private void lstFiles_DoubleClick(object sender, EventArgs e) {
-            lstFiles.Items[lstFiles.SelectedIndices[0]].Checked = !lstFiles.Items[lstFiles.SelectedIndices[0]].Checked;
+            if (lstFiles.SelectedIndices.Count > 0)
+            {
+                lstFiles.Items[lstFiles.SelectedIndices[0]].Checked = !lstFiles.Items[lstFiles.SelectedIndices[0]].Checked;
+            }
         }
 
         //Enter = Open file
