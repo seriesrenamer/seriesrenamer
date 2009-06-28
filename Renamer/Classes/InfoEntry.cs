@@ -414,14 +414,14 @@ namespace Renamer.Classes
                 Destination = "";
                 return;
             }
-            string basepath = Helper.ReadProperty(Config.LastDirectory);
+            //string basepath = Helper.ReadProperty(Config.LastDirectory);
             string DestinationPath = Helper.ReadProperty(Config.DestinationDirectory);
            
             if (!Directory.Exists(DestinationPath))
             {
-                DestinationPath = basepath;
+                DestinationPath = Filepath;
             }
-            bool DifferentDestinationPath = basepath!=DestinationPath;
+            bool DifferentDestinationPath = Filepath!=DestinationPath;
             //for placing files in directory structure, figure out if selected directory is show name, otherwise create one
             string[] dirs = this.source.Folders;
             bool InSeriesDir = false;
@@ -449,18 +449,24 @@ namespace Renamer.Classes
                 Destination = "";
                 return;
             }
-            if (InSeasonDir&&!DifferentDestinationPath) {
-                DestinationPath = addSeriesDir(getParentsParentDir(Filepath));
+            if (!DifferentDestinationPath)
+            {
+                if (!InSeriesDir && !InSeasonDir)
+                {
+                    DestinationPath = addSeriesDir(Filepath);
+                    DestinationPath = addSeasonsDirIfDesired(DestinationPath);
+                }
+                else if (InSeriesDir)
+                {
+                    DestinationPath = addSeasonsDirIfDesired(Filepath);
+                }
             }
-            //Some Problem here if series dir is deeper nested than in basepath dir!
-            else if(!InSeriesDir&&!DifferentDestinationPath) {
-                DestinationPath = addSeriesDir(Filepath);
-            }
-            else if (DifferentDestinationPath)
+            else
             {
                 DestinationPath = addSeriesDir(DestinationPath);
+                DestinationPath = addSeasonsDirIfDesired(DestinationPath);
             }
-            Destination = addSeasonsDirIfDesired(DestinationPath);
+            Destination = DestinationPath;
         }
         private void getCreateDirectory() {
             if (createDirectoryStructure != DirectoryStructure.Unset)
