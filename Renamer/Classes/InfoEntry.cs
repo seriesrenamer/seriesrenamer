@@ -708,7 +708,7 @@ namespace Renamer.Classes
             this.Name = "";
             this.Destination = "";
             this.Movie = true;
-            string temp = Path.GetFileNameWithoutExtension(this.Filename);
+            string temp = Filepath1.Name;
             //figure out if this is a multi file video
             string end = "CD";
             //Check for single number

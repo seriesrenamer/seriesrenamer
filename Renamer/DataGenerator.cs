@@ -682,7 +682,7 @@ namespace Renamer
                         ie.Season = DirectorySeason;
                     }
                     //if nothing could be recognized, assume that this is a movie
-                    if (ie.Season == -1 && ie.Episode == -1) {
+                    if (ie.Season < 1 && ie.Episode < 1) {
                         ie.Movie = true;
                     }
                     //if not added yet, add it
