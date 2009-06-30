@@ -702,68 +702,18 @@ namespace Renamer.Classes
             }
         }
 
-        public void RemoveVideoTags(string[] regexes) {
+        public void RemoveVideoTags(string[] regexes)
+        {
             this.ProcessingRequested = false;
             //Go through all selected files and remove tags and clean them up
-            this.Name = "";
             this.Destination = "";
             this.Movie = true;
-            string temp = Filepath1.Name;
-            //figure out if this is a multi file video
-            string end = "CD";
-            //Check for single number
-            if (char.IsNumber(temp[temp.Length - 1])) {
-                end += temp[temp.Length - 1].ToString();
-            }
-            //Check for IofN format                    
-            else if (Regex.Match(temp, "\\dof\\d", RegexOptions.IgnoreCase).Success) {
-                end = temp.Substring(temp.Length - 4, 1);
-            }
-            //Check for a/b
-            else if (char.ToLower(temp[temp.Length - 1]) == 'a') {
-                end += "1";
-            }
-            else if (char.ToLower(temp[temp.Length - 1]) == 'b') {
-                end += "2";
-            }
-            else {
-                end = "";
-            }
-
-            //try to match tags                    
-            bool removed = false;
-            foreach (string s in regexes) {
-                Match m = Regex.Match(temp, s, RegexOptions.IgnoreCase);
-                if (m.Success) {
-                    temp = temp.Substring(0, m.Index);
-                    removed = true;
-                }
-            }
-
-            //add possible existant file index back
-            if (removed) {
-                temp = temp + " " + end;
-            }
-
-            //Get rid of dots and _
-            int i = -1;
-            int pos = 0;
-            while ((i = temp.IndexOf(".", pos + 1)) != -1) {
-                if ((Convert.ToInt32(char.IsNumber(temp[i - 1])) + Convert.ToInt32(char.IsNumber(temp[Math.Min(i + 1, temp.Length - 1)]))) < 2) {
-                    temp = temp.Substring(0, i) + " " + temp.Substring(i + 1);
-                }
-                pos = i;
-            }
-            temp = temp.Replace("_", " ");
-            temp = temp.Trim();
-
-
-
-            this.Name = temp;
-            if (this.NewFileName != "" || this.Destination != "") {
+            this.Name=SeriesNameExtractor.Instance.RemoveVideoTags(this.Filepath1.Name, this.Filepath, regexes);
+                        
+            if (this.NewFileName != "" || this.Destination != "")
+            {
                 this.ProcessingRequested = true;
             }
-
         }
 
         public void Rename(ref Helper.InvalidFilenameAction invalidAction, ref string replace) {
