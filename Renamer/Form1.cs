@@ -107,7 +107,7 @@ namespace Renamer
             string[] tags = Helper.ReadProperties(Config.Tags);
             List<string> regexes = new List<string>();
             foreach (string s in tags) {
-                regexes.Add("[\\._\\(\\[-]+" + s);
+                regexes.Add("[\\._\\(\\[-]" + s);
             }
             foreach (ListViewItem lvi in lstFiles.Items) {
                 InfoEntry ie = InfoEntryManager.Instance[((int)lvi.Tag)];

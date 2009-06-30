@@ -195,6 +195,66 @@ namespace Renamer.Classes
             return name;
         }
 
+        public void ProcessMultifiles(string file, out int part)
+        {
+            //figure out if this is a multi file video
+            string pattern = "((?<pos>(CD|Cd|cd)) ?(?<number>(\\d|a|b|c|d|e|I|II|II|IV|V))|(?<pos>\\dof)(?<number>\\d)|(?<pos> )(?<number>\\d)|(?<pos> )(?<number>(a|b|c|d|e)))$";
+            Match m = Regex.Match(file,pattern);
+            part=-1;
+            name = file;
+            if (m.Success)
+            {
+                string number = m.Groups["number"].Value;
+                if (!int.TryParse(number, out part))
+                {
+                    if (number == "a" || number == "I")
+                    {
+                        part = 1;
+                    }
+                    else if (number == "b" || number == "II")
+                    {
+                        part = 2;
+                    }
+                    else if (number == "c" || number == "III")
+                    {
+                        part = 3;
+                    }
+                    else if (number == "d" || number == "IV")
+                    {
+                        part = 4;
+                    }
+                    else if (number == "e" || number == "V")
+                    {
+                        part = 5;
+                    }
+                }
+                name = file.Substring(0, m.Groups["pos"].Index);
+            }
+        }
+        public string RemoveVideoTags(string file, string path, string[] regexes)
+        {
+            reset();
+            name=removeReleaseGroupTag(file); 
+            int part;
+            ProcessMultifiles(file, out part);
+            //try to match tags    
+            foreach (string s in regexes)
+            {
+                Match m = Regex.Match(file, s, RegexOptions.IgnoreCase);
+                if (m.Success)
+                {
+                    name = name.Substring(0, m.Index);
+                }
+            }
+           
+            postprocessing();
+
+            if (part != -1)
+            {
+                name += " CD" + part;
+            }
+            return name;
+        }
 
 
         /// <summary>
