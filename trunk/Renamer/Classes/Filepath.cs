@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Renamer.Classes.Configuration.Keywords;
+using System.IO;
 
 namespace Renamer.Classes
 {
@@ -229,6 +230,22 @@ namespace Renamer.Classes
                 return this.Fullfilename == "";
             }
         }
+        public static string goUpwards(string directory, int howOften)
+        {
+            while (howOften > 0)
+            {
+                directory = Directory.GetParent(directory).FullName;
+                howOften--;
+            }
+            return directory;
+        }
+        public static string goIntoFolder(string directory, string folder)
+        {
+            directory = directory.Trim(DIRECTORY_SEPERATORS);
+            folder=folder.Trim(DIRECTORY_SEPERATORS);
+            return directory + System.IO.Path.DirectorySeparatorChar + folder;
+        }
+
 #endregion
 
     }

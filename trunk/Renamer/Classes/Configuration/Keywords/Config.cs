@@ -178,9 +178,19 @@ namespace Renamer.Classes.Configuration.Keywords
         public const string ShownameExtractionRegex = "ShownameExtractionRegex";
 
         /// <summary>
-        /// strings used to determine if a recognized showname may be invalid
+        /// strings used to determine if a recognized showname may be invalid (i.e. "Season")
         /// </summary>
-        public const string ShownameBlacklist = "ShownameBlacklist";
+        public const string PathBlacklist = "PathBlacklist";
+
+        /// <summary>
+        /// strings used to determine if a filename may not be used for shownames (i.e. "AVSEQ01")
+        /// </summary>
+        public const string FilenameBlacklist = "FilenameBlacklist";
+
+        /// <summary>
+        /// List used as a test to see if a file could be a movie
+        /// </summary>
+        public const string MovieIndicator = "MovieIndicator";
 
         /// <summary>
         /// Regex used to remove non-characters and other crap from names

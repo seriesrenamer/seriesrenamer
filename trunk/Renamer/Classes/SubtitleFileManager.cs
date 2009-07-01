@@ -217,7 +217,7 @@ namespace Renamer.Classes
                             if (sf.Season == ie.Season && sf.Episode == ie.Episode) {
                                 bool move = false;
                                 string source = "";
-                                string target = ie.Filepath + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(ie.Filename) + Path.GetExtension(sf.Filenames[0]);
+                                string target = ie.FilePath.Path + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(ie.Filename) + Path.GetExtension(sf.Filenames[0]);
                                 if (sf.Filenames.Count == 1) {
                                     move = true;
                                     source = folder + Path.DirectorySeparatorChar + sf.Filenames[0];

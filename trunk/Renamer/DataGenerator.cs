@@ -606,6 +606,7 @@ namespace Renamer
                 bool contains = false;
                 DateTime dt;
                 string currentpath = "";
+                string MovieIndicator = String.Join("|", Helper.ReadProperties(Config.MovieIndicator));
                 foreach (FileSystemInfo file in Files) {
                     //showname and season recognized from path
                     DirectorySeason = -1;
@@ -614,7 +615,7 @@ namespace Renamer
                     ie = null;
                     currentpath = Path.GetDirectoryName(file.FullName);
                     foreach (InfoEntry i in InfoEntryManager.Instance) {
-                        if (i.Filename == file.Name && i.Filepath == currentpath) {
+                        if (i.Filename == file.Name && i.FilePath.Path == currentpath) {
                             ie = i;
                             break;
                         }
@@ -626,64 +627,87 @@ namespace Renamer
 
                     //Set basic values, by setting those values destination directory and filename will be generated automagically
                     ie.Filename = file.Name;
-                    ie.Filepath = currentpath;
+                    ie.FilePath.Path = currentpath;
                     ie.Extension = Path.GetExtension(file.FullName).ToLower().Replace(".", "");
-                    //Get season number and showname from directory
-                    DirectorySeason = ExtractSeasonFromDirectory(Path.GetDirectoryName(file.FullName));
-                    dt = DateTime.Now;
-                    //try to recognize season and episode from filename
-                    foreach (string pattern in patterns) {
-                        //Try to match. If it works, get the season and the episode from the match
-                        m = Regex.Match(file.Name, pattern, RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
-                        if (m.Success) {
-                            strSeason = "";
-                            strEpisode = "";
-                            try {
-                                strSeason = Int32.Parse(m.Groups["Season"].Value).ToString();
-                            }
-                            catch (FormatException) {
-                            }
-                            try {
-                                strEpisode = Int32.Parse(m.Groups["Episode"].Value).ToString();
-                            }
-                            catch (FormatException) {
-                            }
-                            //Fix for .0216. notation for example, 4 numbers should always be recognized as %S%S%E%E
-                            if (strEpisode.Length == 3 && strSeason.Length == 1) {
-                                strSeason += strEpisode[0];
-                                strEpisode = strEpisode.Substring(1);
-                                if (strSeason[0] == '0') {
-                                    strSeason = strSeason.Substring(1);
-                                }
-                            }
-                            try {
-                                ie.Episode = Int32.Parse(strEpisode);
-                            }
-                            catch {
-                                Logger.Instance.LogMessage("Cannot parse found episode: " + strEpisode, LogLevel.DEBUG);
-                            }
-                            try {
-                                ie.Season = Int32.Parse(strSeason);
-                            }
-                            catch {
-                                Logger.Instance.LogMessage("Cannot parse found season: " + strSeason, LogLevel.DEBUG);
-                            }
 
-                            //if season recognized from directory name doesn't match season recognized from filename, the file might be located in a wrong directory
-                            if (DirectorySeason != -1 && ie.Season != DirectorySeason) {
-                                Logger.Instance.LogMessage("File seems to be located inconsistently: " + ie.Filename + " was recognized as season " + ie.Season + ", but folder name indicates that it should be season " + DirectorySeason.ToString(), LogLevel.WARNING);
+                    //test for movie path so we can skip all the code below
+                    if (Regex.Match(ie.FilePath.Path, MovieIndicator).Success)
+                    {
+                        ie.Movie = true;
+                    }
+                    else
+                    {
+                        //Get season number and showname from directory
+                        DirectorySeason = ExtractSeasonFromDirectory(Path.GetDirectoryName(file.FullName));
+                        dt = DateTime.Now;
+                        //try to recognize season and episode from filename
+                        foreach (string pattern in patterns)
+                        {
+                            //Try to match. If it works, get the season and the episode from the match
+                            m = Regex.Match(file.Name, pattern, RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
+                            if (m.Success)
+                            {
+                                strSeason = "";
+                                strEpisode = "";
+                                try
+                                {
+                                    strSeason = Int32.Parse(m.Groups["Season"].Value).ToString();
+                                }
+                                catch (FormatException)
+                                {
+                                }
+                                try
+                                {
+                                    strEpisode = Int32.Parse(m.Groups["Episode"].Value).ToString();
+                                }
+                                catch (FormatException)
+                                {
+                                }
+                                //Fix for .0216. notation for example, 4 numbers should always be recognized as %S%S%E%E
+                                if (strEpisode.Length == 3 && strSeason.Length == 1)
+                                {
+                                    strSeason += strEpisode[0];
+                                    strEpisode = strEpisode.Substring(1);
+                                    if (strSeason[0] == '0')
+                                    {
+                                        strSeason = strSeason.Substring(1);
+                                    }
+                                }
+                                try
+                                {
+                                    ie.Episode = Int32.Parse(strEpisode);
+                                }
+                                catch
+                                {
+                                    Logger.Instance.LogMessage("Cannot parse found episode: " + strEpisode, LogLevel.DEBUG);
+                                }
+                                try
+                                {
+                                    ie.Season = Int32.Parse(strSeason);
+                                }
+                                catch
+                                {
+                                    Logger.Instance.LogMessage("Cannot parse found season: " + strSeason, LogLevel.DEBUG);
+                                }
+
+                                //if season recognized from directory name doesn't match season recognized from filename, the file might be located in a wrong directory
+                                if (DirectorySeason != -1 && ie.Season != DirectorySeason)
+                                {
+                                    Logger.Instance.LogMessage("File seems to be located inconsistently: " + ie.Filename + " was recognized as season " + ie.Season + ", but folder name indicates that it should be season " + DirectorySeason.ToString(), LogLevel.WARNING);
+                                }
+                                break;
                             }
-                            break;
+                        }
+                        //if season number couldn't be extracted, try to get it from folder
+                        //(this should never happen if a pattern like %S%E is set)
+                        if (ie.Season == -1 && DirectorySeason != -1)
+                        {
+                            ie.Season = DirectorySeason;
                         }
                     }
-                    //if season number couldn't be extracted, try to get it from folder
-                    //(this should never happen if a pattern like %S%E is set)
-                    if (ie.Season == -1 && DirectorySeason != -1) {
-                        ie.Season = DirectorySeason;
-                    }
                     //if nothing could be recognized, assume that this is a movie
-                    if (ie.Season < 1 && ie.Episode < 1) {
-                        ie.Movie = true;
+                    if ((ie.Season < 1 && ie.Episode < 1) || ie.Movie) {
+                        ie.RemoveVideoTags();
                     }
                     //if not added yet, add it
                     if (!contains) {
@@ -810,8 +834,7 @@ namespace Renamer
                     ie.Movie = false;
                 }
                 else {
-                    ie.ProcessingRequested = (ie.Season != -1 && ie.Episode != -1);
-                    ie.Movie = !ie.ProcessingRequested;
+                    ie.ProcessingRequested = (ie.Season != -1 && ie.Episode != -1)||(ie.Movie && ((ie.Destination!="" && ie.Destination!=ie.FilePath.Path)||(ie.NewFileName!=""&&ie.NewFileName!=ie.Filename)));
                 }
             }
         }

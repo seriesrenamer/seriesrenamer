@@ -12,12 +12,13 @@ namespace Renamer.Classes
         private string[] folders;
         private string[] extractPatterns;
         private string[] shownamePatterns;
-
+        private string[] MovieTagPatterns;
         private bool seriesNameFromDirectory;
-        private string shownameBlacklist;
+        private string pathBlacklist;
+        private string filenameBlacklist;
         private string name;
-
-
+        private bool filenameBlacklisted;
+        private InfoEntry ie;
         private static SeriesNameExtractor instance = null;
         private static object m_lock = new object();
 
@@ -30,30 +31,42 @@ namespace Renamer.Classes
             }
         }
 
-        private SeriesNameExtractor() {
-
-            string[] blacklist = Helper.ReadProperties(Config.ShownameBlacklist);
-            shownameBlacklist = String.Join("|", blacklist);
+        private SeriesNameExtractor()
+        {
+            string[] tags = Helper.ReadProperties(Config.Tags);  
+            List<string> MovieRegexes = new List<string>();
+            foreach (string s in tags)
+            {
+                MovieRegexes.Add("[^A-Za-z0-9]+" + s);
+            }
+            MovieTagPatterns = MovieRegexes.ToArray();
+            string[] blacklist = Helper.ReadProperties(Config.PathBlacklist);
+            pathBlacklist = String.Join("|", blacklist);
+            blacklist = Helper.ReadProperties(Config.FilenameBlacklist);
+            filenameBlacklist = String.Join("|", blacklist);
             extractPatterns = (string[])Helper.ReadProperties(Config.Extract);
             for (int index = 0; index < extractPatterns.Length; index++) {
                 extractPatterns[index] = transformPlaceholderToRegex(extractPatterns[index]);
             }
-
+            filenameBlacklisted = false;
             shownamePatterns = Helper.ReadProperties(Config.ShownameExtractionRegex);
         }
 
         private void reset() {
             this.seriesNameFromDirectory = false;
             this.name = null;
-
+            filenameBlacklisted = false;
         }
 
         private string removeReleaseGroupTag(string filename) {
             //remove releasegroup tag, 
             // normally 3 to 6 characters at the beginning of the filename seperated by a '-'
-
-            //Logger.Instance.LogMessage("SNE: removeReleasGroupTag: " + filename + "=>" + Regex.Replace(filename, "^\\w{3,6}-", ""), LogLevel.DEBUG);
-            return Regex.Replace(filename, "^\\w{3,6}-", "");
+            //if filename too short, it might be a part of the real name, so skip it
+            if (filename.Length > 5)
+            {
+                return Regex.Replace(Regex.Replace(filename, "^(([^\\p{Lu}]\\p{Ll}{1,3})|(\\p{Lu}{2,2}\\w))-", ""), "-\\w{2,4}$", "");
+            }
+            else return filename;
         }
 
         private string[] extractFoldernamesFromPath(string path) {
@@ -94,7 +107,7 @@ namespace Renamer.Classes
                 }
                 else if (m.Success) {
                     string matchedname = folders[folders.Length - 2];
-                    if (Regex.IsMatch(matchedname, shownameBlacklist, RegexOptions.IgnoreCase)) {
+                    if (Regex.IsMatch(matchedname, pathBlacklist, RegexOptions.IgnoreCase)) {
                         matchedname = null;
                     }
                     else {
@@ -127,7 +140,7 @@ namespace Renamer.Classes
                             string seperator = str.Substring(startOfName - 1, 1);
                             matchedname = str.Substring(startOfName, str.IndexOf(seperator, startOfName) - startOfName);
                         }
-                        if (Regex.Match(matchedname, shownameBlacklist, RegexOptions.IgnoreCase).Success) {
+                        if (Regex.Match(matchedname, pathBlacklist, RegexOptions.IgnoreCase).Success) {
                             matchedname = null;
                             seriesNameFromDirectory = false;
                         }
@@ -146,7 +159,7 @@ namespace Renamer.Classes
                 return;
             }
             for (int i = 1; i < folders.Length - 1; i++) {
-                if (!Regex.Match(folders[folders.Length - i], shownameBlacklist, RegexOptions.IgnoreCase).Success)
+                if (!Regex.Match(folders[folders.Length - i], pathBlacklist, RegexOptions.IgnoreCase).Success)
                 {
                     name = folders[folders.Length - i];
                     break;
@@ -160,29 +173,46 @@ namespace Renamer.Classes
             if (String.IsNullOrEmpty(name)) {
                 return;
             }
+            name = Regex.Replace(name, "(?<pos1>[\\p{Ll}\\d])(?<pos2>[\\p{Lu}\\d][\\p{Ll}\\d])|(?<pos1>[^\\d])(?<pos2>\\d)", new MatchEvaluator(SeriesNameExtractor.InsertSpaces));
             name = Regex.Replace(name, "\\[.+\\]|\\(.+\\)", "");
             name = name.Trim(new char[] { '-', '_', '.', ' ', '(', ')', '[', ']' });
             name = Regex.Replace(name, "[\\._]", " ");
             name = Regex.Replace(name, "\\[.*\\]", "");
             name = name.Replace("  ", " ");
-            if (!this.seriesNameFromDirectory) {
+            if (!ContainsLowercaseCharacters(name)||!ContainsUppercaseCharacters(name)) {
                 name = Helper.UpperEveryFirst(name);
             }
             name = name.Trim();
         }
 
-
-        internal string ExtractSeriesName(Filepath filepath) {
-            return this.ExtractSeriesName(filepath.Filename, filepath.Path);
+        private bool ContainsLowercaseCharacters(string str)
+        {
+            return Regex.IsMatch(str, "\\p{Ll}");
         }
-        public string ExtractSeriesName(string file, string path) {
+        private bool ContainsUppercaseCharacters(string str)
+        {
+            return Regex.IsMatch(str, "\\p{Lu}");
+        }
+        static string InsertSpaces(Match m){
+            //if we only found numbers, we want to skip this tag (i.e. 007)
+            foreach (char c in m.Groups["pos1"].Value + m.Groups["pos2"].Value)
+            {
+                if (!Char.IsDigit(c))
+                {
+                    return m.Groups["pos1"].Value + " " + m.Groups["pos2"].Value;
+                }
+            }
+            return m.Groups["pos1"].Value + m.Groups["pos2"].Value;
+        }
+        public string ExtractSeriesName(InfoEntry ie) {
             reset();
+            this.ie = ie;
             // Read plain filename
-            string filename = System.IO.Path.GetFileNameWithoutExtension(file);
+            string filename = System.IO.Path.GetFileNameWithoutExtension(ie.Filename);
 
 
             filename = removeReleaseGroupTag(filename);
-            folders = extractFoldernamesFromPath(path);
+            folders = extractFoldernamesFromPath(ie.FilePath.Path);
 
             extractNameFromSeasonsFolder();
             extractNameFromString(filename);
@@ -195,13 +225,21 @@ namespace Renamer.Classes
             return name;
         }
 
-        public void ProcessMultifiles(string file, out int part)
+
+        public int ProcessMultifiles()
         {
             //figure out if this is a multi file video
-            string pattern = "((?<pos>(CD|Cd|cd)) ?(?<number>(\\d|a|b|c|d|e|I|II|II|IV|V))|(?<pos>\\dof)(?<number>\\d)|(?<pos> )(?<number>\\d)|(?<pos> )(?<number>(a|b|c|d|e)))$";
-            Match m = Regex.Match(file,pattern);
-            part=-1;
-            name = file;
+            string pattern = "(?<pos>(CD|Cd|cd))\\s?(?<number>(\\d|I|II|II|IV|V))|((?<pos>\\d\\s?of\\s?)(?<number>\\d)|(?<pos> )(?<number>(a|b|c|d|e)))$";
+            Match m;
+            if (filenameBlacklisted)
+            {
+                m = Regex.Match(ie.FilePath.Path, pattern);
+            }
+            else
+            {
+                m = Regex.Match(name, pattern);
+            }
+            int part=-1;
             if (m.Success)
             {
                 string number = m.Groups["number"].Value;
@@ -228,19 +266,50 @@ namespace Renamer.Classes
                         part = 5;
                     }
                 }
-                name = file.Substring(0, m.Groups["pos"].Index);
+                if (filenameBlacklisted)
+                {
+                    name = Path.GetFileName(Filepath.goUpwards(ie.FilePath.Path,1));
+                    ie.ExtractedNameLevel = 2;
+                }
+                else
+                {
+                    name = name.Substring(0, m.Groups["pos"].Index);
+                    if (name == "")
+                    {
+                        name = Path.GetFileName(ie.FilePath.Path);
+                        ie.ExtractedNameLevel = 1;
+                    }
+                }
             }
+            return part;
         }
-        public string RemoveVideoTags(string file, string path, string[] regexes)
+        public string ExtractMovieName(InfoEntry ie)
         {
             reset();
-            name=removeReleaseGroupTag(file); 
-            int part;
-            ProcessMultifiles(file, out part);
-            //try to match tags    
-            foreach (string s in regexes)
+            this.ie = ie;
+            name = ie.FilePath.Name;
+            if (Regex.IsMatch(name, filenameBlacklist, RegexOptions.IgnoreCase))
             {
-                Match m = Regex.Match(file, s, RegexOptions.IgnoreCase);
+                filenameBlacklisted = true;
+                name = ie.FilePath.Path;
+                //must be atleast 1 then
+                ie.ExtractedNameLevel = 1;
+            }
+            int part = ProcessMultifiles();
+            name = removeReleaseGroupTag(name);
+            //if part couldn't be extracted yet, maybe it was because of a tag at the end before the part identifier
+            if (part == -1)
+            {
+                part = ProcessMultifiles();
+            }
+            if (part != -1)
+            {
+                ie.IsMultiFileMovie = true;
+            }
+            //try to match tags    
+            foreach (string s in MovieTagPatterns)
+            {
+                Match m = Regex.Match(name, s, RegexOptions.IgnoreCase);
                 if (m.Success)
                 {
                     name = name.Substring(0, m.Index);
