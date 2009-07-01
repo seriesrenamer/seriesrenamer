@@ -114,7 +114,7 @@ namespace Renamer
                 ie.ProcessingRequested = false;
                 //Go through all selected files and remove tags and clean them up
                 if (lvi.Selected) {
-                    ie.RemoveVideoTags(regexes.ToArray());
+                    ie.RemoveVideoTags();
                     lvi.Selected = false;
                 }
                 SyncItem(((int)lvi.Tag), false);
@@ -420,7 +420,7 @@ namespace Renamer
         private void lstFiles_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
                 foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                    Process myProc = Process.Start(InfoEntryManager.Instance[(int)lvi.Tag].Filepath + Path.DirectorySeparatorChar + InfoEntryManager.Instance[(int)lvi.Tag].Filename);
+                    Process myProc = Process.Start(InfoEntryManager.Instance[(int)lvi.Tag].FilePath.Path + Path.DirectorySeparatorChar + InfoEntryManager.Instance[(int)lvi.Tag].Filename);
                 }
             }
         }
@@ -899,7 +899,7 @@ namespace Renamer
                     ListViewItem lvi = lstFiles.SelectedItems[i];
                     if (InfoEntryManager.Instance[((int)lvi.Tag)].Filename != "")
                         OldFilename = true;
-                    if (InfoEntryManager.Instance[((int)lvi.Tag)].Filepath != "")
+                    if (InfoEntryManager.Instance[((int)lvi.Tag)].FilePath.Path != "")
                         OldPath = true;
                     if (InfoEntryManager.Instance[((int)lvi.Tag)].Name != "")
                         Name = true;
@@ -1036,7 +1036,7 @@ namespace Renamer
             }
             foreach (InfoEntry ie in lie) {
                 try {
-                    File.Delete(ie.Filepath + Path.DirectorySeparatorChar + ie.Filename);
+                    File.Delete(ie.FilePath.Path + Path.DirectorySeparatorChar + ie.Filename);
                     InfoEntryManager.Instance.Remove(ie);
                 }
                 catch (Exception ex) {
@@ -1049,7 +1049,7 @@ namespace Renamer
         //Open file
         private void viewToolStripMenuItem_Click(object sender, EventArgs e) {
             InfoEntry ie = InfoEntryManager.Instance.GetVideo(InfoEntryManager.Instance[(int)lstFiles.SelectedItems[0].Tag]);
-            string VideoPath = ie.Filepath + Path.DirectorySeparatorChar + ie.Filename;
+            string VideoPath = ie.FilePath.Path + Path.DirectorySeparatorChar + ie.Filename;
             try {
                 Process myProc = Process.Start(VideoPath);
             }
@@ -1063,10 +1063,10 @@ namespace Renamer
             InfoEntry sub = InfoEntryManager.Instance.GetSubtitle(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)]);
             InfoEntry video = InfoEntryManager.Instance.GetVideo(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)]);
             if (sub != null) {
-                string path = sub.Filepath + Path.DirectorySeparatorChar + sub.Filename;
+                string path = sub.FilePath.Path + Path.DirectorySeparatorChar + sub.Filename;
                 string videopath = "";
                 if (video != null) {
-                    videopath = video.Filepath + Path.DirectorySeparatorChar + video.Filename;
+                    videopath = video.FilePath.Path + Path.DirectorySeparatorChar + video.Filename;
                 }
                 EditSubtitles es = new EditSubtitles(path, videopath);
                 es.ShowDialog();
@@ -1107,7 +1107,7 @@ namespace Renamer
             InfoEntry ie = InfoEntryManager.Instance[item];
             if (direction == false) {
                 lvi.SubItems[0].Text = ie.Filename;
-                lvi.SubItems[1].Text = ie.Filepath;
+                lvi.SubItems[1].Text = ie.FilePath.Path;
                 lvi.SubItems[2].Text = ie.Season.ToString();
                 lvi.SubItems[3].Text = ie.Episode.ToString();
                 lvi.SubItems[4].Text = ie.Name;
@@ -1125,7 +1125,7 @@ namespace Renamer
             }
             else {
                 ie.Filename = lvi.SubItems[0].Text;
-                ie.Filepath = lvi.SubItems[1].Text;
+                ie.FilePath.Path = lvi.SubItems[1].Text;
                 try {
                     ie.Season = Int32.Parse(lvi.SubItems[2].Text);
                 }
@@ -1166,7 +1166,7 @@ namespace Renamer
                 InfoEntry ie = InfoEntryManager.Instance[i];
                 ListViewItem lvi = new ListViewItem(ie.Filename);
                 lvi.Tag = i;
-                lvi.SubItems.Add(ie.Filepath);
+                lvi.SubItems.Add(ie.FilePath.Path);
                 lvi.SubItems.Add(ie.Season.ToString());
                 lvi.SubItems.Add(ie.Episode.ToString());
                 lvi.SubItems.Add(ie.Name);
@@ -1206,7 +1206,7 @@ namespace Renamer
             lvi.BackColor = Color.White;
             lvi.ForeColor = Color.Black;
             InfoEntry ie = InfoEntryManager.Instance.GetByListViewItem(lvi);
-            if ((ie.NewFileName==""&&(ie.Destination==""||ie.Destination==ie.Filepath))||!ie.ProcessingRequested){
+            if ((ie.NewFileName==""&&(ie.Destination==""||ie.Destination==ie.FilePath.Path))||!ie.ProcessingRequested){
                 lvi.ForeColor = Color.Gray;
             }
             else {
@@ -1303,7 +1303,7 @@ namespace Renamer
         private void pathOrigNameToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].Filepath + Path.DirectorySeparatorChar + InfoEntryManager.Instance[((int)lvi.Tag)].Filename + Environment.NewLine;
+                clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].FilePath.Path + Path.DirectorySeparatorChar + InfoEntryManager.Instance[((int)lvi.Tag)].Filename + Environment.NewLine;
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
@@ -1430,7 +1430,7 @@ namespace Renamer
                         source = ie.Filename;
                         break;
                     case "Original Path":
-                        source = ie.Filepath;
+                        source = ie.FilePath.Path;
                         break;
                     case "Destination Filename":
                         source = ie.NewFileName;
@@ -1442,7 +1442,7 @@ namespace Renamer
                 //Insert parameter values
                 LocalSearchString = LocalSearchString.Replace("%OF", ie.Filename);
                 LocalSearchString = LocalSearchString.Replace("%DF", ie.NewFileName);
-                LocalSearchString = LocalSearchString.Replace("%OP", ie.Filepath);
+                LocalSearchString = LocalSearchString.Replace("%OP", ie.FilePath.Path);
                 LocalSearchString = LocalSearchString.Replace("%DP", ie.Destination);
                 LocalSearchString = LocalSearchString.Replace("%T", title);
                 LocalSearchString = LocalSearchString.Replace("%N", ie.Name);
@@ -1452,7 +1452,7 @@ namespace Renamer
                 LocalSearchString = LocalSearchString.Replace("%S", ie.Season.ToString("00"));
                 LocalReplaceString = LocalReplaceString.Replace("%OF", ie.Filename);
                 LocalReplaceString = LocalReplaceString.Replace("%DF", ie.NewFileName);
-                LocalReplaceString = LocalReplaceString.Replace("%OP", ie.Filepath);
+                LocalReplaceString = LocalReplaceString.Replace("%OP", ie.FilePath.Path);
                 LocalReplaceString = LocalReplaceString.Replace("%DP", ie.Destination);
                 LocalReplaceString = LocalReplaceString.Replace("%T", title);
                 LocalReplaceString = LocalReplaceString.Replace("%N", ie.Name);
@@ -1509,7 +1509,7 @@ namespace Renamer
         private void byPathToolStripMenuItem_Click(object sender, EventArgs e) {
             List<string> paths = new List<string>();
             foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                string path = InfoEntryManager.Instance[(int)lvi.Tag].Filepath;
+                string path = InfoEntryManager.Instance[(int)lvi.Tag].FilePath.Path;
                 if (!paths.Contains(path)) {
                     paths.Add(path);
                 }

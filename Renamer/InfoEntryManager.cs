@@ -67,7 +67,7 @@ namespace Renamer
             InfoEntry ie;
             for (int i = 0; i < this.episodes.Count; i++) {
                 ie = this.episodes[i];
-                if (!File.Exists(ie.Filepath + Path.DirectorySeparatorChar + ie.Name)) {
+                if (!File.Exists(ie.FilePath.Path + Path.DirectorySeparatorChar + ie.Name)) {
                     this.episodes.Remove(ie);
                     i--;
                 }
@@ -240,7 +240,7 @@ namespace Renamer
                 {
                     try
                     {
-                        File.Delete(ie.Filepath1.Fullfilename);
+                        File.Delete(ie.FilePath.Fullfilename);
                         episodes.Remove(ie);
                         //Go back so no entry is skipped after removal of current entry
                         i--;
@@ -248,7 +248,7 @@ namespace Renamer
                     }
                     catch (Exception ex)
                     {
-                        Logger.Instance.LogMessage("Couldn't delete " + ie.Filepath1.Fullfilename + ": " + ex.Message, LogLevel.ERROR);
+                        Logger.Instance.LogMessage("Couldn't delete " + ie.FilePath.Fullfilename + ": " + ex.Message, LogLevel.ERROR);
                     }
                 }
                 ie.Rename(ref invalidAction, ref replace);
@@ -400,7 +400,7 @@ namespace Renamer
             Showname = Showname.ToLower();
             //whatever, just check path and filename if it contains the showname
             foreach (InfoEntry ie in this.episodes) {
-                string[] folders = Helper.splitFilePath(ie.Filepath);
+                string[] folders = Helper.splitFilePath(ie.FilePath.Path);
                 string processed = ie.Filename.ToLower();
 
                 //try to extract the name from a shortcut, i.e. sga for Stargate Atlantis

@@ -146,7 +146,7 @@ namespace Renamer
         public static List<InfoEntry> FindSimilarByPath(List<InfoEntry> source, string Basepath) {
             List<InfoEntry> matches = new List<InfoEntry>();
             foreach (InfoEntry ie in source) {
-                if (ie.Filepath.StartsWith(Basepath)) {
+                if (ie.FilePath.Path.StartsWith(Basepath)) {
                     matches.Add(ie);
                 }
             }

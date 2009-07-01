@@ -196,7 +196,7 @@ namespace Renamer
             defaults[Config.Replace] = new List<string>(new string[] { "//Comments are indicated by //", "//Format used here is \"From->To\",", "//where \"From\" is a c# regular expression, see", "//http://www.radsoftware.com.au/articles/regexlearnsyntax.aspx for details", "//example: \"\\s->.\" replaces whitespaces with dots", "cd->CD", " i\\.-> I.", " ii\\.-> II.", " iii\\.-> III.", " iv\\.-> IV.", " v\\.-> V.", " vi\\.-> VI.", " vii\\.-> VII.", " i -> I ", " ii -> II ", " iii -> III ", " iv -> IV ", " v -> V ", " vi -> VI ", " vii -> VII ", "\\[\\d+\\]->", " +-> " });
             defaults[Config.Tags] = new List<string>(new string[] { "Xvid", "DivX", "R5", "R3", "GERMAN", "DVD", "INTERNAL", "PROPER", "TELECINE", "LINE", "LD", "MD", "AC3", "SVCD", "XSVCD", "VCD", "Dubbed", "HD", "720P", "720", "SCREENER", "RSVCD", "\\d\\d\\d\\d", "TS", "GER" });
             defaults[Config.ResizeColumns] = "1";
-            defaults[Config.ShownameBlacklist] = "Season^Staffel";
+            defaults[Config.PathBlacklist] = "Season^Staffel";
             defaults[Config.FindMissingEpisodes] = "1";
             defaults[Config.DeleteSampleFiles] = "1";
             defaults[Config.DestinationDirectory] = "";
