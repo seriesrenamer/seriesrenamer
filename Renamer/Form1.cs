@@ -33,6 +33,7 @@ using Renamer.Classes.Configuration;
 using System.Runtime.InteropServices;
 using Renamer.Logging;
 using Renamer.Classes.Provider;
+using System.Threading;
 namespace Renamer
 {
     /// <summary>
@@ -1162,6 +1163,7 @@ namespace Renamer
         private void FillListView() {
             // TODO: show at least a progressbar while adding items, user can't see anything but processor utilization will be very high
             lstFiles.Items.Clear();
+            List<ListViewItem> list = new List<ListViewItem>();
             for (int i = 0; i < InfoEntryManager.Instance.Count; i++) {
                 InfoEntry ie = InfoEntryManager.Instance[i];
                 ListViewItem lvi = new ListViewItem(ie.Filename);
@@ -1181,8 +1183,9 @@ namespace Renamer
                     lvi.SubItems.Add(ie.Showname);
                 }
                 lvi.Checked = ie.ProcessingRequested;
-                lstFiles.Items.Add(lvi);
+                list.Add(lvi);
             }
+            lstFiles.Items.AddRange(list.ToArray());
             Colorize();
             lstFiles.Sort();
             lstFiles.Refresh();
@@ -1192,8 +1195,12 @@ namespace Renamer
         /// colorizes the file list
         /// </summary>
         private void Colorize() {
-            foreach (ListViewItem lvi1 in lstFiles.Items) {
-                Colorize(lvi1);
+            if (!working)
+            {
+                foreach (ListViewItem lvi1 in lstFiles.Items)
+                {
+                    Colorize(lvi1);
+                }
             }
         }
 
@@ -1654,9 +1661,24 @@ namespace Renamer
 
 
         #region Functions remaining in Form1
-        private void UpdateList(bool clear) {
+        bool working = false;
+        private void UpdateList(bool clear)
+        {
+            progressBar1.Visible = true;
+            /*Thread t = new Thread(this.UpdateListThread);
+            t.Start(clear);
+        }
+        private void UpdateListThread(object clearList) {
+            bool clear = (bool)clearList;*/
+            DateTime dt = DateTime.Now;
             DataGenerator.UpdateList(clear);
+            Logger.Instance.LogMessage((dt - DateTime.Now).TotalSeconds.ToString(), LogLevel.INFO);
+            progressBar1.Visible = false;
+            DateTime dt2 = DateTime.Now;
+            working = true;
             FillListView();
+            working = false;
+            Logger.Instance.LogMessage((dt2 - DateTime.Now).TotalSeconds.ToString(), LogLevel.INFO);
 
             //also update some gui elements for the sake of it
             txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);

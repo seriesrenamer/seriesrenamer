@@ -607,7 +607,10 @@ namespace Renamer
                 DateTime dt;
                 string currentpath = "";
                 string MovieIndicator = String.Join("|", Helper.ReadProperties(Config.MovieIndicator));
-                foreach (FileSystemInfo file in Files) {
+                Form1.Instance.progressBar1.Maximum = Files.Count;
+                for(int f=0;f<Files.Count;f++){
+                    Form1.Instance.progressBar1.Value=f;
+                    FileSystemInfo file=Files[f];
                     //showname and season recognized from path
                     DirectorySeason = -1;
 
