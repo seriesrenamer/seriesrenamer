@@ -1,5 +1,0 @@
-C:\Projekte\C#\Renamer\Renamer\ObjectListView\bin\Debug\ObjectListView.dll
-C:\Projekte\C#\Renamer\Renamer\ObjectListView\bin\Debug\ObjectListView.pdb
-C:\Projekte\C#\Renamer\Renamer\ObjectListView\obj\Debug\ResolveAssemblyReference.cache
-C:\Projekte\C#\Renamer\Renamer\ObjectListView\obj\Debug\ObjectListView.dll
-C:\Projekte\C#\Renamer\Renamer\ObjectListView\obj\Debug\ObjectListView.pdb

@@ -1,9 +1,0 @@
-C:\Projekte\C#\listview\ListViewPrinter\bin\Release\ListViewPrinter.dll
-C:\Projekte\C#\listview\ListViewPrinter\bin\Release\ListViewPrinter.pdb
-C:\Projekte\C#\listview\ListViewPrinter\bin\Release\ObjectListView.dll
-C:\Projekte\C#\listview\ListViewPrinter\bin\Release\ObjectListView.pdb
-C:\Projekte\C#\listview\ListViewPrinter\obj\Release\ResolveAssemblyReference.cache
-C:\Projekte\C#\listview\ListViewPrinter\obj\Release\BrightIdeasSoftware.BrushForm.resources
-C:\Projekte\C#\listview\ListViewPrinter\obj\Release\ListViewPrinter2008.csproj.GenerateResource.Cache
-C:\Projekte\C#\listview\ListViewPrinter\obj\Release\ListViewPrinter.dll
-C:\Projekte\C#\listview\ListViewPrinter\obj\Release\ListViewPrinter.pdb
