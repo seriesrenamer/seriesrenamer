@@ -34,6 +34,7 @@ using System.Runtime.InteropServices;
 using Renamer.Logging;
 using Renamer.Classes.Provider;
 using System.Threading;
+using BrightIdeasSoftware;
 namespace Renamer
 {
     /// <summary>
@@ -110,15 +111,15 @@ namespace Renamer
             foreach (string s in tags) {
                 regexes.Add("[\\._\\(\\[-]" + s);
             }
-            foreach (ListViewItem lvi in lstFiles.Items) {
-                InfoEntry ie = InfoEntryManager.Instance[((int)lvi.Tag)];
+            for(int i=0;i<lstEntries.Items.Count;i++){
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[i];
+                InfoEntry ie = (InfoEntry)((OLVListItem)lvi).RowObject;
                 ie.ProcessingRequested = false;
                 //Go through all selected files and remove tags and clean them up
                 if (lvi.Selected) {
                     ie.RemoveVideoTags();
                     lvi.Selected = false;
                 }
-                SyncItem(((int)lvi.Tag), false);
             }
         }
         #endregion
@@ -225,14 +226,7 @@ namespace Renamer
        
         #endregion
         #region LstFilesEvents
-        //Update Coloring when file is checked/unchecked and set process flag
-        private void lstFiles_ItemChecked(object sender, ItemCheckedEventArgs e) {
-            InfoEntryManager.Instance[(int)e.Item.Tag].ProcessingRequested = e.Item.Checked;
-            Colorize();
-            btnTitles.Enabled=lstFiles.CheckedItems.Count!=0;
-            btnSubs.Enabled=lstFiles.CheckedItems.Count!=0;
-        }
-
+       
         //Since sorting after the last two selected columns is supported, we need some event handling here
         private void lstFiles_ColumnClick(object sender, ColumnClickEventArgs e) {
             // Determine if clicked column is already the column that is being sorted.
@@ -253,11 +247,11 @@ namespace Renamer
             }
 
             // Perform the sort with these new sort options.
-            this.lstFiles.Sort();
+            //this.lstFiles.Sort();
         }
 
         //End editing with combo box data types
-        private void cbEdit_SelectedIndexChanged(object sender, EventArgs e) {
+        /*private void cbEdit_SelectedIndexChanged(object sender, EventArgs e) {
             lstFiles.EndEditing(true);
         }
 
@@ -415,16 +409,8 @@ namespace Renamer
             {
                 lstFiles.Items[lstFiles.SelectedIndices[0]].Checked = !lstFiles.Items[lstFiles.SelectedIndices[0]].Checked;
             }
-        }
+        }*/
 
-        //Enter = Open file
-        private void lstFiles_KeyDown(object sender, KeyEventArgs e) {
-            if (e.KeyCode == Keys.Enter) {
-                foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                    Process myProc = Process.Start(InfoEntryManager.Instance[(int)lvi.Tag].FilePath.Path + Path.DirectorySeparatorChar + InfoEntryManager.Instance[(int)lvi.Tag].Filename);
-                }
-            }
-        }
         #endregion
         #region GUI-Events
         //Main Initialization
@@ -454,7 +440,7 @@ namespace Renamer
             //and read a value to make sure it is loaded into memory
             Helper.ReadProperty(Config.Case);
 
-            lstFiles.ListViewItemSorter = lvwColumnSorter;
+            //lstFiles.ListViewItemSorter = lvwColumnSorter;
             txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
 
             
@@ -478,6 +464,7 @@ namespace Renamer
                     Helper.WriteProperty(Config.LastDirectory, lastdir);
                 }
             }
+            InitListView();
             if (lastdir != null && lastdir != "" && Directory.Exists(lastdir)) {
                 txtPath.Text = lastdir;
                 Environment.CurrentDirectory = lastdir;
@@ -487,19 +474,19 @@ namespace Renamer
 
             string[] ColumnWidths = Helper.ReadProperties(Config.ColumnWidths);
             string[] ColumnOrder = Helper.ReadProperties(Config.ColumnOrder);
-            for (int i = 0; i < lstFiles.Columns.Count; i++) {
+            for (int i = 0; i < lstEntries.Columns.Count; i++) {
                 try {
-                    int width = lstFiles.Columns[i].Width;
+                    int width = lstEntries.Columns[i].Width;
                     Int32.TryParse(ColumnWidths[i], out width);
-                    lstFiles.Columns[i].Width = width;
+                    lstEntries.Columns[i].Width = width;
                 }
                 catch (Exception) {
                     Logger.Instance.LogMessage("Invalid Value for ColumnWidths[" + i + "]", LogLevel.ERROR);
                 }
                 try {
-                    int order = lstFiles.Columns[i].DisplayIndex;
+                    int order = lstEntries.Columns[i].DisplayIndex;
                     Int32.TryParse(ColumnOrder[i], out order);
-                    lstFiles.Columns[i].DisplayIndex = order;
+                    lstEntries.Columns[i].DisplayIndex = order;
                 }
                 catch (Exception) {
                     Logger.Instance.LogMessage("Invalid Value for ColumnOrder[" + i + "]", LogLevel.ERROR);
@@ -527,20 +514,20 @@ namespace Renamer
         private void Form1_ResizeBegin(object sender, EventArgs e) {
             if (Helper.ReadBool(Config.ResizeColumns)) {
                 columnsizes = new float[]{
-                (float)(lstFiles.Columns[0].Width)/(float)(lstFiles.ClientRectangle.Width),
-                (float)(lstFiles.Columns[1].Width)/(float)(lstFiles.ClientRectangle.Width),
-                (float)(lstFiles.Columns[2].Width)/(float)(lstFiles.ClientRectangle.Width),
-                (float)(lstFiles.Columns[3].Width)/(float)(lstFiles.ClientRectangle.Width),
-                (float)(lstFiles.Columns[4].Width)/(float)(lstFiles.ClientRectangle.Width),
-                (float)(lstFiles.Columns[5].Width)/(float)(lstFiles.ClientRectangle.Width),
-                (float)(lstFiles.Columns[6].Width)/(float)(lstFiles.ClientRectangle.Width),
-                (float)(lstFiles.Columns[7].Width)/(float)(lstFiles.ClientRectangle.Width)};
+                (float)(lstEntries.Columns[0].Width)/(float)(lstEntries.ClientRectangle.Width),
+                (float)(lstEntries.Columns[1].Width)/(float)(lstEntries.ClientRectangle.Width),
+                (float)(lstEntries.Columns[2].Width)/(float)(lstEntries.ClientRectangle.Width),
+                (float)(lstEntries.Columns[3].Width)/(float)(lstEntries.ClientRectangle.Width),
+                (float)(lstEntries.Columns[4].Width)/(float)(lstEntries.ClientRectangle.Width),
+                (float)(lstEntries.Columns[5].Width)/(float)(lstEntries.ClientRectangle.Width),
+                (float)(lstEntries.Columns[6].Width)/(float)(lstEntries.ClientRectangle.Width),
+                (float)(lstEntries.Columns[7].Width)/(float)(lstEntries.ClientRectangle.Width)};
                 float sum = 0;
-                for (int i = 0; i < lstFiles.Columns.Count; i++) {
+                for (int i = 0; i < lstEntries.Columns.Count; i++) {
                     sum += columnsizes[i];
                 }
                 //some numeric correction to make ratios:
-                for (int i = 0; i < lstFiles.Columns.Count; i++)
+                for (int i = 0; i < lstEntries.Columns.Count; i++)
                 {
                     columnsizes[i] *= (float)1 / sum;
                 }
@@ -550,16 +537,16 @@ namespace Renamer
         //Auto column resize, restore Column width ratios at resize end (to make sure!)
         private void Form1_ResizeEnd(object sender, EventArgs e) {
             if (Helper.ReadBool(Config.ResizeColumns)) {
-                if (lstFiles != null && lstFiles.Columns.Count > 0 && columnsizes != null)
+                if (lstEntries != null && lstEntries.Columns.Count > 0 && columnsizes != null)
                 {
-                    lstFiles.Columns[0].Width = (int)(columnsizes[0] * (float)(lstFiles.ClientRectangle.Width));
-                    lstFiles.Columns[1].Width = (int)(columnsizes[1] * (float)(lstFiles.ClientRectangle.Width));
-                    lstFiles.Columns[2].Width = (int)(columnsizes[2] * (float)(lstFiles.ClientRectangle.Width));
-                    lstFiles.Columns[3].Width = (int)(columnsizes[3] * (float)(lstFiles.ClientRectangle.Width));
-                    lstFiles.Columns[4].Width = (int)(columnsizes[4] * (float)(lstFiles.ClientRectangle.Width));
-                    lstFiles.Columns[5].Width = (int)(columnsizes[5] * (float)(lstFiles.ClientRectangle.Width));
-                    lstFiles.Columns[6].Width = (int)(columnsizes[6] * (float)(lstFiles.ClientRectangle.Width));
-                    lstFiles.Columns[7].Width = (int)(columnsizes[7] * (float)(lstFiles.ClientRectangle.Width));
+                    lstEntries.Columns[0].Width = (int)(columnsizes[0] * (float)(lstEntries.ClientRectangle.Width));
+                    lstEntries.Columns[1].Width = (int)(columnsizes[1] * (float)(lstEntries.ClientRectangle.Width));
+                    lstEntries.Columns[2].Width = (int)(columnsizes[2] * (float)(lstEntries.ClientRectangle.Width));
+                    lstEntries.Columns[3].Width = (int)(columnsizes[3] * (float)(lstEntries.ClientRectangle.Width));
+                    lstEntries.Columns[4].Width = (int)(columnsizes[4] * (float)(lstEntries.ClientRectangle.Width));
+                    lstEntries.Columns[5].Width = (int)(columnsizes[5] * (float)(lstEntries.ClientRectangle.Width));
+                    lstEntries.Columns[6].Width = (int)(columnsizes[6] * (float)(lstEntries.ClientRectangle.Width));
+                    lstEntries.Columns[7].Width = (int)(columnsizes[7] * (float)(lstEntries.ClientRectangle.Width));
                 }
             }
         }
@@ -568,15 +555,15 @@ namespace Renamer
         private void Form1_Resize(object sender, EventArgs e) {
             if (this.Visible) {
                 if (Helper.ReadBool(Config.ResizeColumns)) {
-                    if (lstFiles != null && lstFiles.Columns.Count >0 && columnsizes != null) {
-                        lstFiles.Columns[0].Width = (int)(columnsizes[0] * (float)(lstFiles.ClientRectangle.Width));
-                        lstFiles.Columns[1].Width = (int)(columnsizes[1] * (float)(lstFiles.ClientRectangle.Width));
-                        lstFiles.Columns[2].Width = (int)(columnsizes[2] * (float)(lstFiles.ClientRectangle.Width));
-                        lstFiles.Columns[3].Width = (int)(columnsizes[3] * (float)(lstFiles.ClientRectangle.Width));
-                        lstFiles.Columns[4].Width = (int)(columnsizes[4] * (float)(lstFiles.ClientRectangle.Width));
-                        lstFiles.Columns[5].Width = (int)(columnsizes[5] * (float)(lstFiles.ClientRectangle.Width));
-                        lstFiles.Columns[6].Width = (int)(columnsizes[6] * (float)(lstFiles.ClientRectangle.Width));
-                        lstFiles.Columns[7].Width = (int)(columnsizes[7] * (float)(lstFiles.ClientRectangle.Width));
+                    if (lstEntries != null && lstEntries.Columns.Count >0 && columnsizes != null) {
+                        lstEntries.Columns[0].Width = (int)(columnsizes[0] * (float)(lstEntries.ClientRectangle.Width));
+                        lstEntries.Columns[1].Width = (int)(columnsizes[1] * (float)(lstEntries.ClientRectangle.Width));
+                        lstEntries.Columns[2].Width = (int)(columnsizes[2] * (float)(lstEntries.ClientRectangle.Width));
+                        lstEntries.Columns[3].Width = (int)(columnsizes[3] * (float)(lstEntries.ClientRectangle.Width));
+                        lstEntries.Columns[4].Width = (int)(columnsizes[4] * (float)(lstEntries.ClientRectangle.Width));
+                        lstEntries.Columns[5].Width = (int)(columnsizes[5] * (float)(lstEntries.ClientRectangle.Width));
+                        lstEntries.Columns[6].Width = (int)(columnsizes[6] * (float)(lstEntries.ClientRectangle.Width));
+                        lstEntries.Columns[7].Width = (int)(columnsizes[7] * (float)(lstEntries.ClientRectangle.Width));
                     }
                 }
             }
@@ -614,7 +601,7 @@ namespace Renamer
             AboutBox ab = new AboutBox();
             ab.AppMoreInfo += Environment.NewLine;
             ab.AppMoreInfo += "Using:" + Environment.NewLine;
-            ab.AppMoreInfo += "ListViewEx " + "http://www.codeproject.com/KB/list/ListViewCellEditors.aspx" + Environment.NewLine;
+            ab.AppMoreInfo += "ObjectListView " + "http://www.codeproject.com/KB/list/ObjectListView.aspx" + Environment.NewLine;
             ab.AppMoreInfo += "About Box " + "http://www.codeproject.com/KB/vb/aboutbox.aspx" + Environment.NewLine;
             ab.AppMoreInfo += "Unrar.dll " + "http://www.rarlab.com" + Environment.NewLine;
             ab.AppMoreInfo += "SharpZipLib " + "http://www.icsharpcode.net/OpenSource/SharpZipLib/" + Environment.NewLine;
@@ -781,11 +768,11 @@ namespace Renamer
             Helper.WriteProperty(Config.LastSubProvider, cbSubs.SelectedItem.ToString());
 
             //Save column order and sizes
-            string[] ColumnWidths = new string[lstFiles.Columns.Count];
-            string[] ColumnOrder = new string[lstFiles.Columns.Count];
-            for (int i = 0; i < lstFiles.Columns.Count; i++) {
-                ColumnOrder[i] = lstFiles.Columns[i].DisplayIndex.ToString();
-                ColumnWidths[i] = lstFiles.Columns[i].Width.ToString();
+            string[] ColumnWidths = new string[lstEntries.Columns.Count];
+            string[] ColumnOrder = new string[lstEntries.Columns.Count];
+            for (int i = 0; i < lstEntries.Columns.Count; i++) {
+                ColumnOrder[i] = lstEntries.Columns[i].DisplayIndex.ToString();
+                ColumnWidths[i] = lstEntries.Columns[i].Width.ToString();
             }
             Helper.WriteProperties(Config.ColumnOrder, ColumnOrder);
             Helper.WriteProperties(Config.ColumnWidths, ColumnWidths);
@@ -813,24 +800,31 @@ namespace Renamer
             editSubtitleToolStripMenuItem.Visible = false;
             viewToolStripMenuItem.Visible = false;
             renamingToolStripMenuItem.Visible = false;
-            if (lstFiles.SelectedItems.Count == 1) {
+            if (lstEntries.SelectedIndices.Count == 1)
+            {
                 //if selected file is a subtitle
                 List<string> subext = new List<string>(Helper.ReadProperties(Config.SubtitleExtensions));
-                if (subext.Contains(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)].Extension.ToLower())) {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]];
+                InfoEntry ie=(InfoEntry)lvi.RowObject;
+                if (subext.Contains(ie.Extension.ToLower()))
+                {
                     editSubtitleToolStripMenuItem.Visible = true;
                 }
 
                 //if selected file is a video and there is a matching subtitle
-                if (InfoEntryManager.Instance.GetSubtitle(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)]) != null) {
+                if (InfoEntryManager.Instance.GetSubtitle(ie) != null)
+                {
                     editSubtitleToolStripMenuItem.Visible = true;
                 }
 
                 //if there is a matching video
-                if (InfoEntryManager.Instance.GetVideo(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)]) != null) {
+                if (InfoEntryManager.Instance.GetVideo(ie) != null)
+                {
                     viewToolStripMenuItem.Visible = true;
                 }
             }
-            if (lstFiles.SelectedItems.Count > 0) {
+            if (lstEntries.SelectedIndices.Count > 0)
+            {
                 renamingToolStripMenuItem.Visible = true;
                 createDirectoryStructureToolStripMenuItem1.Checked = false;
                 dontCreateDirectoryStructureToolStripMenuItem.Checked = false;
@@ -850,21 +844,26 @@ namespace Renamer
                 InfoEntry.DirectoryStructure CreateDirectoryStructure = InfoEntry.DirectoryStructure.Unset;
                 InfoEntry.Case Case = InfoEntry.Case.Unset;
                 InfoEntry.UmlautAction Umlaute = InfoEntry.UmlautAction.Unset;
-                for (int i = 0; i < lstFiles.SelectedItems.Count; i++) {
-                    ListViewItem lvi = lstFiles.SelectedItems[i];
+                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                {
+                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                    InfoEntry ie = (InfoEntry)lvi.RowObject;
                     if (i == 0) {
-                        CreateDirectoryStructure = InfoEntryManager.Instance[((int)lvi.Tag)].CreateDirectoryStructure;
-                        Case = InfoEntryManager.Instance[((int)lvi.Tag)].Casing;
-                        Umlaute = InfoEntryManager.Instance[((int)lvi.Tag)].UmlautUsage;
+                        CreateDirectoryStructure = ie.CreateDirectoryStructure;
+                        Case = ie.Casing;
+                        Umlaute = ie.UmlautUsage;
                     }
                     else {
-                        if (CreateDirectoryStructure != InfoEntryManager.Instance[((int)lvi.Tag)].CreateDirectoryStructure) {
+                        if (CreateDirectoryStructure != ie.CreateDirectoryStructure)
+                        {
                             CreateDirectoryStructure = InfoEntry.DirectoryStructure.Unset;
                         }
-                        if (Case != InfoEntryManager.Instance[((int)lvi.Tag)].Casing) {
+                        if (Case != ie.Casing)
+                        {
                             Case = InfoEntry.Case.Unset;
                         }
-                        if (Umlaute != InfoEntryManager.Instance[((int)lvi.Tag)].UmlautUsage) {
+                        if (Umlaute != ie.UmlautUsage)
+                        {
                             Umlaute = InfoEntry.UmlautAction.Unset;
                         }
                     }
@@ -896,17 +895,19 @@ namespace Renamer
                 else if (Umlaute == InfoEntry.UmlautAction.Ignore) {
                     useProvidedNamesToolStripMenuItem.Checked = true;
                 }
-                for (int i = 0; i < lstFiles.SelectedItems.Count; i++) {
-                    ListViewItem lvi = lstFiles.SelectedItems[i];
-                    if (InfoEntryManager.Instance[((int)lvi.Tag)].Filename != "")
+                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                {
+                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                    InfoEntry ie = (InfoEntry)lvi.RowObject;
+                    if (ie.Filename != "")
                         OldFilename = true;
-                    if (InfoEntryManager.Instance[((int)lvi.Tag)].FilePath.Path != "")
+                    if (ie.FilePath.Path != "")
                         OldPath = true;
-                    if (InfoEntryManager.Instance[((int)lvi.Tag)].Name != "")
+                    if (ie.Name != "")
                         Name = true;
-                    if (InfoEntryManager.Instance[((int)lvi.Tag)].Destination != "")
+                    if (ie.Destination != "")
                         Destination = true;
-                    if (InfoEntryManager.Instance[((int)lvi.Tag)].NewFileName != "")
+                    if (ie.NewFilename != "")
                         NewFilename = true;
                 }
                 originalNameToolStripMenuItem.Visible = OldFilename;
@@ -922,20 +923,25 @@ namespace Renamer
 
         //Select all list items
         private void selectAllToolStripMenuItem_Click(object sender, EventArgs e) {
-            lstFiles.SelectedIndices.Clear();
-            foreach (ListViewItem lvi in lstFiles.Items) {
-                lstFiles.SelectedIndices.Add(lvi.Index);
+            lstEntries.SelectedIndices.Clear();
+            for (int i = 0; i < lstEntries.Items.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[i];
+                lstEntries.SelectedIndices.Add(lvi.Index);
             }
         }
 
         //Invert file list selection
         private void invertSelectionToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (ListViewItem lvi in lstFiles.Items) {
-                if (lstFiles.SelectedIndices.Contains(lvi.Index)) {
-                    lstFiles.SelectedIndices.Remove(lvi.Index);
+            for (int i = 0; i < lstEntries.Items.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[i];
+                if (lstEntries.SelectedIndices.Contains(lvi.Index))
+                {
+                    lstEntries.SelectedIndices.Remove(lvi.Index);
                 }
                 else {
-                    lstFiles.SelectedIndices.Add(lvi.Index);
+                    lstEntries.SelectedIndices.Add(lvi.Index);
                 }
             }
         }
@@ -945,7 +951,7 @@ namespace Renamer
             foreach (InfoEntry ie in InfoEntryManager.Instance) {
                 ie.ProcessingRequested = true;
             }
-            SyncAllItems(false);
+            lstEntries.Refresh();
         }
 
         //Uncheck all list boxes
@@ -953,7 +959,7 @@ namespace Renamer
             foreach (InfoEntry ie in InfoEntryManager.Instance) {
                 ie.ProcessingRequested = false;
             }
-            SyncAllItems(false);
+            lstEntries.Refresh();
         }
 
         //Invert check status of Selected list boxes
@@ -961,17 +967,19 @@ namespace Renamer
             foreach (InfoEntry ie in InfoEntryManager.Instance) {
                 ie.ProcessingRequested = !ie.ProcessingRequested;
             }
-            SyncAllItems(false);
+            lstEntries.Refresh();
         }
 
         //Filter function to select files by keyword
         private void selectByKeywordToolStripMenuItem_Click(object sender, EventArgs e) {
             Filter f = new Filter("");
             if (f.ShowDialog() == DialogResult.OK) {
-                lstFiles.SelectedIndices.Clear();
-                foreach (ListViewItem lvi in lstFiles.Items) {
+                lstEntries.SelectedIndices.Clear();
+                for (int i = 0; i < lstEntries.Items.Count; i++)
+                {
+                    OLVListItem lvi = (OLVListItem)lstEntries.Items[i];
                     if (lvi.Text.ToLower().Contains(f.result.ToLower())) {
-                        lstFiles.SelectedIndices.Add(lvi.Index);
+                        lstEntries.SelectedIndices.Add(lvi.Index);
                     }
                 }
             }
@@ -983,9 +991,12 @@ namespace Renamer
             //yes we are smart and guess the season from existing ones
             int sum = 0;
             int count = 0;
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                if (InfoEntryManager.Instance[(int)lvi.Tag].Season != -1) {
-                    sum += InfoEntryManager.Instance[(int)lvi.Tag].Season;
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                if (ie.Season != -1) {
+                    sum += ie.Season;
                     count++;
                 }
             }
@@ -995,26 +1006,30 @@ namespace Renamer
                 string basepath = Helper.ReadProperty(Config.LastDirectory);
                 bool createdirectorystructure = (Helper.ReadInt(Config.CreateDirectoryStructure) > 0);
                 bool UseSeasonDir = (Helper.ReadInt(Config.UseSeasonSubDir) > 0);
-                foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                    int season = es.season;
-                    InfoEntryManager.Instance[(int)lvi.Tag].Season = season;
-                    //SetupRelation((int)lvi.Tag);
-                    //SetDestinationPath(InfoEntryManager.Instance[(int)lvi.Tag], basepath, createdirectorystructure, UseSeasonDir);
-                    if (InfoEntryManager.Instance[(int)lvi.Tag].Destination != "") {
-                        InfoEntryManager.Instance[(int)lvi.Tag].ProcessingRequested = true;
+                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                {
+                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                    InfoEntry ie = (InfoEntry)lvi.RowObject;
+                    ie.Season = es.season;                    
+                    if (ie.Destination != "") {
+                        ie.ProcessingRequested = true;
                     }
+                    lstEntries.RefreshItem(lvi);
                 }
-                FillListView();
             }
+
         }
 
         //Set episodes for selected items to a range
         private void setEpisodesFromtoToolStripMenuItem_Click(object sender, EventArgs e) {
-            SetEpisodes se = new SetEpisodes(lstFiles.SelectedIndices.Count);
+            SetEpisodes se = new SetEpisodes(lstEntries.SelectedIndices.Count);
             if (se.ShowDialog() == DialogResult.OK) {
-                for (int i = 0; i < lstFiles.SelectedIndices.Count; i++) {
-                    InfoEntryManager.Instance[((int)lstFiles.SelectedItems[i].Tag)].Episode = (i + se.From);
-                    lstFiles.SelectedItems[i].SubItems[3].Text = (i + se.From).ToString();
+                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                {
+                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                    InfoEntry ie = (InfoEntry)lvi.RowObject;
+                    ie.Episode = (i + se.From);
+                    lstEntries.RefreshItem(lvi);
                 }
             }
 
@@ -1032,8 +1047,11 @@ namespace Renamer
             if (MessageBox.Show("Delete selected files?", "Delete selected files?", MessageBoxButtons.YesNo) == DialogResult.No)
                 return;
             List<InfoEntry> lie = new List<InfoEntry>();
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                lie.Add(InfoEntryManager.Instance[(int)lvi.Tag]);
+            for (int i = 0; i < lstEntries.Items.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[i];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                lie.Add(ie);
             }
             foreach (InfoEntry ie in lie) {
                 try {
@@ -1049,7 +1067,7 @@ namespace Renamer
 
         //Open file
         private void viewToolStripMenuItem_Click(object sender, EventArgs e) {
-            InfoEntry ie = InfoEntryManager.Instance.GetVideo(InfoEntryManager.Instance[(int)lstFiles.SelectedItems[0].Tag]);
+            InfoEntry ie = InfoEntryManager.Instance.GetVideo((InfoEntry)((OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]]).RowObject);
             string VideoPath = ie.FilePath.Path + Path.DirectorySeparatorChar + ie.Filename;
             try {
                 Process myProc = Process.Start(VideoPath);
@@ -1061,8 +1079,8 @@ namespace Renamer
 
         //Edit subtitle
         private void editSubtitleToolStripMenuItem_Click(object sender, EventArgs e) {
-            InfoEntry sub = InfoEntryManager.Instance.GetSubtitle(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)]);
-            InfoEntry video = InfoEntryManager.Instance.GetVideo(InfoEntryManager.Instance[((int)lstFiles.SelectedItems[0].Tag)]);
+            InfoEntry sub = InfoEntryManager.Instance.GetSubtitle((InfoEntry)((OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]]).RowObject);
+            InfoEntry video = InfoEntryManager.Instance.GetVideo((InfoEntry)((OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]]).RowObject);
             if (sub != null) {
                 string path = sub.FilePath.Path + Path.DirectorySeparatorChar + sub.Filename;
                 string videopath = "";
@@ -1078,10 +1096,13 @@ namespace Renamer
         private void setDestinationToolStripMenuItem_Click(object sender, EventArgs e) {
             InputBox ib = new InputBox("Set Destination", "Set Destination directory for selected files", Helper.ReadProperty(Config.LastDirectory), InputBox.BrowseType.Folder, true);
             if (ib.ShowDialog(this) == DialogResult.OK) {
-                foreach (ListViewItem lvi in lstFiles.SelectedItems) {
+                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                {
+                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                    InfoEntry ie = (InfoEntry)lvi.RowObject;
                     string destination = ib.input;
-                    InfoEntryManager.Instance[(int)lvi.Tag].Destination = destination;
-                    lvi.SubItems[6].Text = destination;
+                    ie.Destination = destination;
+                    lstEntries.RefreshItem(lvi);
                 }
             }
         }
@@ -1089,117 +1110,117 @@ namespace Renamer
         #region misc
         
         /// <summary>
-        /// Syncs an item between data and GUI, will bitch if item doesn't exist already though. To create new items, add one to the data manually and use FillListView()
-        /// </summary>
-        /// <param name="item">Item to be synchronized. The index which is used here is that of the InfoEntry list in info class. ListViewItems Use Tag Property.</param>
-        /// <param name="direction">Direction in which synching should occur. 0 = data->GUI, 1 = GUI->data</param>
-        private void SyncItem(int item, bool direction) {
-            ListViewItem lvi = null;
-            foreach (ListViewItem lv in lstFiles.Items) {
-                if ((int)lv.Tag == item) {
-                    lvi = lv;
-                    break;
-                }
-            }
-            if (lvi == null) {
-                Logger.Instance.LogMessage("Synching between data and gui failed because item doesn't exist in GUI.", LogLevel.ERROR);
-                return;
-            }
-            InfoEntry ie = InfoEntryManager.Instance[item];
-            if (direction == false) {
-                lvi.SubItems[0].Text = ie.Filename;
-                lvi.SubItems[1].Text = ie.FilePath.Path;
-                lvi.SubItems[2].Text = ie.Season.ToString();
-                lvi.SubItems[3].Text = ie.Episode.ToString();
-                lvi.SubItems[4].Text = ie.Name;
-                lvi.SubItems[5].Text = ie.NewFileName;
-                lvi.SubItems[6].Text = ie.Destination;
-                if (string.IsNullOrEmpty(ie.Showname))
-                {
-                    lvi.SubItems[7].Text = InfoEntry.NotRecognized;
-                }
-                else
-                {
-                    lvi.SubItems[7].Text = ie.Showname;
-                }
-                lvi.Checked = ie.ProcessingRequested;
-            }
-            else {
-                ie.Filename = lvi.SubItems[0].Text;
-                ie.FilePath.Path = lvi.SubItems[1].Text;
-                try {
-                    ie.Season = Int32.Parse(lvi.SubItems[2].Text);
-                }
-                catch {
-                    ie.Season = -1;
-                }
-                try {
-                    ie.Episode = Int32.Parse(lvi.SubItems[3].Text);
-                }
-                catch {
-                    ie.Episode = -1;
-                }
-
-                ie.Name = lvi.SubItems[4].Text;
-                ie.NewFileName = lvi.SubItems[5].Text;
-                ie.Destination = lvi.SubItems[6].Text;
-                if (lvi.SubItems[7].Text == InfoEntry.NotRecognized)
-                {
-                    ie.Showname = "";
-                }
-                else
-                {
-                    ie.Showname = lvi.SubItems[7].Text;
-                }
-                ie.ProcessingRequested = lvi.Checked;
-            }
-
-            Colorize();
-        }
-
-        /// <summary>
         /// Fills list view control with info data
         /// </summary>
         private void FillListView() {
             // TODO: show at least a progressbar while adding items, user can't see anything but processor utilization will be very high
-            lstFiles.Items.Clear();
+            lstEntries.Items.Clear();
             List<ListViewItem> list = new List<ListViewItem>();
-            for (int i = 0; i < InfoEntryManager.Instance.Count; i++) {
-                InfoEntry ie = InfoEntryManager.Instance[i];
-                ListViewItem lvi = new ListViewItem(ie.Filename);
-                lvi.Tag = i;
-                lvi.SubItems.Add(ie.FilePath.Path);
-                lvi.SubItems.Add(ie.Season.ToString());
-                lvi.SubItems.Add(ie.Episode.ToString());
-                lvi.SubItems.Add(ie.Name);
-                lvi.SubItems.Add(ie.NewFileName);
-                lvi.SubItems.Add(ie.Destination);
-                if (String.IsNullOrEmpty(ie.Showname))
-                {
-                    lvi.SubItems.Add(InfoEntry.NotRecognized);
-                }
-                else
-                {
-                    lvi.SubItems.Add(ie.Showname);
-                }
-                lvi.Checked = ie.ProcessingRequested;
-                list.Add(lvi);
-            }
-            lstFiles.Items.AddRange(list.ToArray());
+            lstEntries.VirtualListSize = InfoEntryManager.Instance.Count;
+            lstEntries.SetObjects(InfoEntryManager.Instance);
             Colorize();
-            lstFiles.Sort();
-            lstFiles.Refresh();
+            lstEntries.Sort();
+            lstEntries.Refresh();
         }
 
+
+
+
+
+        private void InitListView()
+        {
+            //Processing
+            this.lstEntries.BooleanCheckStateGetter = delegate(object x)
+            {
+                return ((InfoEntry)x).ProcessingRequested;
+            };
+            this.lstEntries.BooleanCheckStatePutter = delegate(object x, bool newValue)
+            {
+                ((InfoEntry)x).ProcessingRequested = newValue;
+                btnTitles.Enabled = lstEntries.CheckedItems.Count != 0;
+                btnSubs.Enabled = lstEntries.CheckedItems.Count != 0;
+                return newValue;
+            };
+
+            //source filename
+            this.ColumnSource.AspectGetter = delegate(object x) {
+                return ((InfoEntry)x).Filename;
+            };
+
+            //Source path
+            this.ColumnFilepath.AspectGetter = delegate(object x)
+            {
+                return ((InfoEntry)x).FilePath.Path;
+            };
+
+            //Showname
+            this.ColumnShowname.AspectGetter = delegate(object x)
+            {
+                return ((InfoEntry)x).Showname;
+            };
+            this.ColumnShowname.AspectPutter = delegate(object x, object newValue) {
+                ((InfoEntry)x).Showname=(string)newValue; 
+            };
+
+            //Season
+            this.ColumnSeason.AspectGetter = delegate(object x)
+            {
+                return ((InfoEntry)x).Season;
+            };
+            this.ColumnSeason.AspectPutter = delegate(object x, object newValue) { ((InfoEntry)x).Season=(int)newValue; };
+
+            //Episode
+            this.ColumnEpisode.AspectGetter = delegate(object x)
+            {
+                return ((InfoEntry)x).Episode;
+            };
+            this.ColumnEpisode.AspectPutter = delegate(object x, object newValue) { ((InfoEntry)x).Episode=(int)newValue; };
+
+            //Episode Name
+            this.ColumnEpisodeName.AspectGetter = delegate(object x)
+            {
+                return ((InfoEntry)x).Name;
+            };
+            this.ColumnEpisodeName.AspectPutter = delegate(object x, object newValue) { 
+                ((InfoEntry)x).Name=(string)newValue; 
+                //backtrack to see if entered text matches a season/episode
+                RelationCollection rc = RelationManager.Instance.GetRelationCollection(((InfoEntry)x).Showname);
+                    if (rc != null) {
+                        foreach (Relation rel in rc) {
+                            //if found, set season and episode in gui and sync back to data
+                            if ((string)newValue == rel.Name) {
+                                ((InfoEntry)x).Season=rel.Season;
+                                ((InfoEntry)x).Episode=rel.Episode;
+                                break;
+                            }
+                        }
+                    }
+            };
+
+            //Destination
+            this.ColumnDestination.AspectGetter = delegate(object x)
+            {
+                return ((InfoEntry)x).Destination;
+            };
+            this.ColumnDestination.AspectPutter = delegate(object x, object newValue) { 
+                ((InfoEntry)x).Destination=(string)newValue; 
+            };
+
+            //Filename
+            this.ColumnNewFilename.AspectGetter = delegate(object x)
+            {
+                return ((InfoEntry)x).NewFilename;
+            };
+            this.ColumnNewFilename.AspectPutter = delegate(object x, object newValue) { ((InfoEntry)x).NewFilename=(string)newValue; };
+        }
         /// <summary>
         /// colorizes the file list
         /// </summary>
         private void Colorize() {
             if (!working)
             {
-                foreach (ListViewItem lvi1 in lstFiles.Items)
-                {
-                    Colorize(lvi1);
+                for(int i=0;i<lstEntries.Items.Count;i++){
+                    Colorize(lstEntries.Items[i]);
                 }
             }
         }
@@ -1209,16 +1230,17 @@ namespace Renamer
         /// </summary>
         /// <param name="lvi">List item to be colorized</param>
         private void Colorize(ListViewItem lvi) {
+            return;
             //reset colors to make sure they are set properly
             lvi.BackColor = Color.White;
             lvi.ForeColor = Color.Black;
             InfoEntry ie = InfoEntryManager.Instance.GetByListViewItem(lvi);
-            if ((ie.NewFileName==""&&(ie.Destination==""||ie.Destination==ie.FilePath.Path))||!ie.ProcessingRequested){
+            if ((ie.NewFilename==""&&(ie.Destination==""||ie.Destination==ie.FilePath.Path))||!ie.ProcessingRequested){
                 lvi.ForeColor = Color.Gray;
             }
             else {
                 lvi.ForeColor = Color.Black;
-                if (ie.NewFileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || ie.Destination.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+                if (ie.NewFilename.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || ie.Destination.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
                 {
                     lvi.BackColor = Color.Yellow;
                 }
@@ -1228,12 +1250,13 @@ namespace Renamer
                 }
                 if (!ie.MarkedForDeletion)
                 {
-                    foreach (ListViewItem lvi2 in lstFiles.Items)
+                    for (int i = 0; i < lstEntries.Items.Count; i++)
                     {
+                        OLVListItem lvi2 = (OLVListItem)lstEntries.Items[i];
                         if (lvi != lvi2)
                         {
                             InfoEntry ie2 = InfoEntryManager.Instance.GetByListViewItem(lvi2);
-                            if (ie.Destination == ie2.Destination && ie.NewFileName == ie2.NewFileName && ie.NewFileName != "")
+                            if (ie.Destination == ie2.Destination && ie.NewFilename == ie2.NewFilename && ie.NewFilename != "")
                             {
                                 lvi.BackColor = Color.IndianRed;
                                 break;
@@ -1247,18 +1270,7 @@ namespace Renamer
                 }
             }            
         }
-        private ListViewItem GetListViewItemFromInfoEntry(InfoEntry ie)
-        {
-            int pos=InfoEntryManager.Instance.IndexOf(ie);
-            foreach (ListViewItem lvi in lstFiles.Items)
-            {
-                if ((int)lvi.Tag == pos)
-                {
-                    return lvi;
-                }
-            }
-            return null;
-        }
+
         /// <summary>
         /// Gets focussed control
         /// </summary>
@@ -1299,8 +1311,11 @@ namespace Renamer
 
         private void originalNameToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].Filename + Environment.NewLine;
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                clipboard += ie.Filename + Environment.NewLine;
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
@@ -1309,8 +1324,11 @@ namespace Renamer
 
         private void pathOrigNameToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].FilePath.Path + Path.DirectorySeparatorChar + InfoEntryManager.Instance[((int)lvi.Tag)].Filename + Environment.NewLine;
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                clipboard += ie.FilePath.Path + Path.DirectorySeparatorChar + ie.Filename + Environment.NewLine;
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
@@ -1319,8 +1337,11 @@ namespace Renamer
 
         private void titleToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].Name + Environment.NewLine;
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                clipboard += ie.Name + Environment.NewLine;
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
@@ -1329,8 +1350,11 @@ namespace Renamer
 
         private void newFileNameToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].NewFileName + Environment.NewLine;
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                clipboard += ie.NewFilename + Environment.NewLine;
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
@@ -1339,9 +1363,12 @@ namespace Renamer
 
         private void destinationNewFileNameToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                if (InfoEntryManager.Instance[((int)lvi.Tag)].Destination != "" && InfoEntryManager.Instance[((int)lvi.Tag)].NewFileName != "") {
-                    clipboard += InfoEntryManager.Instance[((int)lvi.Tag)].Destination + Path.DirectorySeparatorChar + InfoEntryManager.Instance[((int)lvi.Tag)].NewFileName + Environment.NewLine;
+           for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                if(ie.Destination != "" && ie.NewFilename != "") {
+                    clipboard += ie.Destination + Path.DirectorySeparatorChar + ie.NewFilename + Environment.NewLine;
                 }
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
@@ -1351,18 +1378,30 @@ namespace Renamer
 
         private void operationToolStripMenuItem_Click(object sender, EventArgs e) {
             string clipboard = "";
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntry ie = InfoEntryManager.Instance[((int)lvi.Tag)];
-                if (ie.Destination != "") {
-                    clipboard += ie.Filename + " --> " + ie.Destination + Path.DirectorySeparatorChar + ie.NewFileName + Environment.NewLine;
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                bool DestinationDifferent = ie.Destination != "" && ie.Destination != ie.FilePath.Path;
+                bool FilenameDifferent = ie.NewFilename != "" && ie.NewFilename != ie.Filename;
+                if (DestinationDifferent&&FilenameDifferent) {
+                    clipboard += ie.Filename + " --> " + ie.Destination + Path.DirectorySeparatorChar + ie.NewFilename + Environment.NewLine;
                 }
-                else {
-                    clipboard += ie.Filename + " --> " + ie.NewFileName + Environment.NewLine;
+                else if (DestinationDifferent)
+                {
+                    clipboard += ie.Filename + " --> " + ie.Destination + Environment.NewLine;
+                }
+                else if (FilenameDifferent)
+                {
+                    clipboard += ie.Filename + " --> " + ie.NewFilename + Environment.NewLine;
                 }
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
-            Clipboard.SetText(clipboard);
+            if (!string.IsNullOrEmpty(clipboard))
+            {
+                Clipboard.SetText(clipboard);
+            }
         }
 
         private void btnOpen_Click(object sender, EventArgs e) {
@@ -1393,15 +1432,6 @@ namespace Renamer
             RemoveVideoTags();
         }
 
-        /// <summary>
-        /// Syncs all items
-        /// </summary>
-        /// <param name="direction">Direction in which synching should occur. false = data->GUI, true = GUI->data</param>
-        private void SyncAllItems(bool direction) {
-            foreach (ListViewItem lvi in lstFiles.Items) {
-                SyncItem((int)lvi.Tag, direction);
-            }
-        }
 
         private void replaceInPathToolStripMenuItem_Click(object sender, EventArgs e) {
             ReplaceWindow rw = new ReplaceWindow(this);
@@ -1425,8 +1455,10 @@ namespace Renamer
             string destination = "Filename";
             if (Source.Contains("Path"))
                 destination = "Path";
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntry ie = InfoEntryManager.Instance[(int)lvi.Tag];
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
                 string source = "";
 
                 string LocalSearchString = SearchString;
@@ -1440,7 +1472,7 @@ namespace Renamer
                         source = ie.FilePath.Path;
                         break;
                     case "Destination Filename":
-                        source = ie.NewFileName;
+                        source = ie.NewFilename;
                         break;
                     case "Destination Path":
                         source = ie.Destination;
@@ -1448,7 +1480,7 @@ namespace Renamer
                 }
                 //Insert parameter values
                 LocalSearchString = LocalSearchString.Replace("%OF", ie.Filename);
-                LocalSearchString = LocalSearchString.Replace("%DF", ie.NewFileName);
+                LocalSearchString = LocalSearchString.Replace("%DF", ie.NewFilename);
                 LocalSearchString = LocalSearchString.Replace("%OP", ie.FilePath.Path);
                 LocalSearchString = LocalSearchString.Replace("%DP", ie.Destination);
                 LocalSearchString = LocalSearchString.Replace("%T", title);
@@ -1458,7 +1490,7 @@ namespace Renamer
                 LocalSearchString = LocalSearchString.Replace("%BD", basedir);
                 LocalSearchString = LocalSearchString.Replace("%S", ie.Season.ToString("00"));
                 LocalReplaceString = LocalReplaceString.Replace("%OF", ie.Filename);
-                LocalReplaceString = LocalReplaceString.Replace("%DF", ie.NewFileName);
+                LocalReplaceString = LocalReplaceString.Replace("%DF", ie.NewFilename);
                 LocalReplaceString = LocalReplaceString.Replace("%OP", ie.FilePath.Path);
                 LocalReplaceString = LocalReplaceString.Replace("%DP", ie.Destination);
                 LocalReplaceString = LocalReplaceString.Replace("%T", title);
@@ -1473,7 +1505,7 @@ namespace Renamer
                 //do the replace
                 source = source.Replace(LocalSearchString, LocalReplaceString);
                 if (destination == "Filename") {
-                    ie.NewFileName = source;
+                    ie.NewFilename = source;
                 }
                 else if (destination == "Path") {
                     ie.Destination = source;
@@ -1481,7 +1513,6 @@ namespace Renamer
 
                 //mark files for processing
                 ie.ProcessingRequested = true;
-                SyncItem((int)lvi.Tag, false);
             }
             if (count > 0) {
                 Logger.Instance.LogMessage(SearchString + " was replaced with " + ReplaceString + " in " + count + " fields.", LogLevel.INFO);
@@ -1493,8 +1524,11 @@ namespace Renamer
 
         private void byNameToolStripMenuItem_Click(object sender, EventArgs e) {
             List<string> names = new List<string>();
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                string Showname = InfoEntryManager.Instance[(int)lvi.Tag].Showname;
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                string Showname = ie.Showname;
                 if (!names.Contains(Showname)) {
                     names.Add(Showname);
                 }
@@ -1503,8 +1537,11 @@ namespace Renamer
             foreach (string str in names) {
                 similar.AddRange(InfoEntryManager.Instance.FindSimilarByName(str));
             }
-            foreach (ListViewItem lvi in lstFiles.Items) {
-                if (similar.Contains(InfoEntryManager.Instance[(int)lvi.Tag])) {
+            for (int i = 0; i < lstEntries.Items.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[i];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                if (similar.Contains(ie)) {
                     lvi.Selected = true;
                 }
                 else {
@@ -1515,8 +1552,11 @@ namespace Renamer
 
         private void byPathToolStripMenuItem_Click(object sender, EventArgs e) {
             List<string> paths = new List<string>();
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                string path = InfoEntryManager.Instance[(int)lvi.Tag].FilePath.Path;
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                string path = ie.FilePath.Path;
                 if (!paths.Contains(path)) {
                     paths.Add(path);
                 }
@@ -1525,8 +1565,11 @@ namespace Renamer
             foreach (string str in paths) {
                 similar.AddRange(InfoEntryManager.Instance.FindSimilarByName(str));
             }
-            foreach (ListViewItem lvi in lstFiles.Items) {
-                if (similar.Contains(InfoEntryManager.Instance[(int)lvi.Tag])) {
+            for (int i = 0; i < lstEntries.Items.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[i];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                if (similar.Contains(ie)) {
                     lvi.Selected = true;
                 }
                 else {
@@ -1536,27 +1579,33 @@ namespace Renamer
         }
 
         private void createDirectoryStructureToolStripMenuItem1_Click(object sender, EventArgs e) {
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntryManager.Instance[(int)lvi.Tag].CreateDirectoryStructure = InfoEntry.DirectoryStructure.CreateDirectoryStructure;
-                SyncItem((int)lvi.Tag, false);
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                ie.CreateDirectoryStructure = InfoEntry.DirectoryStructure.CreateDirectoryStructure;
             }
             ((ToolStripMenuItem)sender).Checked = true;
             dontCreateDirectoryStructureToolStripMenuItem.Checked = false;
         }
 
         private void dontCreateDirectoryStructureToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntryManager.Instance[(int)lvi.Tag].CreateDirectoryStructure = InfoEntry.DirectoryStructure.NoDirectoryStructure;
-                SyncItem((int)lvi.Tag, false);
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                ie.CreateDirectoryStructure = InfoEntry.DirectoryStructure.NoDirectoryStructure;
             }
             ((ToolStripMenuItem)sender).Checked = true;
             createDirectoryStructureToolStripMenuItem.Checked = false;
         }
 
         private void useUmlautsToolStripMenuItem1_Click(object sender, EventArgs e) {
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntryManager.Instance[(int)lvi.Tag].UmlautUsage = InfoEntry.UmlautAction.Use;
-                SyncItem((int)lvi.Tag, false);
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                ie.UmlautUsage = InfoEntry.UmlautAction.Use;
             }
             ((ToolStripMenuItem)sender).Checked = true;
             dontUseUmlautsToolStripMenuItem.Checked = false;
@@ -1564,9 +1613,11 @@ namespace Renamer
         }
 
         private void dontUseUmlautsToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntryManager.Instance[(int)lvi.Tag].UmlautUsage = InfoEntry.UmlautAction.Dont_Use;
-                SyncItem((int)lvi.Tag, false);
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                ie.UmlautUsage = InfoEntry.UmlautAction.Dont_Use;
             }
             ((ToolStripMenuItem)sender).Checked = true;
             useUmlautsToolStripMenuItem.Checked = false;
@@ -1574,9 +1625,11 @@ namespace Renamer
         }
 
         private void useProvidedNamesToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntryManager.Instance[(int)lvi.Tag].UmlautUsage = InfoEntry.UmlautAction.Ignore;
-                SyncItem((int)lvi.Tag, false);
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                ie.UmlautUsage = InfoEntry.UmlautAction.Ignore;
             }
             ((ToolStripMenuItem)sender).Checked = true;
             useUmlautsToolStripMenuItem.Checked = false;
@@ -1584,9 +1637,11 @@ namespace Renamer
         }
 
         private void largeToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntryManager.Instance[(int)lvi.Tag].Casing = InfoEntry.Case.UpperFirst;
-                SyncItem((int)lvi.Tag, false);
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                ie.Casing = InfoEntry.Case.UpperFirst;            
             }
             ((ToolStripMenuItem)sender).Checked = true;
             smallToolStripMenuItem.Checked = false;
@@ -1595,9 +1650,11 @@ namespace Renamer
         }
 
         private void smallToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntryManager.Instance[(int)lvi.Tag].Casing = InfoEntry.Case.small;
-                SyncItem((int)lvi.Tag, false);
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                ie.Casing = InfoEntry.Case.small;
             }
             ((ToolStripMenuItem)sender).Checked = true;
             largeToolStripMenuItem.Checked = false;
@@ -1606,9 +1663,11 @@ namespace Renamer
         }
 
         private void igNorEToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntryManager.Instance[(int)lvi.Tag].Casing = InfoEntry.Case.Ignore;
-                SyncItem((int)lvi.Tag, false);
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                ie.Casing = InfoEntry.Case.Ignore;
             }
             ((ToolStripMenuItem)sender).Checked = true;
             smallToolStripMenuItem.Checked = false;
@@ -1617,9 +1676,11 @@ namespace Renamer
         }
 
         private void cAPSLOCKToolStripMenuItem_Click(object sender, EventArgs e) {
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                InfoEntryManager.Instance[(int)lvi.Tag].Casing = InfoEntry.Case.CAPSLOCK;
-                SyncItem((int)lvi.Tag, false);
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                ie.Casing = InfoEntry.Case.CAPSLOCK;
             }
             ((ToolStripMenuItem)sender).Checked = true;
             smallToolStripMenuItem.Checked = false;
@@ -1629,12 +1690,15 @@ namespace Renamer
 
         private void setShownameToolStripMenuItem_Click(object sender, EventArgs e) {
             Dictionary<string, int> ht = new Dictionary<string, int>();
-            foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                if (!ht.ContainsKey(InfoEntryManager.Instance[(int)lvi.Tag].Showname)) {
-                    ht.Add(InfoEntryManager.Instance[(int)lvi.Tag].Showname, 1);
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                if (!ht.ContainsKey(ie.Showname)) {
+                    ht.Add(ie.Showname, 1);
                 }
                 else {
-                    ht[InfoEntryManager.Instance[(int)lvi.Tag].Showname] += 1;
+                    ht[ie.Showname] += 1;
                 }
             }
             int max = 0;
@@ -1646,9 +1710,11 @@ namespace Renamer
             }
             EnterShowname es = new EnterShowname(Showname);
             if (es.ShowDialog() == DialogResult.OK) {
-                foreach (ListViewItem lvi in lstFiles.SelectedItems) {
-                    InfoEntryManager.Instance[(int)lvi.Tag].Showname = es.SelectedName;
-                    SyncItem((int)lvi.Tag, false);
+                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                {
+                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                    ((InfoEntry)lvi.RowObject).Showname = es.SelectedName;
+                    lstEntries.RefreshItem(lvi);
                 }
             }
         }
@@ -1665,11 +1731,6 @@ namespace Renamer
         private void UpdateList(bool clear)
         {
             progressBar1.Visible = true;
-            /*Thread t = new Thread(this.UpdateListThread);
-            t.Start(clear);
-        }
-        private void UpdateListThread(object clearList) {
-            bool clear = (bool)clearList;*/
             DateTime dt = DateTime.Now;
             DataGenerator.UpdateList(clear);
             Logger.Instance.LogMessage((dt - DateTime.Now).TotalSeconds.ToString(), LogLevel.INFO);
@@ -1689,17 +1750,21 @@ namespace Renamer
             cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
             btnTitles.Enabled = InfoEntryManager.Instance.Count > 0;
             btnRename.Enabled = InfoEntryManager.Instance.Count > 0;
-            //make sure get titles and rename button are only enabled if there are recognized shownames
+            //make sure get titles and rename button are only enabled if there are recognized shownames of series
             if(btnTitles.Enabled){
                 btnTitles.Enabled=false;
                 btnRename.Enabled = false;
                 foreach (InfoEntry ie in InfoEntryManager.Instance)
                 {
-                    if (!string.IsNullOrEmpty(ie.Showname))
+                    if (!ie.Movie && !string.IsNullOrEmpty(ie.Showname))
                     {
                         btnTitles.Enabled = true;
-                        btnRename.Enabled = true;
                         break;
+                    }
+                    if (!string.IsNullOrEmpty(ie.Showname))
+                    {
+
+                        btnRename.Enabled = true;
                     }
                 }
             }
@@ -1717,8 +1782,101 @@ namespace Renamer
                     }
                 }
             }
+            lstEntries.Refresh();
         }
         #endregion        
+
+        private void lstEntries_CellEditStarting(object sender, BrightIdeasSoftware.CellEditEventArgs e)
+        {
+            InfoEntry ie = (InfoEntry)e.RowObject;
+            if(e.Column==ColumnEpisode){
+                ((NumericUpDown)e.Control).Minimum = 1;
+                RelationCollection rc = RelationManager.Instance.GetRelationCollection(ie.Showname);
+                if (rc != null)
+                {
+                    ((NumericUpDown)e.Control).Maximum = rc.FindMaxEpisode(ie.Season);    
+                }
+            }
+            else if (e.Column == ColumnSeason)
+            {
+                ((NumericUpDown)e.Control).Minimum = 1;
+                RelationCollection rc = RelationManager.Instance.GetRelationCollection(ie.Showname);
+                if (rc != null)
+                {
+                    ((NumericUpDown)e.Control).Maximum = rc.FindMaxSeason();
+                }
+            }
+            else if (e.Column == ColumnEpisodeName)
+            {
+                RelationCollection rc = RelationManager.Instance.GetRelationCollection(ie.Showname);
+                if (rc != null)
+                {
+                    ComboBox cb = new ComboBox();
+                    cb.Bounds = e.CellBounds;
+                    cb.Font = ((FastObjectListView)sender).Font;
+                    cb.DropDownStyle = ComboBoxStyle.DropDown;
+                    foreach (Relation r in rc)
+                    {
+                        if (r.Season == ie.Season)
+                        {
+                            cb.Items.Add(r.Name);
+                        }
+                        if (ie.Name == r.Name)
+                        {
+                            cb.SelectedItem = r.Name;
+                        }
+                    }
+                    if (cb.SelectedIndex < 0)
+                    {
+                        cb.SelectedIndex = 0;
+                    }
+                    cb.SelectedIndexChanged += new EventHandler(cb_SelectedIndexChanged);
+                    cb.Tag = e.RowObject; // remember which person we are editing
+                    e.Control = cb;
+                }
+            }
+        }
+        private void cb_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (((ComboBox)sender).Tag.GetType() == typeof(InfoEntry))
+            {
+                InfoEntry ie = (InfoEntry)((ComboBox)sender).Tag;
+                ie.Name = ((ComboBox)sender).Text;
+            }
+        }
+
+        private void lstEntries_CellEditFinishing(object sender, CellEditEventArgs e)
+        {
+            InfoEntry ie=(InfoEntry)e.RowObject;
+            if (e.Control.GetType() == typeof(ComboBox))
+            {
+                ComboBox cb = (ComboBox)e.Control;
+            }else if(e.Column==ColumnSeason){
+                int newValue=(int)((NumericUpDown)e.Control).Value;
+                RelationCollection rc= RelationManager.Instance.GetRelationCollection(((InfoEntry)e.RowObject).Showname);
+                if (rc != null)
+                {
+                    if(ie.Episode>rc.FindMaxEpisode(newValue)){
+                        ie.Episode=rc.FindMaxEpisode(newValue);
+                    }
+                }
+                
+            }
+            lstEntries.RefreshItem(e.ListViewItem);
+        }
+
+        private void lstEntries_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                {
+                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                    InfoEntry ie = (InfoEntry)lvi.RowObject;
+                    Process myProc = Process.Start(ie.FilePath.Path + Path.DirectorySeparatorChar + ie.Filename);
+                }
+            }
+        }
         
     }
 }

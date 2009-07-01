@@ -45,6 +45,7 @@ namespace Renamer
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.scContainer = new System.Windows.Forms.SplitContainer();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.btnOpen = new System.Windows.Forms.Button();
             this.btnRename = new System.Windows.Forms.Button();
             this.txtTarget = new System.Windows.Forms.TextBox();
@@ -56,15 +57,6 @@ namespace Renamer
             this.cbProviders = new System.Windows.Forms.ComboBox();
             this.lblTitlesFrom = new System.Windows.Forms.Label();
             this.btnTitles = new System.Windows.Forms.Button();
-            this.lstFiles = new ListViewEx.ListViewEx();
-            this.cOldName = new System.Windows.Forms.ColumnHeader();
-            this.cPath = new System.Windows.Forms.ColumnHeader();
-            this.cSeason = new System.Windows.Forms.ColumnHeader();
-            this.cEpID = new System.Windows.Forms.ColumnHeader();
-            this.cTitle = new System.Windows.Forms.ColumnHeader();
-            this.cNewName = new System.Windows.Forms.ColumnHeader();
-            this.cDestination = new System.Windows.Forms.ColumnHeader();
-            this.cShowname = new System.Windows.Forms.ColumnHeader();
             this.contextFiles = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editSubtitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -113,19 +105,24 @@ namespace Renamer
             this.btnPath = new System.Windows.Forms.Button();
             this.txtPath = new System.Windows.Forms.TextBox();
             this.lblFolder = new System.Windows.Forms.Label();
-            this.txtEdit = new System.Windows.Forms.TextBox();
-            this.numEdit = new System.Windows.Forms.NumericUpDown();
-            this.comEdit = new System.Windows.Forms.ComboBox();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.rtbLog = new System.Windows.Forms.RichTextBox();
             this.fbdPath = new System.Windows.Forms.FolderBrowserDialog();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.lstEntries = new BrightIdeasSoftware.FastObjectListView();
+            this.ColumnSource = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnFilepath = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnShowname = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnSeason = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnEpisode = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnEpisodeName = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnDestination = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnNewFilename = new BrightIdeasSoftware.OLVColumn();
             this.scContainer.Panel1.SuspendLayout();
             this.scContainer.Panel2.SuspendLayout();
             this.scContainer.SuspendLayout();
             this.contextFiles.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numEdit)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lstEntries)).BeginInit();
             this.SuspendLayout();
             // 
             // scContainer
@@ -140,6 +137,7 @@ namespace Renamer
             // 
             // scContainer.Panel1
             // 
+            this.scContainer.Panel1.Controls.Add(this.lstEntries);
             this.scContainer.Panel1.Controls.Add(this.progressBar1);
             this.scContainer.Panel1.Controls.Add(this.btnOpen);
             this.scContainer.Panel1.Controls.Add(this.btnRename);
@@ -152,14 +150,10 @@ namespace Renamer
             this.scContainer.Panel1.Controls.Add(this.cbProviders);
             this.scContainer.Panel1.Controls.Add(this.lblTitlesFrom);
             this.scContainer.Panel1.Controls.Add(this.btnTitles);
-            this.scContainer.Panel1.Controls.Add(this.lstFiles);
             this.scContainer.Panel1.Controls.Add(this.btnConfig);
             this.scContainer.Panel1.Controls.Add(this.btnPath);
             this.scContainer.Panel1.Controls.Add(this.txtPath);
             this.scContainer.Panel1.Controls.Add(this.lblFolder);
-            this.scContainer.Panel1.Controls.Add(this.txtEdit);
-            this.scContainer.Panel1.Controls.Add(this.numEdit);
-            this.scContainer.Panel1.Controls.Add(this.comEdit);
             this.scContainer.Panel1MinSize = 300;
             // 
             // scContainer.Panel2
@@ -172,6 +166,17 @@ namespace Renamer
             this.scContainer.TabIndex = 0;
             this.scContainer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.scContainer_MouseDown);
             this.scContainer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.scContainer_MouseUp);
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Location = new System.Drawing.Point(54, 4);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(319, 23);
+            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.progressBar1.TabIndex = 16;
+            this.progressBar1.Visible = false;
             // 
             // btnOpen
             // 
@@ -189,7 +194,7 @@ namespace Renamer
             // 
             this.btnRename.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnRename.AutoSize = true;
-            this.btnRename.Location = new System.Drawing.Point(737, 4);
+            this.btnRename.Location = new System.Drawing.Point(741, 4);
             this.btnRename.Name = "btnRename";
             this.btnRename.Size = new System.Drawing.Size(85, 23);
             this.btnRename.TabIndex = 11;
@@ -203,7 +208,7 @@ namespace Renamer
             this.txtTarget.Location = new System.Drawing.Point(629, 6);
             this.txtTarget.MinimumSize = new System.Drawing.Size(100, 20);
             this.txtTarget.Name = "txtTarget";
-            this.txtTarget.Size = new System.Drawing.Size(102, 20);
+            this.txtTarget.Size = new System.Drawing.Size(106, 20);
             this.txtTarget.TabIndex = 9;
             this.txtTarget.Text = "S%sE%E - %N";
             this.toolTip.SetToolTip(this.txtTarget, "Valid variables: %S - Season, %E - Episode, %T - Title, %N - Name, Small letter=1" +
@@ -258,7 +263,7 @@ namespace Renamer
             // btnAbout
             // 
             this.btnAbout.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAbout.Location = new System.Drawing.Point(919, 4);
+            this.btnAbout.Location = new System.Drawing.Point(923, 4);
             this.btnAbout.Name = "btnAbout";
             this.btnAbout.Size = new System.Drawing.Size(85, 23);
             this.btnAbout.TabIndex = 10;
@@ -297,90 +302,6 @@ namespace Renamer
             this.btnTitles.Text = "Get Titles !";
             this.btnTitles.UseVisualStyleBackColor = true;
             this.btnTitles.Click += new System.EventHandler(this.btnTitles_Click);
-            // 
-            // lstFiles
-            // 
-            this.lstFiles.AllowColumnReorder = true;
-            this.lstFiles.AllowDrop = true;
-            this.lstFiles.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.lstFiles.CheckBoxes = true;
-            this.lstFiles.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.cOldName,
-            this.cPath,
-            this.cSeason,
-            this.cEpID,
-            this.cTitle,
-            this.cNewName,
-            this.cDestination,
-            this.cShowname});
-            this.lstFiles.ContextMenuStrip = this.contextFiles;
-            this.lstFiles.DoubleClickActivation = true;
-            this.lstFiles.FullRowSelect = true;
-            this.lstFiles.Location = new System.Drawing.Point(15, 33);
-            this.lstFiles.Name = "lstFiles";
-            this.lstFiles.Size = new System.Drawing.Size(993, 427);
-            this.lstFiles.Sorting = System.Windows.Forms.SortOrder.Ascending;
-            this.lstFiles.TabIndex = 4;
-            this.toolTip.SetToolTip(this.lstFiles, "Double click on an entry in Season, Episode, Title or New File Name column to edi" +
-                    "t it");
-            this.lstFiles.UseCompatibleStateImageBehavior = false;
-            this.lstFiles.View = System.Windows.Forms.View.Details;
-            this.lstFiles.SubItemClicked += new ListViewEx.SubItemEventHandler(this.lstFiles_SubItemClicked);
-            this.lstFiles.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lstFiles_ItemChecked);
-            this.lstFiles.DoubleClick += new System.EventHandler(this.lstFiles_DoubleClick);
-            this.lstFiles.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstFiles_DragDrop);
-            this.lstFiles.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.lstFiles_ColumnClick);
-            this.lstFiles.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstFiles_DragEnter);
-            this.lstFiles.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstFiles_KeyDown);
-            this.lstFiles.SubItemEndEditing += new ListViewEx.SubItemEndEditingEventHandler(this.lstFiles_SubItemEndEditing);
-            // 
-            // cOldName
-            // 
-            this.cOldName.Text = "Old File Name";
-            this.cOldName.Width = 171;
-            // 
-            // cPath
-            // 
-            this.cPath.Text = "Path";
-            this.cPath.Width = 134;
-            // 
-            // cSeason
-            // 
-            this.cSeason.DisplayIndex = 3;
-            this.cSeason.Text = "Season";
-            this.cSeason.Width = 54;
-            // 
-            // cEpID
-            // 
-            this.cEpID.DisplayIndex = 4;
-            this.cEpID.Text = "Episode";
-            this.cEpID.Width = 56;
-            // 
-            // cTitle
-            // 
-            this.cTitle.DisplayIndex = 5;
-            this.cTitle.Text = "Episode Title";
-            this.cTitle.Width = 140;
-            // 
-            // cNewName
-            // 
-            this.cNewName.DisplayIndex = 6;
-            this.cNewName.Text = "New File Name";
-            this.cNewName.Width = 181;
-            // 
-            // cDestination
-            // 
-            this.cDestination.DisplayIndex = 7;
-            this.cDestination.Text = "Destination";
-            this.cDestination.Width = 197;
-            // 
-            // cShowname
-            // 
-            this.cShowname.DisplayIndex = 2;
-            this.cShowname.Text = "Show Name";
-            this.cShowname.Width = 110;
             // 
             // contextFiles
             // 
@@ -741,7 +662,7 @@ namespace Renamer
             // 
             this.btnConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnConfig.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnConfig.Location = new System.Drawing.Point(828, 4);
+            this.btnConfig.Location = new System.Drawing.Point(832, 4);
             this.btnConfig.Name = "btnConfig";
             this.btnConfig.Size = new System.Drawing.Size(85, 23);
             this.btnConfig.TabIndex = 3;
@@ -784,47 +705,14 @@ namespace Renamer
             this.lblFolder.TabIndex = 0;
             this.lblFolder.Text = "Folder";
             // 
-            // txtEdit
-            // 
-            this.txtEdit.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.txtEdit.Location = new System.Drawing.Point(32, 104);
-            this.txtEdit.Multiline = true;
-            this.txtEdit.Name = "txtEdit";
-            this.txtEdit.Size = new System.Drawing.Size(80, 16);
-            this.txtEdit.TabIndex = 3;
-            this.txtEdit.Visible = false;
-            // 
-            // numEdit
-            // 
-            this.numEdit.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.numEdit.Location = new System.Drawing.Point(32, 104);
-            this.numEdit.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.numEdit.Name = "numEdit";
-            this.numEdit.Size = new System.Drawing.Size(80, 20);
-            this.numEdit.TabIndex = 3;
-            this.numEdit.Visible = false;
-            // 
-            // comEdit
-            // 
-            this.comEdit.Location = new System.Drawing.Point(32, 104);
-            this.comEdit.Name = "comEdit";
-            this.comEdit.Size = new System.Drawing.Size(80, 21);
-            this.comEdit.TabIndex = 3;
-            this.comEdit.Visible = false;
-            this.comEdit.SelectedIndexChanged += new System.EventHandler(this.cbEdit_SelectedIndexChanged);
-            // 
             // txtLog
             // 
-            this.txtLog.Location = new System.Drawing.Point(15, 10);
+            this.txtLog.Location = new System.Drawing.Point(12, 3);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
             this.txtLog.ReadOnly = true;
             this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtLog.Size = new System.Drawing.Size(985, 87);
+            this.txtLog.Size = new System.Drawing.Size(996, 91);
             this.txtLog.TabIndex = 1;
             this.txtLog.Visible = false;
             // 
@@ -833,11 +721,11 @@ namespace Renamer
             this.rtbLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.rtbLog.Location = new System.Drawing.Point(15, 3);
+            this.rtbLog.Location = new System.Drawing.Point(12, 3);
             this.rtbLog.Name = "rtbLog";
             this.rtbLog.ReadOnly = true;
             this.rtbLog.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.rtbLog.Size = new System.Drawing.Size(993, 91);
+            this.rtbLog.Size = new System.Drawing.Size(996, 91);
             this.rtbLog.TabIndex = 0;
             this.rtbLog.Text = "";
             this.rtbLog.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtbLog_LinkClicked);
@@ -847,16 +735,89 @@ namespace Renamer
             this.fbdPath.Description = "Browse for folder containing series.";
             this.fbdPath.ShowNewFolderButton = false;
             // 
-            // progressBar1
+            // lstEntries
             // 
-            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.lstEntries.AllColumns.Add(this.ColumnSource);
+            this.lstEntries.AllColumns.Add(this.ColumnFilepath);
+            this.lstEntries.AllColumns.Add(this.ColumnShowname);
+            this.lstEntries.AllColumns.Add(this.ColumnSeason);
+            this.lstEntries.AllColumns.Add(this.ColumnEpisode);
+            this.lstEntries.AllColumns.Add(this.ColumnEpisodeName);
+            this.lstEntries.AllColumns.Add(this.ColumnDestination);
+            this.lstEntries.AllColumns.Add(this.ColumnNewFilename);
+            this.lstEntries.AllowColumnReorder = true;
+            this.lstEntries.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(54, 4);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(319, 23);
-            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
-            this.progressBar1.TabIndex = 16;
-            this.progressBar1.Visible = false;
+            this.lstEntries.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
+            this.lstEntries.CheckBoxes = true;
+            this.lstEntries.CheckedAspectName = "";
+            this.lstEntries.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.ColumnSource,
+            this.ColumnFilepath,
+            this.ColumnShowname,
+            this.ColumnSeason,
+            this.ColumnEpisode,
+            this.ColumnEpisodeName,
+            this.ColumnDestination,
+            this.ColumnNewFilename});
+            this.lstEntries.ContextMenuStrip = this.contextFiles;
+            this.lstEntries.FullRowSelect = true;
+            this.lstEntries.Location = new System.Drawing.Point(12, 33);
+            this.lstEntries.Name = "lstEntries";
+            this.lstEntries.ShowGroups = false;
+            this.lstEntries.ShowImagesOnSubItems = true;
+            this.lstEntries.Size = new System.Drawing.Size(996, 427);
+            this.lstEntries.TabIndex = 17;
+            this.lstEntries.UseCompatibleStateImageBehavior = false;
+            this.lstEntries.View = System.Windows.Forms.View.Details;
+            this.lstEntries.VirtualMode = true;
+            this.lstEntries.CellEditFinishing += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditFinishing);
+            this.lstEntries.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstEntries_KeyDown);
+            this.lstEntries.CellEditStarting += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditStarting);
+            // 
+            // ColumnSource
+            // 
+            this.ColumnSource.AspectName = "Filename";
+            this.ColumnSource.IsEditable = false;
+            this.ColumnSource.Text = "Old Filename";
+            // 
+            // ColumnFilepath
+            // 
+            this.ColumnFilepath.AspectName = "FilePath.Path";
+            this.ColumnFilepath.IsEditable = false;
+            this.ColumnFilepath.Text = "Filepath";
+            // 
+            // ColumnShowname
+            // 
+            this.ColumnShowname.AspectName = "ShowName";
+            this.ColumnShowname.Text = "Showname";
+            // 
+            // ColumnSeason
+            // 
+            this.ColumnSeason.AspectName = "Season";
+            this.ColumnSeason.Text = "Season";
+            // 
+            // ColumnEpisode
+            // 
+            this.ColumnEpisode.AspectName = "Episode";
+            this.ColumnEpisode.Text = "Episode";
+            // 
+            // ColumnEpisodeName
+            // 
+            this.ColumnEpisodeName.Text = "Episode Title";
+            // 
+            // ColumnDestination
+            // 
+            this.ColumnDestination.AspectName = "Destination";
+            this.ColumnDestination.Text = "Destination";
+            this.ColumnDestination.Width = 295;
+            // 
+            // ColumnNewFilename
+            // 
+            this.ColumnNewFilename.AspectName = "NewFilename";
+            this.ColumnNewFilename.Text = "New Filename";
+            this.ColumnNewFilename.Width = 150;
             // 
             // Form1
             // 
@@ -879,7 +840,7 @@ namespace Renamer
             this.scContainer.Panel2.PerformLayout();
             this.scContainer.ResumeLayout(false);
             this.contextFiles.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numEdit)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lstEntries)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -891,20 +852,10 @@ namespace Renamer
         private System.Windows.Forms.Button btnPath;
         private System.Windows.Forms.Button btnConfig;
         private System.Windows.Forms.FolderBrowserDialog fbdPath;
-        private ListViewEx.ListViewEx lstFiles;
-        private System.Windows.Forms.ColumnHeader cOldName;
-        private System.Windows.Forms.ColumnHeader cSeason;
-        private System.Windows.Forms.ColumnHeader cEpID;
-        private System.Windows.Forms.ColumnHeader cTitle;
-        private System.Windows.Forms.ColumnHeader cNewName;
         private System.Windows.Forms.Button btnTitles;
         private System.Windows.Forms.Label lblTargetFilename;
         private System.Windows.Forms.TextBox txtTarget;
         private System.Windows.Forms.Button btnRename;
-        private System.Windows.Forms.ColumnHeader cPath;
-        private System.Windows.Forms.TextBox txtEdit;
-        private System.Windows.Forms.NumericUpDown numEdit;
-        private System.Windows.Forms.ComboBox comEdit;
         private System.Windows.Forms.ComboBox cbProviders;
         private System.Windows.Forms.Label lblTitlesFrom;
         private System.Windows.Forms.Button btnAbout;
@@ -923,7 +874,6 @@ namespace Renamer
         private System.Windows.Forms.ToolStripMenuItem setEpisodesFromtoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editSubtitleToolStripMenuItem;
         private System.Windows.Forms.RichTextBox rtbLog;
-        private System.Windows.Forms.ColumnHeader cDestination;
         private System.Windows.Forms.ToolStripMenuItem setDestinationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem originalNameToolStripMenuItem;
@@ -947,7 +897,6 @@ namespace Renamer
         private System.Windows.Forms.ToolStripMenuItem checkAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem uncheckAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem invertCheckToolStripMenuItem;
-        private System.Windows.Forms.ColumnHeader cShowname;
         private System.Windows.Forms.ToolStripMenuItem createDirectoryStructureToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem dontCreateDirectoryStructureToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem useUmlautsToolStripMenuItem;
@@ -962,6 +911,15 @@ namespace Renamer
         private System.Windows.Forms.ToolStripMenuItem setShownameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem regexTesterToolStripMenuItem;
         public System.Windows.Forms.ProgressBar progressBar1;
+        private BrightIdeasSoftware.FastObjectListView lstEntries;
+        private BrightIdeasSoftware.OLVColumn ColumnSource;
+        private BrightIdeasSoftware.OLVColumn ColumnFilepath;
+        private BrightIdeasSoftware.OLVColumn ColumnShowname;
+        private BrightIdeasSoftware.OLVColumn ColumnSeason;
+        private BrightIdeasSoftware.OLVColumn ColumnEpisode;
+        private BrightIdeasSoftware.OLVColumn ColumnEpisodeName;
+        private BrightIdeasSoftware.OLVColumn ColumnDestination;
+        private BrightIdeasSoftware.OLVColumn ColumnNewFilename;
     }
 }
 

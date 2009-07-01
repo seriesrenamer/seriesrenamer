@@ -108,6 +108,7 @@ namespace Renamer.Classes
                 return;
             
             this.replaceAltDirectorySeperator();
+            path = path.Trim(DIRECTORY_SEPERATORS);
             if (this.path.Length == 2)
             {
                 this.trailingSlashCheck();
