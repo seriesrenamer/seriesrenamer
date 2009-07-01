@@ -202,27 +202,27 @@ namespace Renamer
         /// </summary>
         void RenameSubsToMatchVideos() {
             foreach (InfoEntry ie in this.episodes) {
-                if (!ie.IsSubtitle || ie.NewFileName != "") {
+                if (!ie.IsSubtitle || ie.NewFilename != "") {
                     continue;
                 }
                 InfoEntry videoEntry = GetMatchingVideo(ie.Season, ie.Episode);
                 if (videoEntry == null) {
                     continue;
                 }
-                if (videoEntry.NewFileName == "") {
-                    ie.NewFileName = Path.GetFileNameWithoutExtension(videoEntry.Filename);
+                if (videoEntry.NewFilename == "") {
+                    ie.NewFilename = Path.GetFileNameWithoutExtension(videoEntry.Filename);
                 }
                 else {
-                    ie.NewFileName = Path.GetFileNameWithoutExtension(videoEntry.NewFileName);
+                    ie.NewFilename = Path.GetFileNameWithoutExtension(videoEntry.NewFilename);
                 }
-                ie.NewFileName += "." + ie.Extension;
+                ie.NewFilename += "." + ie.Extension;
 
                 //Move to Video file
                 ie.Destination = videoEntry.Destination;
 
                 //Don't do this again if name fits already
-                if (ie.NewFileName == ie.Filename) {
-                    ie.NewFileName = "";
+                if (ie.NewFilename == ie.Filename) {
+                    ie.NewFilename = "";
                 }
             }
         }

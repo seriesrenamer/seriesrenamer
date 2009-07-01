@@ -54,7 +54,7 @@ namespace Renamer
                             if (ie.Showname == ps.Showname && ie.ProcessingRequested)
                             {
                                 ie.Name = "";
-                                ie.NewFileName = "";
+                                ie.NewFilename = "";
                                 ie.Language = ps.provider.Language;
                             }
                         }
@@ -497,7 +497,6 @@ namespace Renamer
 
                     Int32.TryParse(m.Groups["Season"].Value, out s);
                     Int32.TryParse(m.Groups["Episode"].Value, out e);
-                    Logger.Instance.LogMessage("h", LogLevel.LOG);
                     if (url != url2) {
                         rc.AddRelation(new Relation(season, e, result));
                         Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + result, LogLevel.DEBUG);
@@ -526,20 +525,20 @@ namespace Renamer
                 }
                 List<InfoEntry> lie = InfoEntryManager.Instance.GetMatchingVideos(ie.Season, ie.Episode);
                 if (lie != null && lie.Count == 1) {
-                    if (ie.NewFileName == "") {
-                        if (lie[0].NewFileName == "") {
-                            ie.NewFileName = Path.GetFileNameWithoutExtension(lie[0].Filename) + "." + ie.Extension;
+                    if (ie.NewFilename == "") {
+                        if (lie[0].NewFilename == "") {
+                            ie.NewFilename = Path.GetFileNameWithoutExtension(lie[0].Filename) + "." + ie.Extension;
                         }
                         else {
-                            ie.NewFileName = Path.GetFileNameWithoutExtension(lie[0].NewFileName) + "." + ie.Extension;
+                            ie.NewFilename = Path.GetFileNameWithoutExtension(lie[0].NewFilename) + "." + ie.Extension;
                         }
 
                         //Move to Video file
                         ie.Destination = lie[0].Destination;
 
                         //Don't do this again if name fits already
-                        if (ie.NewFileName == ie.Filename) {
-                            ie.NewFileName = "";
+                        if (ie.NewFilename == ie.Filename) {
+                            ie.NewFilename = "";
                         }
                     }
                 }
@@ -628,9 +627,9 @@ namespace Renamer
                         ie = new InfoEntry();
                     }
 
-                    //Set basic values, by setting those values destination directory and filename will be generated automagically
-                    ie.Filename = file.Name;
+                    //Set basic values, by setting those values destination directory and filename will be generated automagically                    
                     ie.FilePath.Path = currentpath;
+                    ie.Filename = file.Name;
                     ie.Extension = Path.GetExtension(file.FullName).ToLower().Replace(".", "");
 
                     //test for movie path so we can skip all the code below
@@ -837,7 +836,7 @@ namespace Renamer
                     ie.Movie = false;
                 }
                 else {
-                    ie.ProcessingRequested = (ie.Season != -1 && ie.Episode != -1)||(ie.Movie && ((ie.Destination!="" && ie.Destination!=ie.FilePath.Path)||(ie.NewFileName!=""&&ie.NewFileName!=ie.Filename)));
+                    ie.ProcessingRequested = (ie.Season != -1 && ie.Episode != -1)||(ie.Movie && ((ie.Destination!="" && ie.Destination!=ie.FilePath.Path)||(ie.NewFilename!=""&&ie.NewFilename!=ie.Filename)));
                 }
             }
         }
