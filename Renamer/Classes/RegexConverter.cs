@@ -25,7 +25,7 @@ namespace Renamer.Classes
         }
 
         public static string replaceSeriesname(string regex, string showname) {
-            return regex.Replace("%S", "\\d+").Replace("%T", showname);
+            return regex.Replace("%S", "(?<Season>\\d+)").Replace("%T", showname);
         }
         public static string replaceSeriesnameAndSeason(string regex, string showname, int season)
         {
