@@ -22,20 +22,28 @@ namespace Renamer
             //make a list of shownames
             List<string> shownames = new List<string>();
             foreach (InfoEntry ie in InfoEntryManager.Instance) {
-                if (ie.ProcessingRequested && !shownames.Contains(ie.Showname) &&ie.Showname!="" && !ie.Sample) {
+                if (ie.ProcessingRequested && !ie.Movie && ie.Showname!="" && !ie.Sample && !shownames.Contains(ie.Showname) ) {
                     shownames.Add(ie.Showname);
                 }
             }
+            Form1.Instance.progressBar1.Maximum = shownames.Count;
+            Form1.Instance.progressBar1.Value = 0;
+            Form1.Instance.progressBar1.Visible = true;
             List<ParsedSearch> SearchResults = new List<ParsedSearch>();
             // get titles for the entire list generated before
             foreach (string showname in shownames) {
                 SearchResults.Add(Search(RelationProvider.GetCurrentProvider(), showname, showname));
+                Form1.Instance.progressBar1.Value++;
                 //GetTitles(showname);
             }
+            Form1.Instance.progressBar1.Visible = false;
             ShownameSearch ss = new ShownameSearch(SearchResults);
             if (ss.ShowDialog(Form1.Instance) == DialogResult.OK)
             {
                 SearchResults = ss.Results;
+                Form1.Instance.progressBar1.Maximum = SearchResults.Count;
+                Form1.Instance.progressBar1.Value = 0;
+                Form1.Instance.progressBar1.Visible = true;
                 foreach (ParsedSearch ps in SearchResults)
                 {
                     if (ps.SearchString != ps.Showname)
@@ -60,7 +68,9 @@ namespace Renamer
                         }
                         GetRelations((string)ps.Results[ps.SelectedResult], ps.Showname,ps.provider);                        
                     }
+                    Form1.Instance.progressBar1.Value++;
                 }
+                Form1.Instance.progressBar1.Visible = false;
             }
         }
 
@@ -692,6 +702,12 @@ namespace Renamer
                                     Logger.Instance.LogMessage("Cannot parse found season: " + strSeason, LogLevel.DEBUG);
                                 }
 
+                                if ((ie.Filename.Contains("720p") && ie.Season == 7 && ie.Episode == 20) | (ie.Filename.ToLower().Contains("1080p") && ie.Season == 10 && ie.Episode == 80))
+                                {
+                                    ie.Season = -1;
+                                    ie.Episode = -1;
+                                    continue;
+                                }
                                 //if season recognized from directory name doesn't match season recognized from filename, the file might be located in a wrong directory
                                 if (DirectorySeason != -1 && ie.Season != DirectorySeason)
                                 {

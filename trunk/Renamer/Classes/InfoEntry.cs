@@ -188,6 +188,7 @@ namespace Renamer.Classes
                 }
             }
         }
+        
         /// <summary>
         /// number of the season
         /// </summary>
@@ -247,6 +248,8 @@ namespace Renamer.Classes
             set
             {
                 isMovie = value;
+                CreateNewName();
+                SetPath();
             }
                 /*if (isMovie != value) {
                     isMovie = value;
@@ -457,23 +460,33 @@ namespace Renamer.Classes
 
             string seasondir = "";
             string aSeasondir = "";
+            int showdirlevel = 0;
             //loop backwards so first entry is used if nothing is recognized and folder has to be created
             for (int i = seasondirs.Length - 1; i >= 0; i--) {
-                seasondir = RegexConverter.replaceSeriesnameAndSeason(seasondirs[i], nameOfSeries,season);
                 aSeasondir = RegexConverter.replaceSeriesname(seasondirs[i], nameOfSeries);
                 bool InSomething = false;
-                if (dirs.Length > 1 && Regex.Match(dirs[dirs.Length - 1], seasondir).Success) {
-                    InSeasonDir = true;
-                    InSomething = true;
-                }
-                if (dirs.Length > 1 && Regex.Match(dirs[dirs.Length - 1], aSeasondir).Success)
+                if (dirs.Length > 1)
                 {
-                    InASeasonDir = true;
-                    InSomething = true;
+
+                    Match m = Regex.Match(dirs[dirs.Length - 1], aSeasondir);
+                    int parsedSeason;
+                    Int32.TryParse(m.Groups["Season"].Value, out parsedSeason);
+                    if (m.Success)
+                    {
+                        if (parsedSeason == season)
+                        {
+                            InSeasonDir = true;
+                        }
+                        InASeasonDir = true;
+                        InSomething = true;
+                    }
                 }
-                if (dirs.Length > 0 && (dirs[dirs.Length - 1].StartsWith(nameOfSeries)|dirs[dirs.Length - 2].StartsWith(nameOfSeries)))
+                if (dirs.Length > 0 && dirs[dirs.Length - 1].StartsWith(nameOfSeries)){
+                    InSeriesDir=true;
+                }else if(dirs.Length>1 && dirs[dirs.Length - 2].StartsWith(nameOfSeries))
                 {
                     InSeriesDir = true;
+                    showdirlevel=1;
                 }
                 if (InSomething) break;
             }
@@ -498,7 +511,12 @@ namespace Renamer.Classes
                 //wrong season dir, add real seasons dir
                 else if (InSeriesDir && InASeasonDir)
                 {
-                    DestinationPath = addSeasonsDirIfDesired(Filepath.goUpwards(FilePath.Path, 1));
+                    DestinationPath = Filepath.goUpwards(FilePath.Path, 1);
+                    if (showdirlevel == 0)
+                    {
+                        DestinationPath = addSeriesDir(DestinationPath);
+                    }
+                    DestinationPath = addSeasonsDirIfDesired(DestinationPath);
                 }
                 //wrong show dir, go back two levels and add proper dir structure
                 else if (!InSeriesDir && InASeasonDir)

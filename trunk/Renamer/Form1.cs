@@ -1826,7 +1826,7 @@ namespace Renamer
                             cb.SelectedItem = r.Name;
                         }
                     }
-                    if (cb.SelectedIndex < 0)
+                    if (cb.SelectedIndex < 0 && cb.Items.Count>0)
                     {
                         cb.SelectedIndex = 0;
                     }
