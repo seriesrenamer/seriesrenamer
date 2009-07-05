@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using Renamer.Dialogs;
 using System.Windows.Forms;
 using Renamer.Logging;
+using BrightIdeasSoftware;
 
 namespace Renamer
 {
@@ -82,10 +83,6 @@ namespace Renamer
             for (int i = 0; i < this.episodes.Count; i++) {
                 this.episodes[i].CreateNewName();
             }
-        }
-        public InfoEntry GetByListViewItem(ListViewItem lvi)
-        {
-            return episodes[(int)lvi.Tag];
         }
 
         /// <summary>
@@ -197,42 +194,83 @@ namespace Renamer
             this.episodes.Add(ie);
         }
 
-        /// <summary>
-        /// Creates subtitle destination and names subs when no show information is fetched yet, so they have the same name as their video files for better playback
-        /// </summary>
-        void RenameSubsToMatchVideos() {
-            foreach (InfoEntry ie in this.episodes) {
-                if (!ie.IsSubtitle || ie.NewFilename != "") {
-                    continue;
-                }
-                InfoEntry videoEntry = GetMatchingVideo(ie.Season, ie.Episode);
-                if (videoEntry == null) {
-                    continue;
-                }
-                if (videoEntry.NewFilename == "") {
-                    ie.NewFilename = Path.GetFileNameWithoutExtension(videoEntry.Filename);
-                }
-                else {
-                    ie.NewFilename = Path.GetFileNameWithoutExtension(videoEntry.NewFilename);
-                }
-                ie.NewFilename += "." + ie.Extension;
-
-                //Move to Video file
-                ie.Destination = videoEntry.Destination;
-
-                //Don't do this again if name fits already
-                if (ie.NewFilename == ie.Filename) {
-                    ie.NewFilename = "";
+        public InfoEntry GetCollidingInfoEntry(InfoEntry ie){
+            foreach(InfoEntry ie2 in this){
+                if(IsSameTarget(ie,ie2)){
+                    return ie2;
                 }
             }
+            return null;
         }
+        /// <summary>
+        /// figures out if 2 infoentry target locations collide
+        /// </summary>
+        /// <param name="ie1"></param>
+        /// <param name="ie2"></param>
+        /// <returns></returns>
+        public bool IsSameTarget(InfoEntry ie1, InfoEntry ie2)
+        {
+            if (ie1 == ie2) return false;
+            string name1, name2, dest1, dest2;
+            if (ie1.Destination == "")
+            {
+                dest1 = ie1.FilePath.Path;
+            }
+            else
+            {
+                dest1 = ie1.Destination;
+                if (!ie1.ProcessingRequested) return false;
+            }
+            if (ie2.Destination == "")
+            {
+                dest2 = ie2.FilePath.Path;
+            }
+            else
+            {
+                dest2 = ie2.Destination;
+                if (!ie2.ProcessingRequested) return false;
+            }
+            if (ie1.NewFilename == "")
+            {
+                name1 = ie1.Filename;
+            }
+            else
+            {
+                name1 = ie1.NewFilename;
+                if (!ie1.ProcessingRequested) return false;
+            }
+            if (ie2.NewFilename == "")
+            {
+                name2 = ie2.Filename;
+            }
+            else
+            {
+                name2 = ie2.NewFilename;
+                if (!ie2.ProcessingRequested) return false;
+            }
+
+            return name1 == name2 && dest1 == dest2;
+        }
+
         /// <summary>
         /// Main Rename function
         /// </summary>
         public void Rename() {
-            Helper.InvalidFilenameAction invalidAction = Helper.ReadEnum<Helper.InvalidFilenameAction>(Config.InvalidFilenameAction);
-            string replace = Helper.ReadProperty(Config.InvalidCharReplace);
 
+            //Treat colliding files
+            foreach (InfoEntry ie in this)
+            {
+                if (ie.ProcessingRequested)
+                {
+                    InfoEntry ieColliding = InfoEntryManager.Instance.GetCollidingInfoEntry(ie);
+                    while (ieColliding != null)
+                    {
+                        CollidingFiles cf = new CollidingFiles(ie, ieColliding);
+                        cf.ShowDialog();
+                        ieColliding = InfoEntryManager.Instance.GetCollidingInfoEntry(ie);
+                    }
+                }
+            }
             //Go through all files and do stuff
             for (int i = 0; i < this.episodes.Count; i++) {
                 InfoEntry ie = InfoEntryManager.Instance[i];
@@ -251,14 +289,12 @@ namespace Renamer
                         Logger.Instance.LogMessage("Couldn't delete " + ie.FilePath.Fullfilename + ": " + ex.Message, LogLevel.ERROR);
                     }
                 }
-                ie.Rename(ref invalidAction, ref replace);
+                ie.Rename();
             }
             if (Helper.ReadBool(Config.DeleteEmptyFolders)) {
                 //Delete all empty folders code
                 Helper.DeleteAllEmptyFolders(Helper.ReadProperty(Config.LastDirectory), new List<string>(Helper.ReadProperties(Config.IgnoreFiles)));
             }
-            //Get a list of all involved folders
-            //FillListView();
             
         }
 

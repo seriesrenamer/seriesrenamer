@@ -658,7 +658,6 @@ namespace Renamer
 
         private void initMyLoggers()
         {
-
             Logger logger = Logger.Instance;
             logger.removeAllLoggers();
             logger.addLogger(new FileLogger(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "Renamer.log", true, Helper.ReadEnum<LogLevel>(Config.LogFileLevel)));
@@ -1120,7 +1119,6 @@ namespace Renamer
             List<ListViewItem> list = new List<ListViewItem>();
             lstEntries.VirtualListSize = InfoEntryManager.Instance.Count;
             lstEntries.SetObjects(InfoEntryManager.Instance);
-            Colorize();
             lstEntries.Sort();
             lstEntries.Refresh();
         }
@@ -1131,6 +1129,35 @@ namespace Renamer
 
         private void InitListView()
         {
+            lstEntries.RowFormatter =  delegate(OLVListItem olvi)
+            {
+                //reset colors to make sure they are set properly
+                olvi.BackColor = Color.White;
+                olvi.ForeColor = Color.Black;
+                InfoEntry ie = (InfoEntry)olvi.RowObject;
+                if ((ie.NewFilename == "" && (ie.Destination == "" || ie.Destination == ie.FilePath.Path)) || !ie.ProcessingRequested)
+                {
+                    olvi.ForeColor = Color.Gray;
+                }
+                if (!ie.MarkedForDeletion)
+                {
+                    foreach(InfoEntry ie2 in InfoEntryManager.Instance)
+                    {
+                        if (ie != ie2)
+                        {
+                            if (InfoEntryManager.Instance.IsSameTarget(ie, ie2))
+                            {
+                                olvi.BackColor = Color.IndianRed;
+                                break;
+                            }
+                            else if (olvi.BackColor != Color.Yellow)
+                            {
+                                olvi.BackColor = Color.White;
+                            }
+                        }
+                    }
+                }
+            };
             //Processing
             this.lstEntries.BooleanCheckStateGetter = delegate(object x)
             {
@@ -1150,6 +1177,7 @@ namespace Renamer
                 }
                 btnTitles.Enabled = shouldbeenabled;
                 btnSubs.Enabled = shouldbeenabled;
+                lstEntries.Refresh();
                 return newValue;
             };
 
@@ -1170,7 +1198,8 @@ namespace Renamer
                 return ((InfoEntry)x).Showname;
             };
             this.ColumnShowname.AspectPutter = delegate(object x, object newValue) {
-                ((InfoEntry)x).Showname=(string)newValue; 
+                ((InfoEntry)x).Showname = (string)newValue;
+                lstEntries.Refresh();
             };
 
             //Season
@@ -1178,14 +1207,20 @@ namespace Renamer
             {
                 return ((InfoEntry)x).Season;
             };
-            this.ColumnSeason.AspectPutter = delegate(object x, object newValue) { ((InfoEntry)x).Season=(int)newValue; };
+            this.ColumnSeason.AspectPutter = delegate(object x, object newValue) {
+                ((InfoEntry)x).Season = (int)newValue;
+                lstEntries.Refresh();            
+            };
 
             //Episode
             this.ColumnEpisode.AspectGetter = delegate(object x)
             {
                 return ((InfoEntry)x).Episode;
             };
-            this.ColumnEpisode.AspectPutter = delegate(object x, object newValue) { ((InfoEntry)x).Episode=(int)newValue; };
+            this.ColumnEpisode.AspectPutter = delegate(object x, object newValue) {
+                ((InfoEntry)x).Episode = (int)newValue;
+                lstEntries.Refresh();            
+            };
 
             //Episode Name
             this.ColumnEpisodeName.AspectGetter = delegate(object x)
@@ -1214,7 +1249,8 @@ namespace Renamer
                 return ((InfoEntry)x).Destination;
             };
             this.ColumnDestination.AspectPutter = delegate(object x, object newValue) { 
-                ((InfoEntry)x).Destination=(string)newValue; 
+                ((InfoEntry)x).Destination=(string)newValue;
+                lstEntries.Refresh();
             };
 
             //Filename
@@ -1222,66 +1258,13 @@ namespace Renamer
             {
                 return ((InfoEntry)x).NewFilename;
             };
-            this.ColumnNewFilename.AspectPutter = delegate(object x, object newValue) { ((InfoEntry)x).NewFilename=(string)newValue; };
-        }
-        /// <summary>
-        /// colorizes the file list
-        /// </summary>
-        private void Colorize() {
-            if (!working)
-            {
-                for(int i=0;i<lstEntries.Items.Count;i++){
-                    Colorize(lstEntries.Items[i]);
-                }
-            }
+            this.ColumnNewFilename.AspectPutter = delegate(object x, object newValue) {
+                ((InfoEntry)x).NewFilename=(string)newValue;
+                lstEntries.Refresh();
+            };
         }
 
-        /// <summary>
-        /// Colorizes single list item
-        /// </summary>
-        /// <param name="lvi">List item to be colorized</param>
-        private void Colorize(ListViewItem lvi) {
-            return;
-            //reset colors to make sure they are set properly
-            lvi.BackColor = Color.White;
-            lvi.ForeColor = Color.Black;
-            InfoEntry ie = InfoEntryManager.Instance.GetByListViewItem(lvi);
-            if ((ie.NewFilename==""&&(ie.Destination==""||ie.Destination==ie.FilePath.Path))||!ie.ProcessingRequested){
-                lvi.ForeColor = Color.Gray;
-            }
-            else {
-                lvi.ForeColor = Color.Black;
-                if (ie.NewFilename.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || ie.Destination.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
-                {
-                    lvi.BackColor = Color.Yellow;
-                }
-                else
-                {
-                    lvi.BackColor = Color.White;
-                }
-                if (!ie.MarkedForDeletion)
-                {
-                    for (int i = 0; i < lstEntries.Items.Count; i++)
-                    {
-                        OLVListItem lvi2 = (OLVListItem)lstEntries.Items[i];
-                        if (lvi != lvi2)
-                        {
-                            InfoEntry ie2 = InfoEntryManager.Instance.GetByListViewItem(lvi2);
-                            if (ie.Destination == ie2.Destination && ie.NewFilename == ie2.NewFilename && ie.NewFilename != "")
-                            {
-                                lvi.BackColor = Color.IndianRed;
-                                break;
-                            }
-                            else if (lvi.BackColor != Color.Yellow)
-                            {
-                                lvi.BackColor = Color.White;
-                            }
-                        }
-                    }
-                }
-            }            
-        }
-
+        
         /// <summary>
         /// Gets focussed control
         /// </summary>
@@ -1728,16 +1711,9 @@ namespace Renamer
         private void UpdateList(bool clear)
         {
             progressBar1.Visible = true;
-            DateTime dt = DateTime.Now;
             DataGenerator.UpdateList(clear);
-            Logger.Instance.LogMessage((dt - DateTime.Now).TotalSeconds.ToString(), LogLevel.INFO);
             progressBar1.Visible = false;
-            DateTime dt2 = DateTime.Now;
-            working = true;
             FillListView();
-            working = false;
-            Logger.Instance.LogMessage((dt2 - DateTime.Now).TotalSeconds.ToString(), LogLevel.INFO);
-
             //also update some gui elements for the sake of it
             txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
             txtPath.Text = Helper.ReadProperty(Config.LastDirectory);            
@@ -1904,7 +1880,6 @@ namespace Renamer
                 }
             }
         }
-        
     }
 }
 

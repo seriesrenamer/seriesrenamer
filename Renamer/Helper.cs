@@ -31,10 +31,6 @@ namespace Renamer
     /// </summary>
     public class Helper
     {
-        /// <summary>
-        /// action to take when encountering invalid filename
-        /// </summary>
-        public enum InvalidFilenameAction : int { Ask, Skip, Replace };
 
         public enum Languages : int { None, German, English, French, Italian };
 

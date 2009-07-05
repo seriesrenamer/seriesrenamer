@@ -91,15 +91,8 @@ namespace Renamer.Classes
                     return "To be deleted";
                 }
                 else
-                {
-                    if (String.IsNullOrEmpty(Showname))
-                    {
-                        return "";
-                    }
-                    else
-                    {
-                        return destination.Path;
-                    }
+                {                    
+                    return destination.Path;
                 }
             }
             set { destination.Path = value; }
@@ -444,7 +437,7 @@ namespace Renamer.Classes
 
         // TODO: function is still tooooooo large
         private void SetSeriesPath() {
-            if (Season == -1)
+            if (Season == -1||Showname=="")
             {
                 Destination = "";
                 return;
@@ -811,12 +804,6 @@ namespace Renamer.Classes
                     }
                 }
 
-                //Invalid character replace
-                if (Helper.ReadProperty(Config.InvalidCharReplace) != null && (Helper.InvalidFilenameAction)Enum.Parse(typeof(Helper.InvalidFilenameAction), Helper.ReadProperty(Config.InvalidFilenameAction)) == Helper.InvalidFilenameAction.Replace) {
-                    string pattern = "[" + Regex.Escape(new string(System.IO.Path.GetInvalidFileNameChars())) + "]";
-                    tmpname = Regex.Replace(tmpname, pattern, Helper.ReadProperty(Config.InvalidCharReplace));
-                }
-
                 //set new filename if renaming process is required
                 if (Filename == tmpname) {
                     NewFilename = "";
@@ -840,83 +827,59 @@ namespace Renamer.Classes
                 this.ProcessingRequested = true;
             }
         }
-
-        public void Rename(ref Helper.InvalidFilenameAction invalidAction, ref string replace) {
-            string pattern = "[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]";
+        public string GetFormattedFullDestination()
+        {
+            string dest = "";
+            if (Destination != "")
+            {
+                dest = Destination;
+            }
+            else
+            {
+                dest = FilePath.Path;
+            }
+            if (NewFilename != "")
+            {
+                dest += Path.DirectorySeparatorChar + NewFilename;
+            }
+            else
+            {
+                dest += Path.DirectorySeparatorChar + Filename;
+            }
+            return dest;
+        }
+        public void Rename() {
             if (this.ProcessingRequested
                 && ((this.Filename != this.NewFilename && this.NewFilename != "")
                     || (this.Destination != this.FilePath.Path && this.Destination != ""))) {
                 try {
-                    while (this.NewFilename.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 && invalidAction == Helper.InvalidFilenameAction.Skip) {
-                        if (invalidAction == Helper.InvalidFilenameAction.Replace) {
-                            this.NewFilename = Regex.Replace(this.NewFilename, pattern, replace);
-                        }
-                        else if (invalidAction == Helper.InvalidFilenameAction.Ask) {
-                            InvalidFilename td = new InvalidFilename(this.NewFilename);
-                            td.ShowDialog();
-                            if (td.action == InvalidFilename.Action.SkipAll) {
-                                invalidAction = Helper.InvalidFilenameAction.Skip;
-                                if (td.remember) {
-                                    Helper.WriteProperty(Config.InvalidFilenameAction, Helper.InvalidFilenameAction.Skip.ToString());
-                                }
-                                break;
-                            }
-                            else if (td.action == InvalidFilename.Action.Skip) {
-                                return;
-                            }
-                            else if (td.action == InvalidFilename.Action.Filename) {
-                                this.NewFilename = td.FileName;
-                            }
-                            else if (td.action == InvalidFilename.Action.Replace) {
-                                if (td.remember) {
-                                    Helper.WriteProperty(Config.InvalidFilenameAction, Helper.InvalidFilenameAction.Replace.ToString());
-                                    Helper.WriteProperty(Config.InvalidCharReplace, td.Replace);
-                                }
-                                replace = td.Replace;
-                                this.NewFilename = Regex.Replace(this.NewFilename, pattern, replace);
-                            }
-                        }
-                    }
-
-                    //check for empty extension
-                    if (this.NewFilename != "" && Path.GetExtension(this.NewFilename) == "") {
-                        if (MessageBox.Show(this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename + "->" + this.Destination + Path.DirectorySeparatorChar + this.NewFilename + " has no extension. Rename anyway?", "No extension", MessageBoxButtons.YesNo) == DialogResult.No) {
-                            return;
-                        }
-                    }
-
-                    if (this.NewFilename.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 && (invalidAction == Helper.InvalidFilenameAction.Skip)) {
-                        Logger.Instance.LogMessage("Skipped " + this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename + "->" + this.Destination + Path.DirectorySeparatorChar + this.NewFilename + " because of illegal characters in new name.", LogLevel.WARNING);
-                    }
-                    if (invalidAction == Helper.InvalidFilenameAction.Skip) {
-                        return;
-                    }
-
                     //create directory if needed
                     if (this.Destination != "" && !Directory.Exists(this.Destination)) {
                         Directory.CreateDirectory(this.Destination);
                     }
                     //Move to desired destination      
+                    string src = this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename;
+                    string target="";
                     if (this.Destination != "") {
                         if (this.NewFilename != "") {
-                            File.Move(this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename, this.Destination + Path.DirectorySeparatorChar + this.NewFilename);
+                            target = this.Destination + Path.DirectorySeparatorChar + this.NewFilename;
                         }
                         else {
-                            File.Move(this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename, this.Destination + Path.DirectorySeparatorChar + this.Filename);
+                            target = this.Destination + Path.DirectorySeparatorChar + this.Filename;
                         }
                     }
                     else {
                         if (this.NewFilename != "") {
-                            File.Move(this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename, this.FilePath.Path + Path.DirectorySeparatorChar + this.NewFilename);
-                        }
-                        else {
-                            File.Move(this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename, this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename);
+                            target = this.FilePath.Path + Path.DirectorySeparatorChar + this.NewFilename;
                         }
                     }
-                    //Delete empty folders code
-                    if (Helper.ReadBool(Config.DeleteEmptyFolders)) {
-                        //DeleteAllEmptyFolders(this.Filepath.path, Helper.ReadProperties(Config.IgnoreFiles));
+
+                    if (target != "")
+                    {
+                        File.Move(src, target);
                     }
+
+                    //Refresh values
                     if (this.NewFilename != "") {
                         this.Filename = this.NewFilename;
                     }
@@ -927,12 +890,7 @@ namespace Renamer.Classes
                     this.NewFilename = "";
                 }
                 catch (Exception ex) {
-                    Logger.Instance.LogMessage(this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename + " -> " + this.Destination + Path.DirectorySeparatorChar + this.NewFilename + ": " + ex.Message, LogLevel.ERROR);
-                    if (invalidAction == Helper.InvalidFilenameAction.Skip) {
-                        Logger.Instance.LogMessage("Skipping " + this.Filename + " beacause " + ex.Message, LogLevel.WARNING);
-                        return;
-                    }
-
+                    Logger.Instance.LogMessage("Couldn't move "+this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename + " -> " + this.Destination + Path.DirectorySeparatorChar + this.NewFilename + ": " + ex.Message, LogLevel.ERROR);
                 }
             }
         }

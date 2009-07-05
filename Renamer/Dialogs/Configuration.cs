@@ -100,7 +100,6 @@ namespace Renamer.Dialogs
             cbLogwindow.SelectedIndex = (int)(Helper.ReadEnum<Logging.LogLevel>(Config.LogTextBoxLevel));
             cbLogmessagebox.SelectedIndex = (int)(Helper.ReadEnum<Logging.LogLevel>(Config.LogMessageBoxLevel));
 
-            cbReplace.SelectedIndex = (int)Helper.ReadEnum<Helper.InvalidFilenameAction>(Config.InvalidFilenameAction);
             cbUmlaut.SelectedIndex = (int)Helper.ReadEnum<InfoEntry.UmlautAction>(Config.Umlaute) - 1;
             cbCase.SelectedIndex = (int)Helper.ReadEnum<InfoEntry.Case>(Config.Case) - 1;
 
@@ -174,7 +173,6 @@ namespace Renamer.Dialogs
 
             Helper.WriteProperty(Config.Umlaute, Enum.GetName(typeof(InfoEntry.UmlautAction), cbUmlaut.SelectedIndex + 1));
             Helper.WriteProperty(Config.Case, Enum.GetName(typeof(InfoEntry.Case), cbCase.SelectedIndex + 1));
-            Helper.WriteProperty(Config.InvalidFilenameAction, ((Helper.InvalidFilenameAction)cbReplace.SelectedIndex).ToString());
             string[] replace = txtStringReplace.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             Helper.WriteProperties(Config.Replace, replace);
             string[] tags = txtTags.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
