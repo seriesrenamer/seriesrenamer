@@ -416,21 +416,7 @@ namespace Renamer
         //Main Initialization
         private void Form1_Load(object sender, EventArgs e) {
             settings = Settings.Instance;
-            Logger logger = Logger.Instance;
-            // Add Logger
-            logger.addLogger(new FileLogger(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "Renamer.log", true, Helper.ReadEnum<LogLevel>(Config.LogFileLevel)));
-            logger.addLogger(new MessageBoxLogger(Helper.ReadEnum<LogLevel>(Config.LogMessageBoxLevel)));
-
-            //mono compatibility fixes
-            if (Type.GetType("Mono.Runtime") != null) {
-                logger.addLogger(new TextBoxLogger(txtLog, Helper.ReadEnum<LogLevel>(Config.LogTextBoxLevel)));
-                rtbLog.Visible = false;
-                txtLog.Visible = true;
-                Logger.Instance.LogMessage("Running on Mono", LogLevel.INFO);
-            }
-            else {
-                logger.addLogger(new RichTextBoxLogger(rtbLog, Helper.ReadEnum<LogLevel>(Config.LogTextBoxLevel)));
-            }
+            this.initMyLoggers();
 
             // Init logging here:
 
@@ -677,11 +663,34 @@ namespace Renamer
             }
         }
 
+        private void initMyLoggers()
+        {
+
+            Logger logger = Logger.Instance;
+            logger.removeAllLoggers();
+            logger.addLogger(new FileLogger(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "Renamer.log", true, Helper.ReadEnum<LogLevel>(Config.LogFileLevel)));
+            logger.addLogger(new MessageBoxLogger(Helper.ReadEnum<LogLevel>(Config.LogMessageBoxLevel)));
+
+            //mono compatibility fixes
+            if (Type.GetType("Mono.Runtime") != null)
+            {
+                logger.addLogger(new TextBoxLogger(txtLog, Helper.ReadEnum<LogLevel>(Config.LogTextBoxLevel)));
+                rtbLog.Visible = false;
+                txtLog.Visible = true;
+                Logger.Instance.LogMessage("Running on Mono", LogLevel.INFO);
+            }
+            else
+            {
+                logger.addLogger(new RichTextBoxLogger(rtbLog, Helper.ReadEnum<LogLevel>(Config.LogTextBoxLevel)));
+            }
+        }
+
         //Show configuration dialog
         private void btnConfig_Click(object sender, EventArgs e) {
             Configuration cfg = new Configuration();
             if (cfg.ShowDialog() == DialogResult.OK) {
                 UpdateList(true);
+                this.initMyLoggers();
             }
         }
 
