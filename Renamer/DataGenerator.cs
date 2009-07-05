@@ -736,8 +736,13 @@ namespace Renamer
                 SelectRecognizedFilesForProcessing();
             }
 
-            if (clear) {
-                RenameSubsToMatchVideos();
+            //Recreate subtitle names so they can adjust to the video files they belong to
+            foreach (InfoEntry ie in InfoEntryManager.Instance)
+            {
+                if (ie.IsSubtitle)
+                {
+                    ie.CreateNewName();
+                }
             }
 
             Logger.Instance.LogMessage("Found " + InfoEntryManager.Instance.Count + " Files", LogLevel.INFO);
