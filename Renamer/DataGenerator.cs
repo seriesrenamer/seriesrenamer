@@ -447,6 +447,8 @@ namespace Renamer
                     responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
                 }
                 catch (WebException e) {
+                    //Serienjunkies returns "(300) Mehrdeutige Umleitung" when an inexistant season is requested
+                    if (e.Message.Contains("(300)")) break;
                     Logger.Instance.LogMessage(e.Message, LogLevel.ERROR);
                     if (responseHtml != null) {
                         responseHtml.Close();
