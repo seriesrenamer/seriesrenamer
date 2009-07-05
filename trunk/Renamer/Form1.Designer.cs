@@ -194,11 +194,15 @@ namespace Renamer
             this.ColumnDestination,
             this.ColumnNewFilename});
             this.lstEntries.ContextMenuStrip = this.contextFiles;
+            this.lstEntries.EmptyListMsg = "No matching files in this folder";
+            this.lstEntries.EmptyListMsgFont = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lstEntries.FullRowSelect = true;
             this.lstEntries.Location = new System.Drawing.Point(12, 33);
             this.lstEntries.Name = "lstEntries";
+            this.lstEntries.SelectColumnsOnRightClick = false;
             this.lstEntries.ShowGroups = false;
             this.lstEntries.ShowImagesOnSubItems = true;
+            this.lstEntries.ShowItemToolTips = true;
             this.lstEntries.Size = new System.Drawing.Size(996, 427);
             this.lstEntries.TabIndex = 17;
             this.lstEntries.UseCompatibleStateImageBehavior = false;

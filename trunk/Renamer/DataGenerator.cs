@@ -193,7 +193,7 @@ namespace Renamer
             {
                 SearchResult = Regex.Replace(SearchResult, pattern, "");
             }
-            return SearchResult;
+            return SearchResult.Trim();
         }
         /*
         /// <summary>
@@ -336,7 +336,7 @@ namespace Renamer
                 Logger.Instance.LogMessage("No results found", LogLevel.INFO);
                 return ps;
             }
-            else if (mc.Count == 1) {
+            /*else if (mc.Count == 1) {
                 string url = provider.RelationsPage;
                 Logger.Instance.LogMessage("One result found on search page, going to " + url.Replace(" ", "%20") + " with %L=" + mc[0].Groups["link"].Value, LogLevel.DEBUG);
                 url = url.Replace("%L", mc[0].Groups["link"].Value);
@@ -349,7 +349,7 @@ namespace Renamer
                 }
                 return ps;
                 //GetRelations(url, Showname);
-            }
+            }*/
             else {
                 Logger.Instance.LogMessage("Search engine found multiple results at " + SourceURL.Replace(" ", "%20"), LogLevel.INFO);
                 ps.Results = new Hashtable();
@@ -501,19 +501,25 @@ namespace Renamer
                 for (int i = 0; i < mc.Count; i++) {
                     Match m = mc[i];
                     string result = Regex.Replace(System.Web.HttpUtility.HtmlDecode(m.Groups["Title"].Value), CleanupRegex, "");
-                    //if we are iterating through season pages, take season from page url directly
-                    //parse season and episode numbers
-                    int s, e;
+                    //RelationsRemove may be used to filter out results completely, for example if they are a html tag
+                    if (result != "")
+                    {
+                        //parse season and episode numbers
+                        int s, e;
 
-                    Int32.TryParse(m.Groups["Season"].Value, out s);
-                    Int32.TryParse(m.Groups["Episode"].Value, out e);
-                    if (url != url2) {
-                        rc.AddRelation(new Relation(season, e, result));
-                        Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + result, LogLevel.DEBUG);
-                    }
-                    else {
-                        rc.AddRelation(new Relation(s, e, result));
-                        Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + result, LogLevel.DEBUG);
+                        Int32.TryParse(m.Groups["Season"].Value, out s);
+                        Int32.TryParse(m.Groups["Episode"].Value, out e);
+                        //if we are iterating through season pages, take season from page url directly
+                        if (url != url2)
+                        {
+                            rc.AddRelation(new Relation(season, e, result));
+                            Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + result, LogLevel.DEBUG);
+                        }
+                        else
+                        {
+                            rc.AddRelation(new Relation(s, e, result));
+                            Logger.Instance.LogMessage("Found Relation: " + "S" + s.ToString() + "E" + e.ToString() + " - " + result, LogLevel.DEBUG);
+                        }
                     }
                 }
                 RelationManager.Instance.AddRelationCollection(rc);
@@ -524,38 +530,7 @@ namespace Renamer
                 season++;
             }
             Logger.Instance.LogMessage("" + (season - 1) + " Seasons, " + rc.Count + " relations found", LogLevel.DEBUG);
-        }
-        /// <summary>
-        /// Creates subtitle destination and names subs when no show information is fetched yet, so they have the same name as their video files for better playback
-        /// </summary>
-        public static void RenameSubsToMatchVideos() {
-            foreach (InfoEntry ie in InfoEntryManager.Instance) {
-                if (ie.IsSubtitle) {
-                    continue;
-                }
-                List<InfoEntry> lie = InfoEntryManager.Instance.GetMatchingVideos(ie.Season, ie.Episode);
-                if (lie != null && lie.Count == 1) {
-                    if (ie.NewFilename == "") {
-                        if (lie[0].NewFilename == "") {
-                            ie.NewFilename = Path.GetFileNameWithoutExtension(lie[0].Filename) + "." + ie.Extension;
-                        }
-                        else {
-                            ie.NewFilename = Path.GetFileNameWithoutExtension(lie[0].NewFilename) + "." + ie.Extension;
-                        }
-
-                        //Move to Video file
-                        ie.Destination = lie[0].Destination;
-
-                        //Don't do this again if name fits already
-                        if (ie.NewFilename == ie.Filename) {
-                            ie.NewFilename = "";
-                        }
-                    }
-                }
-            }
-        }
-
-        
+        }        
 
         /// <summary>
         /// Updatess list view and do lots of other connected stuff with it

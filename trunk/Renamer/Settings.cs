@@ -161,7 +161,6 @@ namespace Renamer
         /// </summary>
         private void SetupDefaults() {
             defaults = new ConfigFile("");
-            defaults[Config.Comment] = "//";
             defaults[Config.Delimiter] = "^";
             defaults[Config.Extensions] = new List<string>(new string[] { "avi", "mpg", "mpeg", "mp4", "divx", "mkv", "wmv" });
             defaults[Config.SubtitleExtensions] = new List<string>(new string[] { "srt", "sub" });
@@ -169,36 +168,38 @@ namespace Renamer
             defaults[Config.LogTextBoxLevel] = "LOG";
             defaults[Config.LogMessageBoxLevel] = "CRITICAL";
             defaults[Config.LogName] = "Renamer.log";
-            defaults[Config.MaxDepth] = "0";
+            defaults[Config.MaxDepth] = "2";
             defaults[Config.InvalidCharReplace] = "-";
             defaults[Config.EpIdentifier] = new List<string>(new string[] { "S%SE%E", "%Sx%E", "S%S.E%E", "- %S%E -", "-E%E-", ".%S%E.", "%S.%E", "%S%E" });
             defaults[Config.TargetPattern] = "S%sE%E - %N";
-            defaults[Config.LastTitles] = new List<string>(new string[] { "The Simpsons", "Heroes", "Scrubs", "Supernatural", "Eureka", "Chuck", "Stargate", "Stargate Atlantis", "Dexter", "Doctor Who", "24", "Firefly", "Kyle XY", "Prison Break", "Moonlight", "Monk", "House M.D.", "Gilmore Girls", "Friends", "Sex and the City" });
-            defaults[Config.LastProvider] = "";
-            defaults[Config.LastDirectory] = "";
-            defaults[Config.LastSubProvider] = "";
+            defaults[Config.LastTitles] = new List<string>();
+            defaults[Config.LastProvider] = "www.thetvdb.com";
+            defaults[Config.LastDirectory] = "C:\\";
+            defaults[Config.LastSubProvider] = "www.subtitles.de";
             defaults[Config.Timeout] = "10000";
-            defaults[Config.InvalidFilenameAction] = "Ask";
-            defaults[Config.Umlaute] = Renamer.Classes.InfoEntry.UmlautAction.Dont_Use.ToString();
+            defaults[Config.Umlaute] = Renamer.Classes.InfoEntry.UmlautAction.Use.ToString();
             defaults[Config.Case] = Renamer.Classes.InfoEntry.Case.UpperFirst.ToString();
-            defaults[Config.Extract] = new List<string>(new string[] { "Season %S", "Season_%S", "Season%S", "Staffel %S", "Staffel_%S", "Staffel%S" });
+            defaults[Config.Extract] = new List<string>(new string[] { "Season %S", "Season_%S", "Season%S", "Staffel %S", "Staffel_%S", "Staffel%S", "S%S" });
             defaults[Config.CreateDirectoryStructure] = "1";
             defaults[Config.DeleteEmptyFolders] = "1";
             defaults[Config.DeleteAllEmptyFolders] = "1";
             defaults[Config.IgnoreFiles] = new List<string>(new string[] { "nfo", "diz" });
-            defaults[Config.ColumnOrder] = new List<string>(new string[] { "0", "1", "2", "3", "4", "6", "5" });
-            defaults[Config.ColumnWidths] = new List<string>(new string[] { "209", "137", "55", "57", "144", "188", "188" });
+            defaults[Config.ColumnOrder] = new List<string>(new string[] { "0", "1", "2", "3", "4", "5", "6", "7" });
+            defaults[Config.ColumnWidths] = new List<string>(new string[] { "222", "203", "120", "51", "53", "122", "176", "163" });
             defaults[Config.WindowSize] = new List<string>(new string[] { "1024", "600" });
             defaults[Config.UseSeasonSubDir] = "1";
             defaults[Config.TitleHistorySize] = "100";
-            defaults[Config.ShownameExtractionRegex] = "((?<pos>\\.S\\d+E\\d+\\.)|(?<pos>\\.\\d+\\.)|(?<pos>[^\\. _-]\\d{3,}))";
+            defaults[Config.ShownameExtractionRegex] = new List<string>(new string[] { "(?<pos>\\.Ep\\d+.)", "^(?<pos>[Ss]\\d+[Ee]\\d+[\\.-])", "((?<pos>\\.[Ss]\\d+[Ee]\\d+([\\.-]|\\w))|(?<pos>\\.\\d+\\.)|(?<pos>[\\. _-]\\d{3,})|(?<pos>\\d+x\\d+)|(?<pos>[Ss]\\d+x\\d+))", "(?<pos>\\d{2,4}.\\d{2,4}.\\d{2,4})" });
             defaults[Config.CleanupRegex] = "[.-_;,!='+]";
             defaults[Config.Replace] = new List<string>(new string[] { "//Comments are indicated by //", "//Format used here is \"From->To\",", "//where \"From\" is a c# regular expression, see", "//http://www.radsoftware.com.au/articles/regexlearnsyntax.aspx for details", "//example: \"\\s->.\" replaces whitespaces with dots", "cd->CD", " i\\.-> I.", " ii\\.-> II.", " iii\\.-> III.", " iv\\.-> IV.", " v\\.-> V.", " vi\\.-> VI.", " vii\\.-> VII.", " i -> I ", " ii -> II ", " iii -> III ", " iv -> IV ", " v -> V ", " vi -> VI ", " vii -> VII ", "\\[\\d+\\]->", " +-> " });
-            defaults[Config.Tags] = new List<string>(new string[] { "Xvid", "DivX", "R5", "R3", "GERMAN", "DVD", "INTERNAL", "PROPER", "TELECINE", "LINE", "LD", "MD", "AC3", "SVCD", "XSVCD", "VCD", "Dubbed", "HD", "720P", "720", "SCREENER", "RSVCD", "\\d\\d\\d\\d", "TS", "GER" });
+            defaults[Config.Tags] = new List<string>(new string[] { "Xvid", "DivX", "R5", "R3", "GERMAN", "DVD", "INTERNAL", "PROPER", "TELECINE", "LINE", "LD", "MD", "AC3", "SVCD", "XSVCD", "VCD", "Dubbed", "HD", "720P", "720", "SCREENER", "RSVCD", "\\d{4}", "TS", "GER", "by \\w+", "xmas[^A-Za-z0-9]+special" });
             defaults[Config.ResizeColumns] = "1";
-            defaults[Config.PathBlacklist] = "Season^Staffel";
+            defaults[Config.PathBlacklist] = new List<string>(new string[] {"Season", "Staffel", "Disk", "(D)isk", "(S)taffel", "(S)eason", "DVD", "Special", "Downloads", "Download", "Serien", "Series", "Serie", "Videos", "Movies", "Moviez", "Filme"});
             defaults[Config.FindMissingEpisodes] = "1";
             defaults[Config.DeleteSampleFiles] = "1";
+            defaults[Config.DestinationDirectory] = "";
+            defaults[Config.FilenameBlacklist] = new List<string>(new string[] { "AVSEQ01" });
+            defaults[Config.MovieIndicator] = new List<string>(new string[] { "Movies", "Moviez", "Films", "Filme", "Film", "Movie" });
             defaults[Config.DestinationDirectory] = "";
         }
 

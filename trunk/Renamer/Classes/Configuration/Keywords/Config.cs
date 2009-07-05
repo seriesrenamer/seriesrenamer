@@ -24,11 +24,6 @@ namespace Renamer.Classes.Configuration.Keywords
     static class Config
     {
         /// <summary>
-        /// comment string used in config file
-        /// </summary>
-        public const string Comment = "Comment";
-
-        /// <summary>
         /// delimiter character used in config file
         /// </summary>
         public const string Delimiter = "Delimiter";
@@ -106,11 +101,6 @@ namespace Renamer.Classes.Configuration.Keywords
         /// Timeout for network connections
         /// </summary>
         public const string Timeout = "Timeout";
-
-        /// <summary>
-        /// Action to tkae when invalid filenames are encountered
-        /// </summary>
-        public const string InvalidFilenameAction = "InvalidFilenameAction";
 
         /// <summary>
         /// How Umlauts are treated in target filenames

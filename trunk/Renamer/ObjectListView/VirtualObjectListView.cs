@@ -40,6 +40,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace BrightIdeasSoftware
 {
@@ -463,6 +464,7 @@ namespace BrightIdeasSoftware
                     olvi.BackColor = this.BackColor;
 
                 this.CorrectSubItemColors(olvi);
+                olvi.BackColor = Color.IndianRed;
             }
             
             if (this.UseHotItem && this.HotItemIndex == itemIndex)

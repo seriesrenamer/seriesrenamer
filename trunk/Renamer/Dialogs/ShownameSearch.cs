@@ -143,7 +143,6 @@ namespace Renamer.Dialogs
         {
             if (e.KeyCode == Keys.Enter)
             {
-                Logger.Instance.LogMessage("keydown", LogLevel.INFO);
                 foreach (Control c in tableLayoutPanel1.Controls)
                 {
                     if (c.Focused && c.GetType() == typeof(TextBox))
