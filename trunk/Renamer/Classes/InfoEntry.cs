@@ -183,7 +183,11 @@ namespace Renamer.Classes
                         MarkedForDeletion = true;
                     }
                     nameOfSeries = value;
+                    //need to find showname again incase there is different data for new showname
+                    SetupRelation();
+                    //filename might contain showname, so it needs to be updated anyway
                     CreateNewName();
+                    //directory structure also contains showname and should be updated
                     SetPath();
                 }
             }
@@ -410,22 +414,27 @@ namespace Renamer.Classes
             }
             string DestinationPath = Helper.ReadProperty(Config.DestinationDirectory);
 
-            if (Directory.Exists(DestinationPath))
+            if (!Directory.Exists(DestinationPath))
+            {
+                DestinationPath = Filepath.goUpwards(FilePath.Path,ExtractedNameLevel);
+            }
+            if (IsMultiFileMovie)
+            {
+                DestinationPath = getMoviesDestinationPath(DestinationPath);
+            }
+            if (DestinationPath != FilePath.Path)
             {
                 Destination = DestinationPath;
             }
             else
             {
-                Destination = Filepath.goUpwards(FilePath.Path,ExtractedNameLevel);
+                Destination = "";
             }
-            if (IsMultiFileMovie)
-            {
-                Destination = getMoviesDestinationPath();
-            }
+
         }
 
-        private string getMoviesDestinationPath() {
-            return Filepath.goIntoFolder(this.destination.Path, MovieNameWithoutPart());
+        private string getMoviesDestinationPath(string currentDestination) {
+            return Filepath.goIntoFolder(currentDestination, MovieNameWithoutPart());
         }
         private string MovieNameWithoutPart()
         {
@@ -530,7 +539,14 @@ namespace Renamer.Classes
                 DestinationPath = addSeriesDir(DestinationPath);
                 DestinationPath = addSeasonsDirIfDesired(DestinationPath);
             }
-            Destination = DestinationPath;
+            if (DestinationPath != FilePath.Path)
+            {
+                Destination = DestinationPath;
+            }
+            else
+            {
+                Destination = "";
+            }
         }
         private void getCreateDirectory() {
             if (createDirectoryStructure != DirectoryStructure.Unset)
@@ -698,11 +714,57 @@ namespace Renamer.Classes
         /// This function generates a new filename from the Target Pattern, episode, season, title, showname,... values
         /// </summary>
         public void CreateNewName() {
-            if ((Movie && Showname =="") || (!Movie && nameOfEpisode == "")) {
+            if ((Movie && Showname =="") || (!Movie && !isSubtitle && nameOfEpisode == "")) {
                 NewFilename = "";
                 return;
             }
             else {
+                //Note: Subtitle destination path is set here too
+                if (isSubtitle)
+                {
+                    if (nameOfEpisode == "" && Season > -1 && Episode > -1)
+                    {
+                        InfoEntry videoEntry = InfoEntryManager.Instance.GetMatchingVideo(Season, Episode);
+                        if (videoEntry != null)
+                        {
+                            string nfn, dst;
+                            if (videoEntry.NewFilename == "")
+                            {
+                                nfn = Path.GetFileNameWithoutExtension(videoEntry.Filename);
+                            }
+                            else
+                            {
+                                nfn = Path.GetFileNameWithoutExtension(videoEntry.NewFilename);
+                            }
+                            nfn += "." + Extension;
+
+                            //Move to Video file
+                            dst = videoEntry.Destination;
+
+                            //Don't do this if name fits already
+                            if (nfn == Filename)
+                            {
+                                nfn = "";
+                            }
+                            //Don't do this if path fits already
+                            if (dst == FilePath.Path)
+                            {
+                                dst = "";
+                            }
+                            NewFilename = nfn;
+                            Destination = dst;
+                            return;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
                 //Target Filename format
                 string tmpname;
 

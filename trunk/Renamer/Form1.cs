@@ -225,8 +225,7 @@ namespace Renamer
 
        
         #endregion
-        #region LstFilesEvents
-       
+        
         //Since sorting after the last two selected columns is supported, we need some event handling here
         private void lstFiles_ColumnClick(object sender, ColumnClickEventArgs e) {
             // Determine if clicked column is already the column that is being sorted.
@@ -411,7 +410,6 @@ namespace Renamer
             }
         }*/
 
-        #endregion
         #region GUI-Events
         //Main Initialization
         private void Form1_Load(object sender, EventArgs e) {
@@ -633,11 +631,6 @@ namespace Renamer
                 }
         }*/
 
-        //Clear episode informations fetched from providers
-        private void btnClear_Click(object sender, EventArgs e) {
-            RelationManager.Instance.Clear();
-            UpdateList(true);
-        }
 
         //Show File Open dialog and update file list
         private void btnPath_Click(object sender, EventArgs e) {
@@ -1071,7 +1064,7 @@ namespace Renamer
                     Logger.Instance.LogMessage("Error deleting file: " + ex.Message, LogLevel.ERROR);
                 }
             }
-            FillListView();
+            lstEntries.Refresh();
         }
 
         //Open file
@@ -1146,8 +1139,17 @@ namespace Renamer
             this.lstEntries.BooleanCheckStatePutter = delegate(object x, bool newValue)
             {
                 ((InfoEntry)x).ProcessingRequested = newValue;
-                btnTitles.Enabled = lstEntries.CheckedItems.Count != 0;
-                btnSubs.Enabled = lstEntries.CheckedItems.Count != 0;
+                bool shouldbeenabled = false;
+                foreach (InfoEntry ie in InfoEntryManager.Instance)
+                {
+                    if (ie.ProcessingRequested)
+                    {
+                        shouldbeenabled = true;
+                        break;
+                    }
+                }
+                btnTitles.Enabled = shouldbeenabled;
+                btnSubs.Enabled = shouldbeenabled;
                 return newValue;
             };
 
@@ -1419,21 +1421,7 @@ namespace Renamer
             }
         }
 
-        private void lstFiles_DragDrop(object sender, DragEventArgs e) {
-            string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            if (s.Length == 1 && Directory.Exists(s[0])) {
-                InfoEntryManager.Instance.SetPath(s[0]);
-            }
-        }
-
-        private void lstFiles_DragEnter(object sender, DragEventArgs e) {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
-                string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-                if (s.Length == 1 && Directory.Exists(s[0])) {
-                    e.Effect = DragDropEffects.Move;
-                }
-            }
-        }
+        
 
 
 
@@ -1765,16 +1753,16 @@ namespace Renamer
                 btnRename.Enabled = false;
                 foreach (InfoEntry ie in InfoEntryManager.Instance)
                 {
-                    if (!ie.Movie && !string.IsNullOrEmpty(ie.Showname))
-                    {
-                        btnTitles.Enabled = true;
-                        break;
-                    }
                     if (!string.IsNullOrEmpty(ie.Showname))
                     {
 
                         btnRename.Enabled = true;
                     }
+                    if (!ie.Movie && !string.IsNullOrEmpty(ie.Showname))
+                    {
+                        btnTitles.Enabled = true;
+                        break;
+                    }                    
                 }
             }
             btnSubs.Enabled = InfoEntryManager.Instance.Count > 0;
@@ -1883,6 +1871,36 @@ namespace Renamer
                     OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
                     InfoEntry ie = (InfoEntry)lvi.RowObject;
                     Process myProc = Process.Start(ie.FilePath.Path + Path.DirectorySeparatorChar + ie.Filename);
+                }
+            }
+            else if (e.KeyCode == Keys.Space)
+            {
+                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                {
+                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                    InfoEntry ie = (InfoEntry)lvi.RowObject;
+                    ie.ProcessingRequested = !ie.ProcessingRequested;
+                    lstEntries.RefreshObject(ie);
+                }
+            }
+        }
+        private void lstEntries_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            if (s.Length == 1 && Directory.Exists(s[0]))
+            {
+                InfoEntryManager.Instance.SetPath(s[0]);
+            }
+        }
+
+        private void lstEntries_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+                if (s.Length == 1 && Directory.Exists(s[0]))
+                {
+                    e.Effect = DragDropEffects.Move;
                 }
             }
         }

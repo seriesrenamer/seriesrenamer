@@ -42,7 +42,10 @@ namespace Renamer.Dialogs
         {
             InitializeComponent();
             cbFiles.Items.AddRange(Helper.ReadProperties(Config.LastTitles));
-            cbFiles.SelectedIndex = 0;
+            if (cbFiles.Items.Count > 0)
+            {
+                cbFiles.SelectedIndex = 0;
+            }
             for (int i = 0; i < cbFiles.Items.Count; i++)
             {
                 string str = (string)cbFiles.Items[i];
