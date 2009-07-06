@@ -101,26 +101,44 @@ namespace Renamer
 
 
         /// <summary>
-        /// Removes unneeded tags from videos
+        /// Sets an InfoEntry as movie and generates name
         /// </summary>
-        private void RemoveVideoTags() {
-
-            //Tags should be preceeded by . or _
+        private void MarkAsMovie() {
+            //Tags should be preceeded by . or _ or ( or [ or - or ]
             string[] tags = Helper.ReadProperties(Config.Tags);
             List<string> regexes = new List<string>();
             foreach (string s in tags) {
                 regexes.Add("[\\._\\(\\[-]" + s);
             }
-            for(int i=0;i<lstEntries.Items.Count;i++){
-                OLVListItem lvi = (OLVListItem)lstEntries.Items[i];
+            for(int i=0;i<lstEntries.SelectedIndices.Count;i++){
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
                 InfoEntry ie = (InfoEntry)((OLVListItem)lvi).RowObject;
-                ie.ProcessingRequested = false;
                 //Go through all selected files and remove tags and clean them up
-                if (lvi.Selected) {
-                    ie.RemoveVideoTags();
-                    lvi.Selected = false;
-                }
+                ie.Showname = "";
+                ie.Destination = "";
+                ie.NewFilename = "";
+                ie.RemoveVideoTags();
             }
+            lstEntries.Refresh();
+        }
+
+        /// <summary>
+        /// Sets an InfoEntry as TV Show and generates name
+        /// </summary>
+        private void MarkAsTVShow()
+        {            
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)((OLVListItem)lvi).RowObject;
+                //Go through all selected files and remove tags and clean them up
+                ie.Movie = false;
+                ie.Showname=SeriesNameExtractor.Instance.ExtractSeriesName(ie);
+                ie.Destination = "";
+                ie.NewFilename = "";
+                DataGenerator.ExtractSeasonAndEpisode(ie);
+            }
+            lstEntries.Refresh();
         }
         #endregion
 
@@ -434,7 +452,7 @@ namespace Renamer
             string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
             if (LastSubProvider == null)
                 LastSubProvider = "";
-            cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
+            cbSubs.SelectedIndex = Math.Max(-1, cbSubs.Items.IndexOf(LastSubProvider));
             Helper.WriteProperty(Config.LastSubProvider, cbSubs.Text);
 
             //Last directory
@@ -842,6 +860,8 @@ namespace Renamer
                 bool Name = false;
                 bool Destination = false;
                 bool NewFilename = false;
+                bool MoviesOnly = true;
+                bool TVShowsOnly = true;
                 InfoEntry.DirectoryStructure CreateDirectoryStructure = InfoEntry.DirectoryStructure.Unset;
                 InfoEntry.Case Case = InfoEntry.Case.Unset;
                 InfoEntry.UmlautAction Umlaute = InfoEntry.UmlautAction.Unset;
@@ -849,6 +869,8 @@ namespace Renamer
                 {
                     OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
                     InfoEntry ie = (InfoEntry)lvi.RowObject;
+                    if (ie.Movie) TVShowsOnly = false;
+                    else MoviesOnly = false;
                     if (i == 0) {
                         CreateDirectoryStructure = ie.CreateDirectoryStructure;
                         Case = ie.Casing;
@@ -868,6 +890,21 @@ namespace Renamer
                             Umlaute = InfoEntry.UmlautAction.Unset;
                         }
                     }
+                }
+                if (TVShowsOnly)
+                {
+                    markAsMovieToolStripMenuItem.Visible = true;
+                    markAsTVSeriesToolStripMenuItem.Visible = false;
+                }
+                else if (MoviesOnly)
+                {
+                    markAsTVSeriesToolStripMenuItem.Visible = true;
+                    markAsMovieToolStripMenuItem.Visible = false;
+                }
+                else
+                {
+                    markAsMovieToolStripMenuItem.Visible = true;
+                    markAsTVSeriesToolStripMenuItem.Visible = true;
                 }
                 if (CreateDirectoryStructure == InfoEntry.DirectoryStructure.CreateDirectoryStructure) {
                     createDirectoryStructureToolStripMenuItem1.Checked = true;
@@ -1404,23 +1441,11 @@ namespace Renamer
             }
         }
 
-        
-
-
-
-        private void removeTagsToolStripMenuItem_Click(object sender, EventArgs e) {
-            RemoveVideoTags();
-        }
-
-
         private void replaceInPathToolStripMenuItem_Click(object sender, EventArgs e) {
             ReplaceWindow rw = new ReplaceWindow(this);
             rw.Show();
             rw.TopMost = true;
         }
-
-
-
 
         /// <summary>
         /// Replaces strings from various fields in selected files
@@ -1846,6 +1871,7 @@ namespace Renamer
                 {
                     OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
                     InfoEntry ie = (InfoEntry)lvi.RowObject;
+                    if (ie.IsSubtitle) ie = InfoEntryManager.Instance.GetVideo(ie);
                     Process myProc = Process.Start(ie.FilePath.Path + Path.DirectorySeparatorChar + ie.Filename);
                 }
             }
@@ -1879,6 +1905,16 @@ namespace Renamer
                     e.Effect = DragDropEffects.Move;
                 }
             }
+        }
+
+        private void markAsMovieToolStripMenuItem_Click(object sender, EventArgs e)
+        {             
+            MarkAsMovie();
+        }
+
+        private void markAsTVSeriesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MarkAsTVShow();
         }
     }
 }

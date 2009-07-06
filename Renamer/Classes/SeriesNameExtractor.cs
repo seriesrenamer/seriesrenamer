@@ -315,8 +315,31 @@ namespace Renamer.Classes
                     name = name.Substring(0, m.Index);
                 }
             }
-           
             postprocessing();
+            folders = extractFoldernamesFromPath(ie.FilePath.Path);
+            if (folders.Length != 0)
+            {
+                folders[folders.Length - 1] = removeReleaseGroupTag(folders[folders.Length - 1]);
+                if (Helper.InitialsMatch(folders[folders.Length - 1], name))
+                {
+                    name = folders[folders.Length - 1];
+                    //try to match tags    
+                    foreach (string s in MovieTagPatterns)
+                    {
+                        Match m = Regex.Match(name, s, RegexOptions.IgnoreCase);
+                        if (m.Success)
+                        {
+                            name = name.Substring(0, m.Index);
+                        }
+                    }
+                    if (part == -1)
+                    {
+                        part = ProcessMultifiles();
+                    }
+                    postprocessing();
+                }
+            }
+            
 
             if (part != -1)
             {
@@ -325,7 +348,7 @@ namespace Renamer.Classes
             return name;
         }
 
-
+        
         /// <summary>
         /// Extracts season from directory name
         /// </summary>

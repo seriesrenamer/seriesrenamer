@@ -20,6 +20,7 @@ using System.IO;
 using Renamer.Classes.Configuration.Keywords;
 using System.Diagnostics;
 using Renamer.Logging;
+using System.Text.RegularExpressions;
 
 namespace Renamer.Classes.Configuration
 {
@@ -114,6 +115,12 @@ namespace Renamer.Classes.Configuration
                     while ((line = r.ReadLine()) != null) {
                         //Remove leading and trailing whitespaces
                         line = line.Trim();
+                        
+                        //space escape sequence
+                        line = Regex.Replace(line,"[^\\\\]\\s", " ");
+                        line = line.Replace("\\\\", "\\");
+                        
+
                         lineCounter++;
                         // Skip empty lines
                         if (String.IsNullOrEmpty(line)) {
@@ -304,13 +311,13 @@ namespace Renamer.Classes.Configuration
                         fileWriter.WriteLine(line);
 
                         //recoverEasyRegex((string[])config[currentKey]));
-                        foreach (string val in ((string[])config[currentKey])) {
-                            fileWriter.WriteLine("\t" + val);
+                        foreach (string val in ((string[])config[currentKey])) {                            
+                            fileWriter.WriteLine("\t" + Escape(val));
                         }
                         line = settings.EndMultiValueField;
                     }
                     else {
-                        line += (string)config[currentKey];
+                        line += Escape((string)config[currentKey]);
                         this.lastState = ParserState.NormalLine;
                     }
                 }
@@ -330,8 +337,21 @@ namespace Renamer.Classes.Configuration
                 }
                 return line.Substring(0, line.IndexOf(settings.Comment));
             }
+            private string Escape(string v)
+            {
+                v = v.Replace("\\s", "\\\\s");
+                if (v.StartsWith(" "))
+                {
+                    v = "\\s" + v.Substring(1);
+                }
+                if (v.EndsWith(" "))
+                {
+                    v = v.Substring(0, v.Length - 1) + "\\s";
+                }
+                return v;
+            }
         }
-
+        
         /// <summary>
         /// Saves the file
         /// </summary>

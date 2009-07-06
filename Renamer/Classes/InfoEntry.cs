@@ -244,16 +244,13 @@ namespace Renamer.Classes
             get { return isMovie; }
             set
             {
-                isMovie = value;
-                CreateNewName();
-                SetPath();
-            }
-                /*if (isMovie != value) {
+                if (isMovie != value)
+                {
                     isMovie = value;
                     CreateNewName();
                     SetPath();
                 }
-            }*/
+            }
         }
         /// <summary>
         /// If file is to be processed
@@ -427,8 +424,17 @@ namespace Renamer.Classes
         }
 
         private string getMoviesDestinationPath(string currentDestination) {
+            string[] folders = Helper.splitFilePath(currentDestination);
+            if (folders.Length > 0)
+            {
+                if (Helper.InitialsMatch(folders[folders.Length - 1], MovieNameWithoutPart()))
+                {
+                    return currentDestination;
+                }
+            }
             return Filepath.goIntoFolder(currentDestination, MovieNameWithoutPart());
         }
+
         private string MovieNameWithoutPart()
         {
             return Showname.Substring(0, Showname.Length - 3);
@@ -819,9 +825,24 @@ namespace Renamer.Classes
             this.ProcessingRequested = false;
             //Go through all selected files and remove tags and clean them up
             this.Destination = "";
+            Episode = -1;
+            Season = -1;
             this.Movie = true;
             this.Showname=SeriesNameExtractor.Instance.ExtractMovieName(this);
                         
+            if (this.NewFilename != "" || this.Destination != "")
+            {
+                this.ProcessingRequested = true;
+            }
+        }
+        public void MarkAsTVShow()
+        {
+            this.ProcessingRequested = false;
+            //Go through all selected files and remove tags and clean them up
+            this.Destination = "";
+            this.Movie = false;
+            this.Showname = SeriesNameExtractor.Instance.ExtractSeriesName(this);
+
             if (this.NewFilename != "" || this.Destination != "")
             {
                 this.ProcessingRequested = true;

@@ -577,16 +577,13 @@ namespace Renamer
                     Files.AddRange(Helper.GetAllFilesRecursively(path, "*." + ex));
                 }
 
-                //Loop through all files and recognize things, YAY!
-                string[] patterns = Helper.ReadProperties(Config.EpIdentifier);
-                for (int i = 0; i < patterns.Length; i++) {
-                    patterns[i] = RegexConverter.toRegex(patterns[i]);
-                }
 
                 //some declarations already for speed
-                string strSeason = "";
-                string strEpisode = "";
-                Match m = null;
+                string[] patterns = Helper.ReadProperties(Config.EpIdentifier);
+                for (int i = 0; i < patterns.Length; i++)
+                {
+                    patterns[i] = RegexConverter.toRegex(patterns[i]);
+                }
                 int DirectorySeason = -1;
                 InfoEntry ie = null;
                 bool contains = false;
@@ -629,70 +626,18 @@ namespace Renamer
                         //Get season number and showname from directory
                         DirectorySeason = ExtractSeasonFromDirectory(Path.GetDirectoryName(file.FullName));
                         dt = DateTime.Now;
-                        //try to recognize season and episode from filename
-                        foreach (string pattern in patterns)
-                        {
-                            //Try to match. If it works, get the season and the episode from the match
-                            m = Regex.Match(file.Name, pattern, RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
-                            if (m.Success)
-                            {
-                                strSeason = "";
-                                strEpisode = "";
-                                try
-                                {
-                                    strSeason = Int32.Parse(m.Groups["Season"].Value).ToString();
-                                }
-                                catch (FormatException)
-                                {
-                                }
-                                try
-                                {
-                                    strEpisode = Int32.Parse(m.Groups["Episode"].Value).ToString();
-                                }
-                                catch (FormatException)
-                                {
-                                }
-                                //Fix for .0216. notation for example, 4 numbers should always be recognized as %S%S%E%E
-                                if (strEpisode.Length == 3 && strSeason.Length == 1)
-                                {
-                                    strSeason += strEpisode[0];
-                                    strEpisode = strEpisode.Substring(1);
-                                    if (strSeason[0] == '0')
-                                    {
-                                        strSeason = strSeason.Substring(1);
-                                    }
-                                }
-                                try
-                                {
-                                    ie.Episode = Int32.Parse(strEpisode);
-                                }
-                                catch
-                                {
-                                    Logger.Instance.LogMessage("Cannot parse found episode: " + strEpisode, LogLevel.DEBUG);
-                                }
-                                try
-                                {
-                                    ie.Season = Int32.Parse(strSeason);
-                                }
-                                catch
-                                {
-                                    Logger.Instance.LogMessage("Cannot parse found season: " + strSeason, LogLevel.DEBUG);
-                                }
 
-                                if ((ie.Filename.Contains("720p") && ie.Season == 7 && ie.Episode == 20) | (ie.Filename.ToLower().Contains("1080p") && ie.Season == 10 && ie.Episode == 80))
-                                {
-                                    ie.Season = -1;
-                                    ie.Episode = -1;
-                                    continue;
-                                }
-                                //if season recognized from directory name doesn't match season recognized from filename, the file might be located in a wrong directory
-                                if (DirectorySeason != -1 && ie.Season != DirectorySeason)
-                                {
-                                    Logger.Instance.LogMessage("File seems to be located inconsistently: " + ie.Filename + " was recognized as season " + ie.Season + ", but folder name indicates that it should be season " + DirectorySeason.ToString(), LogLevel.WARNING);
-                                }
-                                break;
-                            }
+                        //try to recognize season and episode from filename
+                        ///////////////////////////////////////////////////
+                        ExtractSeasonAndEpisode(ie, patterns);
+                        ///////////////////////////////////////////////////
+
+                        //if season recognized from directory name doesn't match season recognized from filename, the file might be located in a wrong directory
+                        if (DirectorySeason != -1 && ie.Season != DirectorySeason)
+                        {
+                            Logger.Instance.LogMessage("File seems to be located inconsistently: " + ie.Filename + " was recognized as season " + ie.Season + ", but folder name indicates that it should be season " + DirectorySeason.ToString(), LogLevel.WARNING);
                         }
+
                         //if season number couldn't be extracted, try to get it from folder
                         //(this should never happen if a pattern like %S%E is set)
                         if (ie.Season == -1 && DirectorySeason != -1)
@@ -700,10 +645,12 @@ namespace Renamer
                             ie.Season = DirectorySeason;
                         }
                     }
+
                     //if nothing could be recognized, assume that this is a movie
                     if ((ie.Season < 1 && ie.Episode < 1) || ie.Movie) {
                         ie.RemoveVideoTags();
                     }
+
                     //if not added yet, add it
                     if (!contains) {
                         InfoEntryManager.Instance.Add(ie);
@@ -727,23 +674,96 @@ namespace Renamer
             {
                 FindMissingEpisodes();
             }
-            /*
-            FillListView();
-
-            //also update some gui elements for the sake of it
-            txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
-            txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
-            string LastProvider = Helper.ReadProperty(Config.LastProvider);
-            if (LastProvider == null)
-                LastProvider = "";
-            cbProviders.SelectedIndex = Math.Max(0, cbProviders.Items.IndexOf(LastProvider));
-            string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
-            if (LastSubProvider == null)
-                LastSubProvider = "";
-            cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
-            */
         }
 
+        /// <summary>
+        /// Extracts season and episode number by using some regexes from config file
+        /// </summary>
+        /// <param name="ie">InfoEntry which should be processed</param>
+        public static void ExtractSeasonAndEpisode(InfoEntry ie)
+        {
+            string[] patterns = Helper.ReadProperties(Config.EpIdentifier);
+            for (int i = 0; i < patterns.Length; i++)
+            {
+                patterns[i] = RegexConverter.toRegex(patterns[i]);
+            }
+            ExtractSeasonAndEpisode(ie, patterns);
+        }
+
+        /// <summary>
+        /// Extracts season and episode number by using some regexes specified in patterns
+        /// </summary>
+        /// <param name="ie">InfoEntry which should be processed</param>
+        /// <param name="patterns">Patterns to be used for recognition, supply these for speed reasons?</param>
+        public static void ExtractSeasonAndEpisode(InfoEntry ie, string[] patterns)
+        {            
+            string strSeason = "";
+            string strEpisode = "";
+            Match m = null;
+            int episode = -1;
+            int season = -1;
+
+            foreach (string pattern in patterns)
+            {
+                //Try to match. If it works, get the season and the episode from the match
+                m = Regex.Match(ie.Filename, pattern, RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
+                if (m.Success)
+                {
+                    strSeason = "";
+                    strEpisode = "";
+                    try
+                    {
+                        strSeason = Int32.Parse(m.Groups["Season"].Value).ToString();
+                    }
+                    catch (FormatException)
+                    {
+                    }
+                    try
+                    {
+                        strEpisode = Int32.Parse(m.Groups["Episode"].Value).ToString();
+                    }
+                    catch (FormatException)
+                    {
+                    }
+                    //Fix for .0216. notation for example, 4 numbers should always be recognized as %S%S%E%E
+                    if (strEpisode.Length == 3 && strSeason.Length == 1)
+                    {
+                        strSeason += strEpisode[0];
+                        strEpisode = strEpisode.Substring(1);
+                        if (strSeason[0] == '0')
+                        {
+                            strSeason = strSeason.Substring(1);
+                        }
+                    }
+                    try
+                    {
+                        episode = Int32.Parse(strEpisode);
+                    }
+                    catch
+                    {
+                        Logger.Instance.LogMessage("Cannot parse found episode: " + strEpisode, LogLevel.DEBUG);
+                    }
+                    try
+                    {
+                        season = Int32.Parse(strSeason);
+                    }
+                    catch
+                    {
+                        Logger.Instance.LogMessage("Cannot parse found season: " + strSeason, LogLevel.DEBUG);
+                    }
+
+                    if ((ie.Filename.ToLower().Contains("720p") && season == 7 && episode == 20) | (ie.Filename.ToLower().Contains("1080p") && season == 10 && episode == 80))
+                    {
+                        season = -1;
+                        episode = -1;
+                        continue;
+                    }
+                    ie.Season = season;
+                    ie.Episode = episode;
+                    return;
+                }
+            }
+        }
         class EpisodeCollection
         {
             public int maxEpisode = 0;
