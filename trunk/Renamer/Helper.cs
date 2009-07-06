@@ -473,6 +473,55 @@ namespace Renamer
         }
 
         /// <summary>
+        /// figure out if shortstring is contained in longstring somehow
+        /// </summary>
+        /// <param name="longstring">longer string</param>
+        /// <param name="shortstring">shorter string</param>
+        /// <returns>true if longstring contains shortstring</returns>
+        public static bool InitialsMatch(string longstring, string shortstring)
+        {
+            if (shortstring.Length > longstring.Length) return false;
+            string pattern = " [iI]+[ $]";
+            shortstring = Regex.Replace(shortstring, pattern, "");
+            int matches = 0;
+            int startmatches = 0;
+            bool found = false;
+            for(int j=0;j<shortstring.Length;j++){
+                char c = shortstring[j];
+                if (c != ' ' && !Char.IsDigit(c))
+                {
+                    found = false;
+                    int pos = 0;
+                    for (int i = pos; i < longstring.Length; i++)
+                    {
+                        char c2 = longstring[i];
+                        if (Char.ToLower(c) == Char.ToLower(c2))
+                        {
+                            found = true;
+                            matches++;
+                            if (startmatches == j)
+                            {
+                                startmatches++;
+                            }
+                            pos = i + 1;
+                            break;
+                        }
+                    }
+                    if (!found && shortstring.Length < 10)
+                    {
+                        break;
+                    }
+                }
+            }
+            //if everything matched or atleast 70% on longer strings matched or atleast 40% of the start of longer strings matched, return true
+            if ((shortstring.Length<10 && found) || (shortstring.Length >= 10 && ((float)matches / ((float)shortstring.Length) > 0.7)||startmatches>0.4*shortstring.Length))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Deletes all empty folders recursively, ignoring files from IgnoredFiles list
         /// </summary>
         /// <param name="path">Path from which to delete folders</param>

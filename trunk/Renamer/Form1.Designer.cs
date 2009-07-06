@@ -57,7 +57,6 @@ namespace Renamer
             this.contextFiles = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editSubtitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.removeTagsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.renamingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createDirectoryStructureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -118,6 +117,8 @@ namespace Renamer
             this.rtbLog = new System.Windows.Forms.RichTextBox();
             this.fbdPath = new System.Windows.Forms.FolderBrowserDialog();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.markAsMovieToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.markAsTVSeriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scContainer.Panel1.SuspendLayout();
             this.scContainer.Panel2.SuspendLayout();
             this.scContainer.SuspendLayout();
@@ -262,7 +263,8 @@ namespace Renamer
             this.contextFiles.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.viewToolStripMenuItem,
             this.editSubtitleToolStripMenuItem,
-            this.removeTagsToolStripMenuItem,
+            this.markAsMovieToolStripMenuItem,
+            this.markAsTVSeriesToolStripMenuItem,
             this.toolStripSeparator4,
             this.renamingToolStripMenuItem,
             this.selectToolStripMenuItem,
@@ -279,7 +281,7 @@ namespace Renamer
             this.regexTesterToolStripMenuItem});
             this.contextFiles.Name = "contextFiles";
             this.contextFiles.ShowImageMargin = false;
-            this.contextFiles.Size = new System.Drawing.Size(241, 330);
+            this.contextFiles.Size = new System.Drawing.Size(241, 374);
             this.contextFiles.Opening += new System.ComponentModel.CancelEventHandler(this.contextFiles_Opening);
             // 
             // viewToolStripMenuItem
@@ -295,13 +297,6 @@ namespace Renamer
             this.editSubtitleToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
             this.editSubtitleToolStripMenuItem.Text = "Edit Subtitle";
             this.editSubtitleToolStripMenuItem.Click += new System.EventHandler(this.editSubtitleToolStripMenuItem_Click);
-            // 
-            // removeTagsToolStripMenuItem
-            // 
-            this.removeTagsToolStripMenuItem.Name = "removeTagsToolStripMenuItem";
-            this.removeTagsToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
-            this.removeTagsToolStripMenuItem.Text = "Remove Tags";
-            this.removeTagsToolStripMenuItem.Click += new System.EventHandler(this.removeTagsToolStripMenuItem_Click);
             // 
             // toolStripSeparator4
             // 
@@ -825,6 +820,20 @@ namespace Renamer
             this.fbdPath.Description = "Browse for folder containing series.";
             this.fbdPath.ShowNewFolderButton = false;
             // 
+            // markAsMovieToolStripMenuItem
+            // 
+            this.markAsMovieToolStripMenuItem.Name = "markAsMovieToolStripMenuItem";
+            this.markAsMovieToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.markAsMovieToolStripMenuItem.Text = "Mark as Movie";
+            this.markAsMovieToolStripMenuItem.Click += new System.EventHandler(this.markAsMovieToolStripMenuItem_Click);
+            // 
+            // markAsTVSeriesToolStripMenuItem
+            // 
+            this.markAsTVSeriesToolStripMenuItem.Name = "markAsTVSeriesToolStripMenuItem";
+            this.markAsTVSeriesToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.markAsTVSeriesToolStripMenuItem.Text = "Mark as TV series";
+            this.markAsTVSeriesToolStripMenuItem.Click += new System.EventHandler(this.markAsTVSeriesToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -889,7 +898,6 @@ namespace Renamer
         private System.Windows.Forms.ToolStripMenuItem destinationNewFileNameToolStripMenuItem;
         private System.Windows.Forms.Button btnOpen;
         private System.Windows.Forms.TextBox txtLog;
-        private System.Windows.Forms.ToolStripMenuItem removeTagsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem operationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem renamingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createDirectoryStructureToolStripMenuItem;
@@ -926,6 +934,8 @@ namespace Renamer
         private BrightIdeasSoftware.OLVColumn ColumnEpisodeName;
         private BrightIdeasSoftware.OLVColumn ColumnDestination;
         private BrightIdeasSoftware.OLVColumn ColumnNewFilename;
+        private System.Windows.Forms.ToolStripMenuItem markAsMovieToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem markAsTVSeriesToolStripMenuItem;
     }
 }
 

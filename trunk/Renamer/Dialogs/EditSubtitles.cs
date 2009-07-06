@@ -83,6 +83,7 @@ namespace Renamer.Dialogs
                 Close();
                 return;
             }
+            this.Text = "Edit Subtitles: " + Path.GetFileName(path);
             foreach (string sub in subtitle.subs)
             {
                 string replace = Regex.Replace(sub, "<.*?>", "");
