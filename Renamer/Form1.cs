@@ -1085,9 +1085,9 @@ namespace Renamer
             if (MessageBox.Show("Delete selected files?", "Delete selected files?", MessageBoxButtons.YesNo) == DialogResult.No)
                 return;
             List<InfoEntry> lie = new List<InfoEntry>();
-            for (int i = 0; i < lstEntries.Items.Count; i++)
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
             {
-                OLVListItem lvi = (OLVListItem)lstEntries.Items[i];
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
                 InfoEntry ie = (InfoEntry)lvi.RowObject;
                 lie.Add(ie);
             }
