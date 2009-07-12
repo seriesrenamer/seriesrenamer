@@ -117,9 +117,10 @@ namespace Renamer.Classes.Configuration
                         line = line.Trim();
                         
                         //space escape sequence
-                        line = Regex.Replace(line,"[^\\\\]\\s", " ");
-                        line = line.Replace("\\\\", "\\");
-                        
+                        if (line.StartsWith("\"") && line.EndsWith("\""))
+                        {
+                            line = line.Substring(1, line.Length - 2);
+                        }
 
                         lineCounter++;
                         // Skip empty lines
@@ -339,14 +340,9 @@ namespace Renamer.Classes.Configuration
             }
             private string Escape(string v)
             {
-                v = v.Replace("\\s", "\\\\s");
-                if (v.StartsWith(" "))
+                if (v.StartsWith(" ") || v.EndsWith(" "))
                 {
-                    v = "\\s" + v.Substring(1);
-                }
-                if (v.EndsWith(" "))
-                {
-                    v = v.Substring(0, v.Length - 1) + "\\s";
+                    v = "\"" + v + "\"";
                 }
                 return v;
             }
