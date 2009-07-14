@@ -373,7 +373,7 @@ namespace Renamer.Classes
             if (!source.isEmpty) {
                 if (Movie)
                 {
-                    Showname = SeriesNameExtractor.Instance.ExtractMovieName(this);
+                    Showname = MovieNameExtractor.Instance.ExtractMovieName(this);
                 }
                 else
                 {
@@ -828,7 +828,7 @@ namespace Renamer.Classes
             Episode = -1;
             Season = -1;
             this.Movie = true;
-            this.Showname=SeriesNameExtractor.Instance.ExtractMovieName(this);
+            this.Showname=MovieNameExtractor.Instance.ExtractMovieName(this);
                         
             if (this.NewFilename != "" || this.Destination != "")
             {
