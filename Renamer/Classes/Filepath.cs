@@ -231,6 +231,9 @@ namespace Renamer.Classes
                 return this.Fullfilename == "";
             }
         }
+
+#endregion
+        #region static helper functions
         public static string goUpwards(string directory, int howOften)
         {
             while (howOften > 0)
@@ -245,6 +248,22 @@ namespace Renamer.Classes
             directory = directory.Trim(DIRECTORY_SEPERATORS);
             folder=folder.Trim(DIRECTORY_SEPERATORS);
             return directory + System.IO.Path.DirectorySeparatorChar + folder;
+        }
+
+        /// <summary>
+        /// Splits a path into its folder names
+        /// TODO: Why is the regex needed?
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string[] extractFoldernamesFromPath(string path)
+        {
+            string[] folders = path.Split(new char[] { System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < folders.Length; i++)
+            {
+                folders[i] = Regex.Replace(folders[i], "\\((?<letter>\\w)\\)", "${letter}");//.Replace("(", "").Replace(")", "");
+            }
+            return folders;
         }
 
 #endregion

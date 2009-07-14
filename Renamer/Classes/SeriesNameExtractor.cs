@@ -53,29 +53,13 @@ namespace Renamer.Classes
         }
 
         private void reset() {
-            this.seriesNameFromDirectory = false;
-            this.name = null;
+            seriesNameFromDirectory = false;
+            name = null;
+            ie = null;
             filenameBlacklisted = false;
         }
 
-        private string removeReleaseGroupTag(string filename) {
-            //remove releasegroup tag, 
-            // normally 3 to 6 characters at the beginning of the filename seperated by a '-'
-            //if filename too short, it might be a part of the real name, so skip it
-            if (filename.Length > 5)
-            {
-                return Regex.Replace(Regex.Replace(filename, "^(([^\\p{Lu}]\\p{Ll}{1,3})|(\\p{Lu}{2,2}\\w))-", ""), "-\\w{2,4}$", "");
-            }
-            else return filename;
-        }
-
-        private string[] extractFoldernamesFromPath(string path) {
-            string[] folders = path.Split(new char[] { System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < folders.Length; i++) {
-                folders[i] = Regex.Replace(folders[i], "\\((?<letter>\\w)\\)", "${letter}");//.Replace("(", "").Replace(")", "");
-            }
-            return folders;
-        }
+             
 
         private string transformPlaceholderToRegex(string placeholderString) {
             placeholderString = placeholderString.Replace("%S", "\\d+");
@@ -169,41 +153,7 @@ namespace Renamer.Classes
 
         }
 
-        private void postprocessing() {
-            if (String.IsNullOrEmpty(name)) {
-                return;
-            }
-            name = Regex.Replace(name, "(?<pos1>[\\p{Ll}\\d])(?<pos2>[\\p{Lu}\\d][\\p{Ll}\\d])|(?<pos1>[^\\d])(?<pos2>\\d)", new MatchEvaluator(SeriesNameExtractor.InsertSpaces));
-            name = Regex.Replace(name, "\\[.+\\]|\\(.+\\)", "");
-            name = name.Trim(new char[] { '-', '_', '.', ' ', '(', ')', '[', ']' });
-            name = Regex.Replace(name, "[\\._]", " ");
-            name = Regex.Replace(name, "\\[.*\\]", "");
-            name = name.Replace("  ", " ");
-            if (!ContainsLowercaseCharacters(name)||!ContainsUppercaseCharacters(name)) {
-                name = Helper.UpperEveryFirst(name);
-            }
-            name = name.Trim();
-        }
-
-        private bool ContainsLowercaseCharacters(string str)
-        {
-            return Regex.IsMatch(str, "\\p{Ll}");
-        }
-        private bool ContainsUppercaseCharacters(string str)
-        {
-            return Regex.IsMatch(str, "\\p{Lu}");
-        }
-        static string InsertSpaces(Match m){
-            //if we only found numbers, we want to skip this tag (i.e. 007)
-            foreach (char c in m.Groups["pos1"].Value + m.Groups["pos2"].Value)
-            {
-                if (!Char.IsDigit(c))
-                {
-                    return m.Groups["pos1"].Value + " " + m.Groups["pos2"].Value;
-                }
-            }
-            return m.Groups["pos1"].Value + m.Groups["pos2"].Value;
-        }
+        
         public string ExtractSeriesName(InfoEntry ie) {
             reset();
             this.ie = ie;
@@ -211,8 +161,8 @@ namespace Renamer.Classes
             string filename = System.IO.Path.GetFileNameWithoutExtension(ie.Filename);
 
 
-            filename = removeReleaseGroupTag(filename);
-            folders = extractFoldernamesFromPath(ie.FilePath.Path);
+            filename = NameCleanup.RemoveReleaseGroupTag(filename);
+            folders = Filepath.extractFoldernamesFromPath(ie.FilePath.Path);
 
             extractNameFromSeasonsFolder();
             extractNameFromString(filename);
@@ -220,133 +170,11 @@ namespace Renamer.Classes
                 extractNameFromString(folders[folders.Length - 1]);
             }
             fallbackFolderNames();
-            postprocessing();
+            name=NameCleanup.Postprocessing(name);
             if (name == null) return "";
             return name;
         }
 
-
-        public int ProcessMultifiles()
-        {
-            //figure out if this is a multi file video
-            string pattern = "(?<pos>(CD|Cd|cd))\\s?(?<number>(\\d|I|II|II|IV|V))|((?<pos>\\d\\s?of\\s?)(?<number>\\d)|(?<pos> )(?<number>(a|b|c|d|e)))$";
-            Match m;
-            if (filenameBlacklisted)
-            {
-                m = Regex.Match(ie.FilePath.Path, pattern);
-            }
-            else
-            {
-                m = Regex.Match(name, pattern);
-            }
-            int part=-1;
-            if (m.Success)
-            {
-                string number = m.Groups["number"].Value;
-                if (!int.TryParse(number, out part))
-                {
-                    if (number == "a" || number == "I")
-                    {
-                        part = 1;
-                    }
-                    else if (number == "b" || number == "II")
-                    {
-                        part = 2;
-                    }
-                    else if (number == "c" || number == "III")
-                    {
-                        part = 3;
-                    }
-                    else if (number == "d" || number == "IV")
-                    {
-                        part = 4;
-                    }
-                    else if (number == "e" || number == "V")
-                    {
-                        part = 5;
-                    }
-                }
-                if (filenameBlacklisted)
-                {
-                    name = Path.GetFileName(Filepath.goUpwards(ie.FilePath.Path,1));
-                    ie.ExtractedNameLevel = 2;
-                }
-                else
-                {
-                    name = name.Substring(0, m.Groups["pos"].Index);
-                    if (name == "")
-                    {
-                        name = Path.GetFileName(ie.FilePath.Path);
-                        ie.ExtractedNameLevel = 1;
-                    }
-                }
-            }
-            return part;
-        }
-        public string ExtractMovieName(InfoEntry ie)
-        {
-            reset();
-            this.ie = ie;
-            name = ie.FilePath.Name;
-            if (Regex.IsMatch(name, filenameBlacklist, RegexOptions.IgnoreCase))
-            {
-                filenameBlacklisted = true;
-                name = ie.FilePath.Path;
-                //must be atleast 1 then
-                ie.ExtractedNameLevel = 1;
-            }
-            int part = ProcessMultifiles();
-            name = removeReleaseGroupTag(name);
-            //if part couldn't be extracted yet, maybe it was because of a tag at the end before the part identifier
-            if (part == -1)
-            {
-                part = ProcessMultifiles();
-            }
-            if (part != -1)
-            {
-                ie.IsMultiFileMovie = true;
-            }
-            //try to match tags    
-            foreach (string s in MovieTagPatterns)
-            {
-                Match m = Regex.Match(name, s, RegexOptions.IgnoreCase);
-                if (m.Success)
-                {
-                    name = name.Substring(0, m.Index);
-                }
-            }
-            postprocessing();
-            folders = extractFoldernamesFromPath(ie.FilePath.Path);
-            if (folders.Length != 0)
-            {
-                folders[folders.Length - 1] = removeReleaseGroupTag(folders[folders.Length - 1]);
-                if (Helper.InitialsMatch(folders[folders.Length - 1], name))
-                {
-                    name = folders[folders.Length - 1];
-                    //try to match tags    
-                    foreach (string s in MovieTagPatterns)
-                    {
-                        Match m = Regex.Match(name, s, RegexOptions.IgnoreCase);
-                        if (m.Success)
-                        {
-                            name = name.Substring(0, m.Index);
-                        }
-                    }
-                    if (part == -1)
-                    {
-                        part = ProcessMultifiles();
-                    }
-                    postprocessing();
-                }
-            }
-            
-
-            if (part != -1)
-            {
-                name += " CD" + part;
-            }
-            return name;
-        }
 
         
         /// <summary>

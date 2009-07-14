@@ -73,8 +73,11 @@
   <ItemGroup>
     <Compile Include="Classes\Configuration\Keywords\Config.cs" />
     <Compile Include="Classes\Configuration\Keywords\ProviderConfig.cs" />
+    <Compile Include="Classes\MovieNameExtractor.cs" />
+    <Compile Include="Classes\NameCleanup.cs" />
     <Compile Include="Classes\RegexConverter.cs" />
     <Compile Include="Classes\RelationCollection.cs" />
+    <Compile Include="Classes\StringTools.cs" />
     <Compile Include="Classes\SubtitleFileManager.cs" />
     <Compile Include="Classes\WinHttpSafeNativeMethods.cs" />
     <Compile Include="DataGenerator.cs" />
