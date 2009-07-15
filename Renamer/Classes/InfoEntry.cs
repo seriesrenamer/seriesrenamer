@@ -177,7 +177,10 @@ namespace Renamer.Classes
                     }
                     nameOfSeries = value;
                     //need to find showname again incase there is different data for new showname
-                    SetupRelation();
+                    if (!Movie)
+                    {
+                        SetupRelation();
+                    }
                     //filename might contain showname, so it needs to be updated anyway
                     CreateNewName();
                     //directory structure also contains showname and should be updated
