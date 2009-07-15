@@ -466,9 +466,26 @@ namespace Renamer.Classes
             //figure out if we are in a season dir
             string[] seasondirs = Helper.ReadProperties(Config.Extract);
 
+            //Tags are used to figure out if we are in an extraction dir (from rar files or so)
+            string[] tags = Helper.ReadProperties(Config.Tags);
+            string tag = "";
+            foreach (string t in tags)
+            {
+                tag += "|\\." + t;
+            }
+            tag = tag.Substring(1);
+            bool InTagDir = false;
             string seasondir = "";
             string aSeasondir = "";
             int showdirlevel = 0;
+            if (dirs.Length > 0 && Regex.IsMatch(dirs[dirs.Length - 1], tag))
+            {
+                InTagDir = true;
+                DestinationPath = Filepath.goUpwards(DestinationPath, 1);
+                List<string> blah=new List<string>(dirs);
+                blah.RemoveAt(dirs.Length - 1);
+                dirs = blah.ToArray();
+            }
             //loop backwards so first entry is used if nothing is recognized and folder has to be created
             for (int i = seasondirs.Length - 1; i >= 0; i--) {
                 aSeasondir = RegexConverter.replaceSeriesname(seasondirs[i], nameOfSeries);
@@ -489,37 +506,42 @@ namespace Renamer.Classes
                         InSomething = true;
                     }
                 }
-                if (dirs.Length > 0 && dirs[dirs.Length - 1].StartsWith(nameOfSeries)){
+
+                //remove dots to avoid problems with series like "N.C.I.S." or "Dr. House"
+                if (dirs.Length > 0 && dirs[dirs.Length - 1].Replace(".","").StartsWith(nameOfSeries.Replace(".",""))){
                     InSeriesDir=true;
-                }else if(dirs.Length>1 && dirs[dirs.Length - 2].StartsWith(nameOfSeries))
+                }
+                else if (dirs.Length > 1 && dirs[dirs.Length - 2].Replace(".", "").StartsWith(nameOfSeries.Replace(".", "")))
                 {
                     InSeriesDir = true;
                     showdirlevel=1;
                 }
                 if (InSomething) break;
             }
+            
             getCreateDirectory();
             if (createDirectoryStructure != DirectoryStructure.CreateDirectoryStructure || !isSeasonValid()) {
                 Destination = "";
                 return;
             }
+            //if files aren't meant to be moved somewhere else
             if (!DifferentDestinationPath)
-            {
+            {                
                 //somewhere else, create new series dir
                 if (!InSeriesDir && !InSeasonDir &&!InASeasonDir)
                 {
-                    DestinationPath = addSeriesDir(FilePath.Path);
+                    DestinationPath = addSeriesDir(DestinationPath);
                     DestinationPath = addSeasonsDirIfDesired(DestinationPath);
                 }
                 //in series dir, create seasons dir
                 else if (InSeriesDir&&!InASeasonDir)
                 {
-                    DestinationPath = addSeasonsDirIfDesired(FilePath.Path);
+                    DestinationPath = addSeasonsDirIfDesired(DestinationPath);
                 }
                 //wrong season dir, add real seasons dir
-                else if (InSeriesDir && InASeasonDir)
+                else if (InSeriesDir && InASeasonDir &&!InSeasonDir)
                 {
-                    DestinationPath = Filepath.goUpwards(FilePath.Path, 1);
+                    DestinationPath = Filepath.goUpwards(DestinationPath, 1);
                     if (showdirlevel == 0)
                     {
                         DestinationPath = addSeriesDir(DestinationPath);
@@ -529,10 +551,11 @@ namespace Renamer.Classes
                 //wrong show dir, go back two levels and add proper dir structure
                 else if (!InSeriesDir && InASeasonDir)
                 {
-                    DestinationPath = addSeriesDir(Filepath.goUpwards(FilePath.Path, 2));
+                    DestinationPath = addSeriesDir(Filepath.goUpwards(DestinationPath, 2));
                     DestinationPath = addSeasonsDirIfDesired(DestinationPath);
                 }
             }
+            //if they should be moved
             else
             {
                 DestinationPath = addSeriesDir(DestinationPath);
