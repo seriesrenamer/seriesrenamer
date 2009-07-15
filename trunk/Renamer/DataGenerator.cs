@@ -611,17 +611,18 @@ namespace Renamer
                         ie = new InfoEntry();
                     }
 
+                    //test for movie path so we can skip all series recognition code
+                    if (Regex.Match(currentpath, MovieIndicator).Success)
+                    {
+                        ie.Movie = true;
+                    }
                     //Set basic values, by setting those values destination directory and filename will be generated automagically                    
                     ie.FilePath.Path = currentpath;
                     ie.Filename = file.Name;
                     ie.Extension = Path.GetExtension(file.FullName).ToLower().Replace(".", "");
 
-                    //test for movie path so we can skip all the code below
-                    if (Regex.Match(ie.FilePath.Path, MovieIndicator).Success)
-                    {
-                        ie.Movie = true;
-                    }
-                    else
+                    
+                    if(!ie.Movie)
                     {
                         //Get season number and showname from directory
                         DirectorySeason = ExtractSeasonFromDirectory(Path.GetDirectoryName(file.FullName));

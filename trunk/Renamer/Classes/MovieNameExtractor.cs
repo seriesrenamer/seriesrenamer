@@ -51,8 +51,13 @@ namespace Renamer.Classes
             }
         }
         private MovieNameExtractor()
-        {
-            string[] tags = Helper.ReadProperties(Config.Tags);  
+        {            
+            reset();
+        }
+
+        //we should do the other initializations here too, because they won't update when the user changes the configuration if they are initialized in the constructor
+        private void reset() {
+            string[] tags = Helper.ReadProperties(Config.Tags);
             List<string> MovieRegexes = new List<string>();
             foreach (string s in tags)
             {
@@ -63,10 +68,6 @@ namespace Renamer.Classes
             pathBlacklist = String.Join("|", blacklist);
             blacklist = Helper.ReadProperties(Config.FilenameBlacklist);
             filenameBlacklist = String.Join("|", blacklist);
-            reset();
-        }
-
-        private void reset() {
             MovieNameFromDirectory = false;
             name = null;
             ie = null;
@@ -76,6 +77,7 @@ namespace Renamer.Classes
             filenameBlacklisted = false;
         }
 
+        //NOTE: Need a feature to detect if the sequel name is already contained within the filename but was found somewhere else(eg directory) and added to the end again, e.g. "Hackers 2 Operation Takedown 2"
         public string ExtractMovieName(InfoEntry ie)
         {
             reset();
@@ -111,13 +113,16 @@ namespace Renamer.Classes
             name = "";
             for (int i = folders.Count - 1; i >= 0; i--)
             {
-                string testname = folders[i];
-                if (testname.Contains("American"))
-                {
-                    int blah = 1;
-                }
+                string testname = folders[i];                
                 int testpart = -1;
                 int testsequel = -1;
+
+                //Test for sample
+                if (testname.ToLower().Contains("sample"))
+                {
+                    name = "Sample";
+                    return name;
+                }
                 testname = NameCleanup.RemoveReleaseGroupTag(testname);
                 
                 int firsttag = testname.Length;
@@ -152,7 +157,7 @@ namespace Renamer.Classes
                 //Some counterchecks against previous result here
                 if (testpart != -1 && part == -1) part = testpart;
                 if (testsequel != -1 && sequelNumber == -1) sequelNumber = testsequel;
-                if (Helper.InitialsMatch(testname, name)) name = testname;
+                if (name==""||Helper.InitialsMatch(testname, name)) name = testname;
             }
 
             if (sequelNumber != -1)
@@ -231,6 +236,12 @@ namespace Renamer.Classes
                 name = name.Substring(0, m.Groups["sequel"].Index)+name.Substring(m.Groups["sequel"].Index+m.Groups["sequel"].Length,name.Length-(m.Groups["sequel"].Index+m.Groups["sequel"].Length));
 
                 //adjust tagpos if needed
+
+                //if number was removed before tagpos, offset it to compensate
+                if (tagpos > m.Groups["sequel"].Index)
+                {
+                    tagpos -= m.Groups["sequel"].Length;
+                }
                 if (tagpos >= name.Length)
                 {
                     tagpos = name.Length;
@@ -239,11 +250,25 @@ namespace Renamer.Classes
             }
             return -1;
         }
+
+        //figure out if this is a multi file video
         public int ExtractPartNumber(ref string name, ref int tagpos)
         {
-            //figure out if this is a multi file video
-            string pattern = "(?<pos>(CD|Cd|cd))\\s?(?<number>(\\d|I|II|II|IV|V))|((?<pos>\\d\\s?of\\s?)(?<number>\\d)|(?<pos> )(?<number>(a|b|c|d|e)))$";
+            string pattern = "(CD|Cd|cd)\\s?(?<number>(\\d|I|II|II|IV|V))|(\\d\\s?of\\s?(?<number>\\d)|\\s(?<number>(a|b|c|d|e)))$";
             Match m = Regex.Match(name, pattern);
+            //test for number behind tags first, and interpret it as a part number
+            
+            int pos;
+            if (!m.Success)
+            {
+                pattern = "(?<number>\\d)$";
+                m = Regex.Match(name.Substring(tagpos, name.Length - tagpos), pattern);
+                pos = m.Index + name.Substring(0, tagpos).Length;
+            }
+            else
+            {
+                pos = m.Index;                
+            }
             int part = -1;
             if (m.Success)
             {
@@ -271,7 +296,7 @@ namespace Renamer.Classes
                         part = 5;
                     }
                 }
-                name = name.Substring(0, m.Index)+name.Substring(m.Index+m.Length,name.Length-(m.Index+m.Length));
+                name = name.Substring(0, pos)+name.Substring(pos+m.Length,name.Length-(pos+m.Length));
                 //adjust tagpos if needed
                 if (tagpos >= name.Length)
                 {
