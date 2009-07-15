@@ -8,9 +8,7 @@ namespace Renamer.Classes
     {
         public static string toRegex(string easyRegex) {
             easyRegex = easyRegex.Replace("%T", "*.?");
-            if (!easyRegex.Contains("%S")) {
-                easyRegex = easyRegex.Replace("%S", "(?<Season>\\d)");
-            }else if (easyRegex.Contains("%S%E")) {
+            if (easyRegex.Contains("%S%E")) {
                 easyRegex = easyRegex.Replace("%S", "(?<Season>\\d)");
                 easyRegex  = easyRegex.Replace("%E", "(?<Episode>\\d+)");
             }

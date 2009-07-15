@@ -1165,7 +1165,7 @@ namespace Renamer
 
 
         private void InitListView()
-        {
+        { 
             lstEntries.RowFormatter =  delegate(OLVListItem olvi)
             {
                 //reset colors to make sure they are set properly

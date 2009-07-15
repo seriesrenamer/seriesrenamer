@@ -632,18 +632,20 @@ namespace Renamer
                         ExtractSeasonAndEpisode(ie, patterns);
                         ///////////////////////////////////////////////////
 
+                        //Need to do this for filenames which only contain episode numbers (But might be moved in a season dir already)
+                        //if season number couldn't be extracted, try to get it from folder
+                        if (ie.Season == -1 && DirectorySeason != -1)
+                        {
+                            ie.Season = DirectorySeason;
+                        }
+
                         //if season recognized from directory name doesn't match season recognized from filename, the file might be located in a wrong directory
                         if (DirectorySeason != -1 && ie.Season != DirectorySeason)
                         {
                             Logger.Instance.LogMessage("File seems to be located inconsistently: " + ie.Filename + " was recognized as season " + ie.Season + ", but folder name indicates that it should be season " + DirectorySeason.ToString(), LogLevel.WARNING);
                         }
 
-                        //if season number couldn't be extracted, try to get it from folder
-                        //(this should never happen if a pattern like %S%E is set)
-                        if (ie.Season == -1 && DirectorySeason != -1)
-                        {
-                            ie.Season = DirectorySeason;
-                        }
+                        
                     }
 
                     //if nothing could be recognized, assume that this is a movie
