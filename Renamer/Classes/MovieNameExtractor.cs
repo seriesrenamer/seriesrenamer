@@ -84,18 +84,30 @@ namespace Renamer.Classes
             this.ie = ie;
             name = ie.FilePath.Name;
             folders=new List<string>(Filepath.extractFoldernamesFromPath(ie.FilePath.Path));
+
+            //folderlevels are used to see which directory contains the video name, so we can set ie.extractednamelevel for path creation
+            List<int> folderlevels = new List<int>();            
+            int origcount=folders.Count;
             if (Regex.IsMatch(name, filenameBlacklist, RegexOptions.IgnoreCase))
             {
                 filenameBlacklisted = true;
                 //must be atleast 1 then
                 ie.ExtractedNameLevel = 1;
             }
+
             //Remove all illegal paths
+            int j = 0;
             for(int i=0; i<folders.Count;i++){
-                if(Regex.IsMatch(folders[i], pathBlacklist, RegexOptions.IgnoreCase)){
+                if (Regex.IsMatch(folders[i], pathBlacklist, RegexOptions.IgnoreCase))
+                {
                     folders.RemoveAt(i);
                     i--;
                 }
+                else
+                {
+                    folderlevels.Add(origcount-j);
+                }
+                j++;
             }
             if(filenameBlacklisted&&folders.Count==0){
                 return "Not Recognized";
@@ -103,6 +115,7 @@ namespace Renamer.Classes
             if (!filenameBlacklisted)
             {
                 folders.Add(ie.FilePath.Name);
+                folderlevels.Add(0);
             }
 
 
@@ -155,7 +168,11 @@ namespace Renamer.Classes
                 testname = NameCleanup.Postprocessing(testname);
 
                 //Some counterchecks against previous result here
-                if (testpart != -1 && part == -1) part = testpart;
+                if (testpart != -1 && part == -1)
+                {
+                    part = testpart;
+                    ie.ExtractedNameLevel = folderlevels[i];
+                }
                 if (testsequel != -1 && sequelNumber == -1) sequelNumber = testsequel;
                 if (name==""||Helper.InitialsMatch(testname, name)) name = testname;
             }
