@@ -63,15 +63,6 @@ namespace Renamer.Classes
             pathBlacklist = String.Join("|", blacklist);
             blacklist = Helper.ReadProperties(Config.FilenameBlacklist);
             filenameBlacklist = String.Join("|", blacklist);
-            //extractPatterns = (string[])Helper.ReadProperties(Config.Extract);
-            //for (int index = 0; index < extractPatterns.Length; index++) {
-               // extractPatterns[index] = transformPlaceholderToRegex(extractPatterns[index]);
-            //}
-            filenameBlacklisted = false;
-            //shownamePatterns = Helper.ReadProperties(Config.ShownameExtractionRegex);
-            part=-1;
-            multifile=false;
-            sequelNumber=-1;
             reset();
         }
 
@@ -79,6 +70,9 @@ namespace Renamer.Classes
             MovieNameFromDirectory = false;
             name = null;
             ie = null;
+            part = -1;
+            sequelNumber = -1;
+            multifile = false;
             filenameBlacklisted = false;
         }
 
@@ -109,66 +103,143 @@ namespace Renamer.Classes
                 folders.Add(ie.FilePath.Name);
             }
 
-            //NOTE: Everything below is WIP or outdated
+
+            //The idea here is to test if the current name might be a better name instead of the previous one
+            //We go upwards and try to find part and sequel numbers, as well as movie name. Those might be from different folders, so we need to check all legit ones
+
+            //Clean first name (sequel and part should still be -1
+            name = "";
             for (int i = folders.Count - 1; i >= 0; i--)
             {
-                string test = folders[i];
-                ExtractMultifilePart(ref test);
-                test = NameCleanup.RemoveReleaseGroupTag(test);
-                //if part couldn't be extracted yet, maybe it was because of a tag at the end before the part identifier
-                if (part == -1)
+                string testname = folders[i];
+                if (testname.Contains("American"))
                 {
-                    part = ExtractMultifilePart(ref test);
+                    int blah = 1;
                 }
-                if (part != -1)
+                int testpart = -1;
+                int testsequel = -1;
+                testname = NameCleanup.RemoveReleaseGroupTag(testname);
+                
+                int firsttag = testname.Length;
+                //remove tags and store the first occurence of a tag 
+                //since we may miss a few tags, the string after the first occurence of a tag is removed later (not now since it may
+                //contain additional information). Tags need to be removed before part and sequel detection, to avoid detecting things like 720p
+                foreach (string s in MovieTagPatterns)
+                {
+                    Match m = Regex.Match(testname, s, RegexOptions.IgnoreCase);
+                    if (m.Success)
+                    {
+                        if (m.Index < firsttag)
+                        {
+                            firsttag = m.Index;
+                        }
+                        testname = testname.Substring(0, m.Index)+testname.Substring(m.Index+m.Length,testname.Length-(m.Index+m.Length));
+                    }
+                }
+                
+                testpart = ExtractPartNumber(ref testname, ref firsttag);
+                if (testpart != -1)
                 {
                     ie.IsMultiFileMovie = true;
                 }
-                //try to match tags    
-                foreach (string s in MovieTagPatterns)
-                {
-                    Match m = Regex.Match(name, s, RegexOptions.IgnoreCase);
-                    if (m.Success)
-                    {
-                        name = name.Substring(0, m.Index)+name.Substring(m.Index+m.Length,name.Length-(m.Index+m.Length));
-                    }
-                }
-                name = NameCleanup.Postprocessing(name);
-                if (folders.Count != 0)
-                {
-                    folders[folders.Count - 1] = NameCleanup.RemoveReleaseGroupTag(folders[folders.Count - 1]);
-                    if (Helper.InitialsMatch(folders[folders.Count - 1], name))
-                    {
-                        name = folders[folders.Count - 1];
-                        //try to match tags    
-                        foreach (string s in MovieTagPatterns)
-                        {
-                            Match m = Regex.Match(name, s, RegexOptions.IgnoreCase);
-                            if (m.Success)
-                            {
-                                name = name.Substring(0, m.Index);
-                            }
-                        }
-                        if (part == -1)
-                        {
-                            part = ExtractMultifilePart(ref test);
-                        }
-                        name = NameCleanup.Postprocessing(name);
-                    }
-                }
 
+                testsequel = ExtractSequelNumber(ref testname,ref firsttag);
 
-                if (part != -1)
-                {
-                    name += " CD" + part;
+                //now after recognition of part and sequel numbers, remove the rest too
+                testname = testname.Substring(0, firsttag);
+                testname = NameCleanup.Postprocessing(testname);
 
-                }
+                //Some counterchecks against previous result here
+                if (testpart != -1 && part == -1) part = testpart;
+                if (testsequel != -1 && sequelNumber == -1) sequelNumber = testsequel;
+                if (Helper.InitialsMatch(testname, name)) name = testname;
+            }
+
+            if (sequelNumber != -1)
+            {
+                name += " " + sequelNumber;
+            }
+            if (part != -1)
+            {
+                name += " CD" + part;
             }
             return name;
         }
 
+        public int ExtractSequelNumber(ref string name, ref int tagpos)
+        {
+            int sequel = -1;
+            //allow only one-digit numbers and [iI]+ without characters around
+            MatchCollection mc = Regex.Matches(name, "[^\\d](?<sequel>\\d)([^\\d$]|$)|\\P{L}(?<sequel>(i|ii|iii|iv|v|vi|vii|viii|ix|x|xi|xii))(\\P{L}|$)",RegexOptions.IgnoreCase);
+            foreach (Match m in mc)
+            {
+                //skip all matches which are somewhere inside the string at the beginning (i.e. skip "2 Fast 2 Furious.SOMETAG" numbers
+                if (m.Groups["sequel"].Index + m.Groups["sequel"].Length < tagpos) continue;
+                string number = m.Groups["sequel"].Value.ToLower();
+                if (!int.TryParse(number, out sequel))
+                {
+                    if (number == "i" )
+                    {
+                        sequel = 1;
+                    }
+                    else if (number == "ii" )
+                    {
+                        sequel = 2;
+                    }
+                    else if (number == "iii" )
+                    {
+                        sequel = 3;
+                    }
+                    else if (number == "iv" )
+                    {
+                        sequel = 4;
+                    }
+                    else if (number == "v" )
+                    {
+                        sequel = 5;
+                    }
+                    else if (number == "vi")
+                    {
+                        sequel = 6;
+                    }
+                    else if (number == "vii")
+                    {
+                        sequel = 7;
+                    }
+                    else if (number == "viii")
+                    {
+                        sequel = 8;
+                    }
+                    else if (number == "ix")
+                    {
+                        sequel = 9;
+                    }
+                    else if (number == "x")
+                    {
+                        sequel = 10;
+                    }
+                    else if (number == "xi")
+                    {
+                        sequel = 11;
+                    }
+                    else if (number == "xii")
+                    {
+                        sequel = 12;
+                    }
+                }
+                //remove the number from the name
+                name = name.Substring(0, m.Groups["sequel"].Index)+name.Substring(m.Groups["sequel"].Index+m.Groups["sequel"].Length,name.Length-(m.Groups["sequel"].Index+m.Groups["sequel"].Length));
 
-        public int ExtractMultifilePart(ref string name)
+                //adjust tagpos if needed
+                if (tagpos >= name.Length)
+                {
+                    tagpos = name.Length;
+                }
+                return sequel;
+            }
+            return -1;
+        }
+        public int ExtractPartNumber(ref string name, ref int tagpos)
         {
             //figure out if this is a multi file video
             string pattern = "(?<pos>(CD|Cd|cd))\\s?(?<number>(\\d|I|II|II|IV|V))|((?<pos>\\d\\s?of\\s?)(?<number>\\d)|(?<pos> )(?<number>(a|b|c|d|e)))$";
@@ -200,7 +271,12 @@ namespace Renamer.Classes
                         part = 5;
                     }
                 }
-                name = name.Substring(0, m.Groups["pos"].Index);
+                name = name.Substring(0, m.Index)+name.Substring(m.Index+m.Length,name.Length-(m.Index+m.Length));
+                //adjust tagpos if needed
+                if (tagpos >= name.Length)
+                {
+                    tagpos = name.Length;
+                }
                 return part;
             }
             return -1;
