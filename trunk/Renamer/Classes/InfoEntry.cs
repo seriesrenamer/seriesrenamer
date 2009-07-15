@@ -250,8 +250,11 @@ namespace Renamer.Classes
                 if (isMovie != value)
                 {
                     isMovie = value;
-                    CreateNewName();
-                    SetPath();
+                    if (Showname != "")
+                    {
+                        CreateNewName();
+                        SetPath();
+                    }
                 }
             }
         }
