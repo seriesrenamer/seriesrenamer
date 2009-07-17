@@ -481,17 +481,20 @@ namespace Renamer
         public static bool InitialsMatch(string longstring, string shortstring)
         {
             if (shortstring.Length > longstring.Length) return false;
+            //ignore roman digits(not optimal yet, but whatever)
             string pattern = " [iI]+[ $]";
             shortstring = Regex.Replace(shortstring, pattern, "");
             int matches = 0;
+
+            //startmatches are the matches on the long string at the start (without additional characters in between, they are weighted stronger)
             int startmatches = 0;
             bool found = false;
+            int pos = 0;
             for(int j=0;j<shortstring.Length;j++){
                 char c = shortstring[j];
                 if (c != ' ' && !Char.IsDigit(c))
                 {
                     found = false;
-                    int pos = 0;
                     for (int i = pos; i < longstring.Length; i++)
                     {
                         char c2 = longstring[i];
@@ -513,11 +516,35 @@ namespace Renamer
                     }
                 }
             }
+            //check in opposite direction, if short string consists of garbage mostly, check if the captial letters of long string are included in short string
+            pos=0;
+            bool reversefound=false;
+            for (int i = 0; i < longstring.Length; i++)
+            {
+                if (char.IsUpper(longstring[i]))
+                {
+                    reversefound = false;
+                    for (int j = pos; j < shortstring.Length; j++)
+                    {
+                        if (longstring[i] == char.ToUpper(shortstring[j]))
+                        {
+                            reversefound = true;
+                            pos = j;
+                            break;
+                        }
+                    }
+                    if (!reversefound)
+                    {
+                        break;
+                    }
+                }
+            }
             //if everything matched or atleast 70% on longer strings matched or atleast 40% of the start of longer strings matched, return true
             if ((shortstring.Length<10 && found) || (shortstring.Length >= 10 && ((float)matches / ((float)shortstring.Length) > 0.7)||startmatches>0.4*shortstring.Length))
             {
                 return true;
             }
+            if (reversefound) return true;
             return false;
         }
 
