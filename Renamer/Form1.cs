@@ -1153,7 +1153,6 @@ namespace Renamer
         private void FillListView() {
             // TODO: show at least a progressbar while adding items, user can't see anything but processor utilization will be very high
             lstEntries.Items.Clear();
-            List<ListViewItem> list = new List<ListViewItem>();
             lstEntries.VirtualListSize = InfoEntryManager.Instance.Count;
             lstEntries.SetObjects(InfoEntryManager.Instance);
             lstEntries.Sort();
@@ -1735,6 +1734,7 @@ namespace Renamer
         bool working = false;
         private void UpdateList(bool clear)
         {
+            lstEntries.ClearObjects();
             progressBar1.Visible = true;
             DataGenerator.UpdateList(clear);
             progressBar1.Visible = false;

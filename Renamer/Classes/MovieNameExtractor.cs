@@ -271,7 +271,7 @@ namespace Renamer.Classes
         //figure out if this is a multi file video
         public int ExtractPartNumber(ref string name, ref int tagpos)
         {
-            string pattern = "(CD|Cd|cd)\\s?(?<number>(\\d|I|II|II|IV|V))|(\\d\\s?of\\s?(?<number>\\d)|\\s(?<number>(a|b|c|d|e)))$";
+            string pattern = "(CD|Cd|cd)\\s?(?<number>(\\d|I|II|II|IV|V))|((?<number>\\d)\\s?of\\s?(?<number2>\\d)|\\s(?<number>(a|b|c|d|e)))$";
             Match m = Regex.Match(name, pattern);
             //test for number behind tags first, and interpret it as a part number
             
@@ -314,6 +314,12 @@ namespace Renamer.Classes
                     }
                 }
                 name = name.Substring(0, pos)+name.Substring(pos+m.Length,name.Length-(pos+m.Length));
+
+                //if something like "1 of 1" is encountered, forget about part specifiers and treat it like a single file
+                if (m.Groups.Count>1&&m.Groups["number2"].Value=="1")
+                {
+                    part = -1;
+                }
                 //adjust tagpos if needed
                 if (tagpos >= name.Length)
                 {
