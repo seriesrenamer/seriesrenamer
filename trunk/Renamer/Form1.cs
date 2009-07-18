@@ -1454,8 +1454,7 @@ namespace Renamer
         /// <param name="Source">Field from which the source string is taken</param>
         public void Replace(string SearchString, string ReplaceString, string Source) {
             int count = 0;
-            string title = Helper.ReadProperties(Config.LastTitles)[0];
-            string basedir = Helper.ReadProperty(Config.LastDirectory);
+            
             string destination = "Filename";
             if (Source.Contains("Path"))
                 destination = "Path";
@@ -1463,6 +1462,7 @@ namespace Renamer
             {
                 OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
                 InfoEntry ie = (InfoEntry)lvi.RowObject;
+                string title=ie.Showname;
                 string source = "";
 
                 string LocalSearchString = SearchString;
@@ -1491,7 +1491,6 @@ namespace Renamer
                 LocalSearchString = LocalSearchString.Replace("%N", ie.Name);
                 LocalSearchString = LocalSearchString.Replace("%E", ie.Episode.ToString());
                 LocalSearchString = LocalSearchString.Replace("%s", ie.Season.ToString());
-                LocalSearchString = LocalSearchString.Replace("%BD", basedir);
                 LocalSearchString = LocalSearchString.Replace("%S", ie.Season.ToString("00"));
                 LocalReplaceString = LocalReplaceString.Replace("%OF", ie.Filename);
                 LocalReplaceString = LocalReplaceString.Replace("%DF", ie.NewFilename);
@@ -1517,6 +1516,7 @@ namespace Renamer
 
                 //mark files for processing
                 ie.ProcessingRequested = true;
+                lstEntries.Refresh();
             }
             if (count > 0) {
                 Logger.Instance.LogMessage(SearchString + " was replaced with " + ReplaceString + " in " + count + " fields.", LogLevel.INFO);
@@ -1552,6 +1552,7 @@ namespace Renamer
                     lvi.Selected = false;
                 }
             }
+            lstEntries.Refresh();
         }
 
         private void byPathToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1580,6 +1581,7 @@ namespace Renamer
                     lvi.Selected = false;
                 }
             }
+            lstEntries.Refresh();
         }
 
         private void createDirectoryStructureToolStripMenuItem1_Click(object sender, EventArgs e) {
@@ -1591,6 +1593,7 @@ namespace Renamer
             }
             ((ToolStripMenuItem)sender).Checked = true;
             dontCreateDirectoryStructureToolStripMenuItem.Checked = false;
+            lstEntries.Refresh();
         }
 
         private void dontCreateDirectoryStructureToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1602,6 +1605,7 @@ namespace Renamer
             }
             ((ToolStripMenuItem)sender).Checked = true;
             createDirectoryStructureToolStripMenuItem.Checked = false;
+            lstEntries.Refresh();
         }
 
         private void useUmlautsToolStripMenuItem1_Click(object sender, EventArgs e) {
@@ -1614,6 +1618,7 @@ namespace Renamer
             ((ToolStripMenuItem)sender).Checked = true;
             dontUseUmlautsToolStripMenuItem.Checked = false;
             useProvidedNamesToolStripMenuItem.Checked = false;
+            lstEntries.Refresh();
         }
 
         private void dontUseUmlautsToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1626,6 +1631,7 @@ namespace Renamer
             ((ToolStripMenuItem)sender).Checked = true;
             useUmlautsToolStripMenuItem.Checked = false;
             useProvidedNamesToolStripMenuItem.Checked = false;
+            lstEntries.Refresh();
         }
 
         private void useProvidedNamesToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1638,6 +1644,7 @@ namespace Renamer
             ((ToolStripMenuItem)sender).Checked = true;
             useUmlautsToolStripMenuItem.Checked = false;
             dontUseUmlautsToolStripMenuItem.Checked = false;
+            lstEntries.Refresh();
         }
 
         private void largeToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1651,6 +1658,7 @@ namespace Renamer
             smallToolStripMenuItem.Checked = false;
             igNorEToolStripMenuItem.Checked = false;
             cAPSLOCKToolStripMenuItem.Checked = false;
+            lstEntries.Refresh();
         }
 
         private void smallToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1664,6 +1672,7 @@ namespace Renamer
             largeToolStripMenuItem.Checked = false;
             igNorEToolStripMenuItem.Checked = false;
             cAPSLOCKToolStripMenuItem.Checked = false;
+            lstEntries.Refresh();
         }
 
         private void igNorEToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1677,6 +1686,7 @@ namespace Renamer
             smallToolStripMenuItem.Checked = false;
             largeToolStripMenuItem.Checked = false;
             cAPSLOCKToolStripMenuItem.Checked = false;
+            lstEntries.Refresh();
         }
 
         private void cAPSLOCKToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1690,6 +1700,7 @@ namespace Renamer
             smallToolStripMenuItem.Checked = false;
             igNorEToolStripMenuItem.Checked = false;
             largeToolStripMenuItem.Checked = false;
+            lstEntries.Refresh();
         }
 
         private void setShownameToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1916,6 +1927,7 @@ namespace Renamer
         {
             MarkAsTVShow();
         }
+
     }
 }
 

@@ -91,10 +91,10 @@ namespace Renamer
         /// <param name="season">season to search for</param>
         /// <param name="episode">episode to search for</param>
         /// <returns>List of all matching InfoEntries, never null, but may be empty</returns>
-        public List<InfoEntry> GetMatchingVideos(int season, int episode) {
+        public List<InfoEntry> GetMatchingVideos(string showname, int season, int episode) {
             List<InfoEntry> lie = new List<InfoEntry>();
             foreach (InfoEntry ie in this.episodes) {
-                if (ie.Season == season && ie.Episode == episode && ie.IsVideofile) {
+                if (ie.Showname==showname && ie.Season == season && ie.Episode == episode && ie.IsVideofile) {
                     lie.Add(ie);
                 }
             }
@@ -176,8 +176,8 @@ namespace Renamer
         /// <param name="season">season to search for</param>
         /// <param name="episode">episode to search for</param>
         /// <returns>InfoEntry of matching video file, null if not found or more than one found</returns>
-        public InfoEntry GetMatchingVideo(int season, int episode) {
-            List<InfoEntry> lie = GetMatchingVideos(season, episode);
+        public InfoEntry GetMatchingVideo(string showname, int season, int episode) {
+            List<InfoEntry> lie = GetMatchingVideos(showname, season, episode);
             InfoEntry ie = (lie.Count == 1) ? lie[0] : null;
             return ie;
         }

@@ -429,6 +429,7 @@ namespace BrightIdeasSoftware
         public virtual void ClearCachedInfo()
         {
             this.lastRetrieveVirtualItemIndex = -1;
+            this.lastRetrieveVirtualItem = null;
         }
 
         /// <summary>
@@ -515,12 +516,13 @@ namespace BrightIdeasSoftware
         /// <param name="newSize"></param>
         protected virtual void SetVirtualListSize(int newSize)
         {
+            this.ClearCachedInfo();
             if (newSize < 0 || this.VirtualListSize == newSize)
                 return;
 
             int oldSize = this.VirtualListSize;
 
-            this.ClearCachedInfo();
+            
 
             // There is a bug in .NET when a virtual ListView is cleared
             // (i.e. VirtuaListSize set to 0) AND it is scrolled vertically: the scroll position 

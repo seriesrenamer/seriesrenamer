@@ -62,7 +62,7 @@ namespace Renamer.Logging
 
         internal void removeAllLoggers()
         {
-            LogMessage("All loggers removed", LogLevel.INFO);
+            //LogMessage("All loggers removed", LogLevel.INFO);
             this.allLogers = null;   
         }
     }

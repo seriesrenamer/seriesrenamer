@@ -45,18 +45,11 @@ namespace Renamer
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.scContainer = new System.Windows.Forms.SplitContainer();
-            this.lstEntries = new BrightIdeasSoftware.FastObjectListView();
-            this.ColumnSource = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnFilepath = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnShowname = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnSeason = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnEpisode = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnEpisodeName = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnDestination = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnNewFilename = new BrightIdeasSoftware.OLVColumn();
             this.contextFiles = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editSubtitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.markAsMovieToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.markAsTVSeriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.renamingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createDirectoryStructureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -117,13 +110,20 @@ namespace Renamer
             this.rtbLog = new System.Windows.Forms.RichTextBox();
             this.fbdPath = new System.Windows.Forms.FolderBrowserDialog();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.markAsMovieToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.markAsTVSeriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lstEntries = new BrightIdeasSoftware.FastObjectListView();
+            this.ColumnSource = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnFilepath = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnShowname = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnSeason = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnEpisode = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnEpisodeName = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnDestination = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnNewFilename = new BrightIdeasSoftware.OLVColumn();
             this.scContainer.Panel1.SuspendLayout();
             this.scContainer.Panel2.SuspendLayout();
             this.scContainer.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.lstEntries)).BeginInit();
             this.contextFiles.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.lstEntries)).BeginInit();
             this.SuspendLayout();
             // 
             // scContainer
@@ -168,96 +168,6 @@ namespace Renamer
             this.scContainer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.scContainer_MouseDown);
             this.scContainer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.scContainer_MouseUp);
             // 
-            // lstEntries
-            // 
-            this.lstEntries.AllColumns.Add(this.ColumnSource);
-            this.lstEntries.AllColumns.Add(this.ColumnFilepath);
-            this.lstEntries.AllColumns.Add(this.ColumnShowname);
-            this.lstEntries.AllColumns.Add(this.ColumnSeason);
-            this.lstEntries.AllColumns.Add(this.ColumnEpisode);
-            this.lstEntries.AllColumns.Add(this.ColumnEpisodeName);
-            this.lstEntries.AllColumns.Add(this.ColumnDestination);
-            this.lstEntries.AllColumns.Add(this.ColumnNewFilename);
-            this.lstEntries.AllowColumnReorder = true;
-            this.lstEntries.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.lstEntries.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
-            this.lstEntries.CheckBoxes = true;
-            this.lstEntries.CheckedAspectName = "";
-            this.lstEntries.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.ColumnSource,
-            this.ColumnFilepath,
-            this.ColumnShowname,
-            this.ColumnSeason,
-            this.ColumnEpisode,
-            this.ColumnEpisodeName,
-            this.ColumnDestination,
-            this.ColumnNewFilename});
-            this.lstEntries.ContextMenuStrip = this.contextFiles;
-            this.lstEntries.EmptyListMsg = "No matching files in this folder";
-            this.lstEntries.EmptyListMsgFont = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lstEntries.FullRowSelect = true;
-            this.lstEntries.Location = new System.Drawing.Point(12, 33);
-            this.lstEntries.Name = "lstEntries";
-            this.lstEntries.SelectColumnsOnRightClick = false;
-            this.lstEntries.ShowGroups = false;
-            this.lstEntries.ShowImagesOnSubItems = true;
-            this.lstEntries.ShowItemToolTips = true;
-            this.lstEntries.Size = new System.Drawing.Size(996, 427);
-            this.lstEntries.TabIndex = 17;
-            this.lstEntries.UseCompatibleStateImageBehavior = false;
-            this.lstEntries.View = System.Windows.Forms.View.Details;
-            this.lstEntries.VirtualMode = true;
-            this.lstEntries.CellEditFinishing += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditFinishing);
-            this.lstEntries.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstEntries_KeyDown);
-            this.lstEntries.CellEditStarting += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditStarting);
-            this.lstEntries.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstEntries_DragDrop);
-            this.lstEntries.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstEntries_DragEnter);
-            // 
-            // ColumnSource
-            // 
-            this.ColumnSource.AspectName = "Filename";
-            this.ColumnSource.IsEditable = false;
-            this.ColumnSource.Text = "Old Filename";
-            // 
-            // ColumnFilepath
-            // 
-            this.ColumnFilepath.AspectName = "FilePath.Path";
-            this.ColumnFilepath.IsEditable = false;
-            this.ColumnFilepath.Text = "Filepath";
-            // 
-            // ColumnShowname
-            // 
-            this.ColumnShowname.AspectName = "ShowName";
-            this.ColumnShowname.Text = "Showname";
-            // 
-            // ColumnSeason
-            // 
-            this.ColumnSeason.AspectName = "Season";
-            this.ColumnSeason.Text = "Season";
-            // 
-            // ColumnEpisode
-            // 
-            this.ColumnEpisode.AspectName = "Episode";
-            this.ColumnEpisode.Text = "Episode";
-            // 
-            // ColumnEpisodeName
-            // 
-            this.ColumnEpisodeName.Text = "Episode Title";
-            // 
-            // ColumnDestination
-            // 
-            this.ColumnDestination.AspectName = "Destination";
-            this.ColumnDestination.Text = "Destination";
-            this.ColumnDestination.Width = 295;
-            // 
-            // ColumnNewFilename
-            // 
-            this.ColumnNewFilename.AspectName = "NewFilename";
-            this.ColumnNewFilename.Text = "New Filename";
-            this.ColumnNewFilename.Width = 150;
-            // 
             // contextFiles
             // 
             this.contextFiles.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -297,6 +207,20 @@ namespace Renamer
             this.editSubtitleToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
             this.editSubtitleToolStripMenuItem.Text = "Edit Subtitle";
             this.editSubtitleToolStripMenuItem.Click += new System.EventHandler(this.editSubtitleToolStripMenuItem_Click);
+            // 
+            // markAsMovieToolStripMenuItem
+            // 
+            this.markAsMovieToolStripMenuItem.Name = "markAsMovieToolStripMenuItem";
+            this.markAsMovieToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.markAsMovieToolStripMenuItem.Text = "Mark as Movie";
+            this.markAsMovieToolStripMenuItem.Click += new System.EventHandler(this.markAsMovieToolStripMenuItem_Click);
+            // 
+            // markAsTVSeriesToolStripMenuItem
+            // 
+            this.markAsTVSeriesToolStripMenuItem.Name = "markAsTVSeriesToolStripMenuItem";
+            this.markAsTVSeriesToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.markAsTVSeriesToolStripMenuItem.Text = "Mark as TV series";
+            this.markAsTVSeriesToolStripMenuItem.Click += new System.EventHandler(this.markAsTVSeriesToolStripMenuItem_Click);
             // 
             // toolStripSeparator4
             // 
@@ -820,19 +744,95 @@ namespace Renamer
             this.fbdPath.Description = "Browse for folder containing series.";
             this.fbdPath.ShowNewFolderButton = false;
             // 
-            // markAsMovieToolStripMenuItem
+            // lstEntries
             // 
-            this.markAsMovieToolStripMenuItem.Name = "markAsMovieToolStripMenuItem";
-            this.markAsMovieToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
-            this.markAsMovieToolStripMenuItem.Text = "Mark as Movie";
-            this.markAsMovieToolStripMenuItem.Click += new System.EventHandler(this.markAsMovieToolStripMenuItem_Click);
+            this.lstEntries.AllColumns.Add(this.ColumnSource);
+            this.lstEntries.AllColumns.Add(this.ColumnFilepath);
+            this.lstEntries.AllColumns.Add(this.ColumnShowname);
+            this.lstEntries.AllColumns.Add(this.ColumnSeason);
+            this.lstEntries.AllColumns.Add(this.ColumnEpisode);
+            this.lstEntries.AllColumns.Add(this.ColumnEpisodeName);
+            this.lstEntries.AllColumns.Add(this.ColumnDestination);
+            this.lstEntries.AllColumns.Add(this.ColumnNewFilename);
+            this.lstEntries.AllowColumnReorder = true;
+            this.lstEntries.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lstEntries.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
+            this.lstEntries.CheckBoxes = true;
+            this.lstEntries.CheckedAspectName = "";
+            this.lstEntries.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.ColumnSource,
+            this.ColumnFilepath,
+            this.ColumnShowname,
+            this.ColumnSeason,
+            this.ColumnEpisode,
+            this.ColumnEpisodeName,
+            this.ColumnDestination,
+            this.ColumnNewFilename});
+            this.lstEntries.ContextMenuStrip = this.contextFiles;
+            this.lstEntries.EmptyListMsg = "No matching files in this folder";
+            this.lstEntries.EmptyListMsgFont = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lstEntries.FullRowSelect = true;
+            this.lstEntries.Location = new System.Drawing.Point(12, 33);
+            this.lstEntries.Name = "lstEntries";
+            this.lstEntries.SelectColumnsOnRightClick = false;
+            this.lstEntries.ShowGroups = false;
+            this.lstEntries.ShowImagesOnSubItems = true;
+            this.lstEntries.ShowItemToolTips = true;
+            this.lstEntries.Size = new System.Drawing.Size(996, 427);
+            this.lstEntries.TabIndex = 17;
+            this.lstEntries.UseCompatibleStateImageBehavior = false;
+            this.lstEntries.View = System.Windows.Forms.View.Details;
+            this.lstEntries.VirtualMode = true;
+            this.lstEntries.CellEditFinishing += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditFinishing);
+            this.lstEntries.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstEntries_KeyDown);
+            this.lstEntries.CellEditStarting += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditStarting);
+            this.lstEntries.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstEntries_DragDrop);
+            this.lstEntries.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstEntries_DragEnter);
             // 
-            // markAsTVSeriesToolStripMenuItem
+            // ColumnSource
             // 
-            this.markAsTVSeriesToolStripMenuItem.Name = "markAsTVSeriesToolStripMenuItem";
-            this.markAsTVSeriesToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
-            this.markAsTVSeriesToolStripMenuItem.Text = "Mark as TV series";
-            this.markAsTVSeriesToolStripMenuItem.Click += new System.EventHandler(this.markAsTVSeriesToolStripMenuItem_Click);
+            this.ColumnSource.AspectName = "Filename";
+            this.ColumnSource.IsEditable = false;
+            this.ColumnSource.Text = "Old Filename";
+            // 
+            // ColumnFilepath
+            // 
+            this.ColumnFilepath.AspectName = "FilePath.Path";
+            this.ColumnFilepath.IsEditable = false;
+            this.ColumnFilepath.Text = "Filepath";
+            // 
+            // ColumnShowname
+            // 
+            this.ColumnShowname.AspectName = "ShowName";
+            this.ColumnShowname.Text = "Showname";
+            // 
+            // ColumnSeason
+            // 
+            this.ColumnSeason.AspectName = "Season";
+            this.ColumnSeason.Text = "Season";
+            // 
+            // ColumnEpisode
+            // 
+            this.ColumnEpisode.AspectName = "Episode";
+            this.ColumnEpisode.Text = "Episode";
+            // 
+            // ColumnEpisodeName
+            // 
+            this.ColumnEpisodeName.Text = "Episode Title";
+            // 
+            // ColumnDestination
+            // 
+            this.ColumnDestination.AspectName = "Destination";
+            this.ColumnDestination.Text = "Destination";
+            this.ColumnDestination.Width = 295;
+            // 
+            // ColumnNewFilename
+            // 
+            this.ColumnNewFilename.AspectName = "NewFilename";
+            this.ColumnNewFilename.Text = "New Filename";
+            this.ColumnNewFilename.Width = 150;
             // 
             // Form1
             // 
@@ -854,8 +854,8 @@ namespace Renamer
             this.scContainer.Panel2.ResumeLayout(false);
             this.scContainer.Panel2.PerformLayout();
             this.scContainer.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.lstEntries)).EndInit();
             this.contextFiles.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.lstEntries)).EndInit();
             this.ResumeLayout(false);
 
         }
