@@ -139,14 +139,17 @@ namespace Renamer.Classes
         }
 
         private void fallbackFolderNames() {
-            if (!String.IsNullOrEmpty(name) || folders.Length == 0) {
+            if (folders.Length == 0) {
                 return;
             }
             for (int i = 1; i < folders.Length - 1; i++) {
                 if (!Regex.Match(folders[folders.Length - i], pathBlacklist, RegexOptions.IgnoreCase).Success)
                 {
-                    name = folders[folders.Length - i];
-                    break;
+                    if (name == null || (Helper.InitialsMatch(folders[folders.Length - 1], name) && !Filepath.IsExtractionDirectory(folders[folders.Length-1])))
+                    {
+                        name = folders[folders.Length - i];
+                        break;
+                    }
                 }
             }
             //Logger.Instance.LogMessage("SNE: fallbackFolderNames: " + name, LogLevel.DEBUG);
@@ -158,12 +161,16 @@ namespace Renamer.Classes
             reset();
             this.ie = ie;
             // Read plain filename
-            string filename = System.IO.Path.GetFileNameWithoutExtension(ie.Filename);
-
-
+            string filename = System.IO.Path.GetFileNameWithoutExtension(ie.Filename);            
             filename = NameCleanup.RemoveReleaseGroupTag(filename);
             folders = Filepath.extractFoldernamesFromPath(ie.FilePath.Path);
-
+            if (ie.InSeasonFolder && folders.Length > 2)
+            {
+                if (!Regex.IsMatch(folders[folders.Length - 2], pathBlacklist, RegexOptions.IgnoreCase))
+                {
+                    return folders[folders.Length - 2];
+                }
+            }
             extractNameFromSeasonsFolder();
             extractNameFromString(filename);
             if (folders.Length != 0) {

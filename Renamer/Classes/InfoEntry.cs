@@ -118,8 +118,11 @@ namespace Renamer.Classes
                     }
                 }
             }
-            set { this.destination.Filename = value; }
+            set {
+                this.destination.Filename = value; 
+            }
         }
+
         /// <summary>
         /// Old filename with extension
         /// </summary>
@@ -240,6 +243,7 @@ namespace Renamer.Classes
                 return this.isSubtitle;
             }
         }
+
         /// <summary>
         /// If file is a movie.
         /// </summary>
@@ -334,7 +338,20 @@ namespace Renamer.Classes
                 }
             }
         }
-
+        /// <summary>
+        /// True if the file is located in a season folder, false if uninitialized or otherwise
+        /// </summary>
+        public bool InSeasonFolder
+        {
+            get {
+                if (string.IsNullOrEmpty(FilePath.Path)) return false;
+                string[] patterns = Helper.ReadProperties(Config.Extract);
+                foreach(string pattern in patterns){
+                    if(Regex.IsMatch(FilePath.Path,pattern))
+                        return true;
+                }
+                return false; }
+        }
         public bool IsMultiFileMovie
         {
             get;
@@ -471,28 +488,20 @@ namespace Renamer.Classes
             bool UseSeasonSubDirs = Helper.ReadBool(Config.UseSeasonSubDir);
             //figure out if we are in a season dir
             string[] seasondirs = Helper.ReadProperties(Config.Extract);
-
-            //Tags are used to figure out if we are in an extraction dir (from rar files or so)
-            string[] tags = Helper.ReadProperties(Config.Tags);
-            string tag = "";
-            foreach (string t in tags)
-            {
-                tag += "|\\." + t;
-            }
-            tag = tag.Substring(1);
-            bool InTagDir = false;
-            string seasondir = "";
             string aSeasondir = "";
             int showdirlevel = 0;
-            if (dirs.Length > 0 && Regex.IsMatch(dirs[dirs.Length - 1], tag))
+
+            //figure out if we are in an extraction dir, if we are, we need to go upwards one level
+            if (dirs.Length > 0 &&Filepath.IsExtractionDirectory(dirs[dirs.Length-1]))
             {
-                InTagDir = true;
                 DestinationPath = Filepath.goUpwards(DestinationPath, 1);
                 List<string> blah=new List<string>(dirs);
                 blah.RemoveAt(dirs.Length - 1);
                 dirs = blah.ToArray();
             }
-            //loop backwards so first entry is used if nothing is recognized and folder has to be created
+
+            //check if we are in a season and/or series directory
+            //loop backwards so first season entry is used if nothing is recognized and folder has to be created
             for (int i = seasondirs.Length - 1; i >= 0; i--) {
                 aSeasondir = RegexConverter.replaceSeriesname(seasondirs[i], nameOfSeries);
                 bool InSomething = false;
@@ -514,13 +523,18 @@ namespace Renamer.Classes
                 }
 
                 //remove dots to avoid problems with series like "N.C.I.S." or "Dr. House"
-                if (dirs.Length > 0 && dirs[dirs.Length - 1].Replace(".","").StartsWith(nameOfSeries.Replace(".",""))){
+                /*if (dirs.Length > 0 && dirs[dirs.Length - 1].Replace(".","").StartsWith(nameOfSeries.Replace(".",""))){
                     InSeriesDir=true;
-                }
-                else if (dirs.Length > 1 && dirs[dirs.Length - 2].Replace(".", "").StartsWith(nameOfSeries.Replace(".", "")))
+                }*/
+                if (dirs.Length > 0 && Helper.InitialsMatch(dirs[dirs.Length - 1], nameOfSeries))
                 {
                     InSeriesDir = true;
-                    showdirlevel=1;
+                }
+                /*else if (dirs.Length > 1 && dirs[dirs.Length - 2].Replace(".", "").StartsWith(nameOfSeries.Replace(".", "")))*/
+                else if (dirs.Length > 1 && Helper.InitialsMatch(dirs[dirs.Length - 2], nameOfSeries))
+                {
+                    InSeriesDir = true;
+                    showdirlevel = 1;
                 }
                 if (InSomething) break;
             }
@@ -581,7 +595,6 @@ namespace Renamer.Classes
                 return;
             loadSettingCreateDirectory();
         }
-
         private void loadSettingCreateDirectory() {
             createDirectoryStructure = (Helper.ReadBool(Config.CreateDirectoryStructure)) ? DirectoryStructure.CreateDirectoryStructure : DirectoryStructure.NoDirectoryStructure;
         }
@@ -669,10 +682,9 @@ namespace Renamer.Classes
             this.Name = "";
         }
 
-        public string adjustSpelling(string input, bool extension) {
+        public void adjustSpelling(ref string input, bool extension) {
             input = adjustUmlauts(input);
             input = adjustCasing(input, extension);
-            return input;
         }
 
         private string adjustUmlauts(string input) {
@@ -752,7 +764,7 @@ namespace Renamer.Classes
                 {
                     if (nameOfEpisode == "" && Season > -1 && Episode > -1)
                     {
-                        InfoEntry videoEntry = InfoEntryManager.Instance.GetMatchingVideo(Season, Episode);
+                        InfoEntry videoEntry = InfoEntryManager.Instance.GetMatchingVideo(Showname, Season, Episode);
                         if (videoEntry != null)
                         {
                             string nfn, dst;
@@ -807,15 +819,15 @@ namespace Renamer.Classes
                     tmpname = tmpname.Replace("%E", episode.ToString("00"));
                     tmpname = tmpname.Replace("%s", season.ToString());
                     tmpname = tmpname.Replace("%S", season.ToString("00"));
-                    adjustSpelling(epname, false);
+                    adjustSpelling(ref epname, false);
                 }
                 else {
                     tmpname = "%T";
                 }
 
                 
-                adjustSpelling(seriesname, false);
-                adjustSpelling(extension, true);
+                adjustSpelling(ref seriesname, false);
+                adjustSpelling(ref extension, true);
 
                 //Now that series title, episode title and extension are properly processed, add them to the filename
 

@@ -596,7 +596,6 @@ namespace Renamer
                     FileSystemInfo file=Files[f];
                     //showname and season recognized from path
                     DirectorySeason = -1;
-
                     //Check if there is already an entry on this file, and if not, create one
                     ie = null;
                     currentpath = Path.GetDirectoryName(file.FullName);
@@ -635,7 +634,7 @@ namespace Renamer
 
                         //Need to do this for filenames which only contain episode numbers (But might be moved in a season dir already)
                         //if season number couldn't be extracted, try to get it from folder
-                        if (ie.Season == -1 && DirectorySeason != -1)
+                        if (ie.Season <= 0 && DirectorySeason != -1)
                         {
                             ie.Season = DirectorySeason;
                         }
@@ -714,6 +713,11 @@ namespace Renamer
                 {
                     strSeason = "";
                     strEpisode = "";
+                    //ignore numbers like 2063, chance is higher they're a year than a valid season/ep combination
+                    if (Int32.Parse(m.Groups["Season"].Value + m.Groups["Episode"].Value) > 2000 && (m.Groups["Season"].Value + m.Groups["Episode"].Value).StartsWith("20"))
+                    {
+                        continue;
+                    }
                     try
                     {
                         strSeason = Int32.Parse(m.Groups["Season"].Value).ToString();
@@ -728,7 +732,7 @@ namespace Renamer
                     catch (FormatException)
                     {
                     }
-                    //Fix for .0216. notation for example, 4 numbers should always be recognized as %S%S%E%E
+                    //Fix for .0216. notation for example, 4 numbers should always be recognized as %S%S%E%E (IF THEY ARENT A YEAR!)
                     if (strEpisode.Length == 3 && strSeason.Length == 1)
                     {
                         strSeason += strEpisode[0];
@@ -738,6 +742,7 @@ namespace Renamer
                             strSeason = strSeason.Substring(1);
                         }
                     }
+                    
                     try
                     {
                         episode = Int32.Parse(strEpisode);
@@ -755,6 +760,7 @@ namespace Renamer
                         Logger.Instance.LogMessage("Cannot parse found season: " + strSeason, LogLevel.DEBUG);
                     }
 
+                    
                     if ((ie.Filename.ToLower().Contains("720p") && season == 7 && episode == 20) | (ie.Filename.ToLower().Contains("1080p") && season == 10 && episode == 80))
                     {
                         season = -1;
@@ -873,7 +879,8 @@ namespace Renamer
             for (int i = 0; i < patterns.Length; i++) {
                 string pattern = patterns[i];
                 pattern = pattern.Replace(Config.RegexMarker.Title, "*.?");
-                pattern = pattern.Replace(Config.RegexMarker.Season, "(?<Season>\\d)");
+                //need \\d+ here instead of just \\d, to allow for seasons > 9
+                pattern = pattern.Replace(Config.RegexMarker.Season, "(?<Season>\\d+)");
                 Match m = Regex.Match(folders[folders.Length - 1], pattern, RegexOptions.IgnoreCase);
 
                 if (!m.Success) {

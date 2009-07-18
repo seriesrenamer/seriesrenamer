@@ -4625,11 +4625,11 @@ namespace BrightIdeasSoftware
         /// Update the rows that are selected
         /// </summary>
         /// <remarks>This method does not resort or regroup the view.</remarks>
-        public virtual void RefreshSelectedObjects() {
-            foreach (ListViewItem lvi in this.SelectedItems)
-                this.RefreshItem((OLVListItem)lvi);
+        public virtual void RefreshSelectedObjects()
+        {
+            foreach (int i in this.SelectedIndices)
+                this.RefreshItem((OLVListItem)this.Items[i]);
         }
-
         /// <summary>
         /// Scroll the listview so that the given group is at the top.
         /// </summary>

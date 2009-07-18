@@ -266,6 +266,27 @@ namespace Renamer.Classes
             return folders;
         }
 
+        /// <summary>
+        /// Figures out if the directory is a extraction directory from an archive by looking at tags in the foldername
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static bool IsExtractionDirectory(string path)
+        {
+            string[] tags = Helper.ReadProperties(Config.Tags);
+            string tag = "";
+            foreach (string t in tags)
+            {
+                tag += "|\\." + t;
+            }
+            tag = tag.Substring(1);
+            string[] dirs = extractFoldernamesFromPath(path);
+            if (dirs.Length > 0 && Regex.IsMatch(dirs[dirs.Length - 1], tag))
+            {
+                return true;
+            }
+            return false;
+        }
 #endregion
 
     }

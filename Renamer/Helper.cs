@@ -480,6 +480,9 @@ namespace Renamer
         /// <returns>true if longstring contains shortstring</returns>
         public static bool InitialsMatch(string longstring, string shortstring)
         {
+            //remove spaces, because we want to match strings which are equal except of some spaces
+            shortstring = shortstring.Replace(" ", "");
+            longstring = longstring.Replace(" ", "");
             if (shortstring.Length > longstring.Length) return false;
             //ignore roman digits(not optimal yet, but whatever)
             string pattern = " [iI]+[ $]";
@@ -519,26 +522,26 @@ namespace Renamer
             //check in opposite direction, if short string consists of garbage mostly, check if the captial letters of long string are included in short string
             pos=0;
             bool reversefound=false;
+            //only do this if longstring has more than one capital letter
+            int Capitals = 0;
             for (int i = 0; i < longstring.Length; i++)
             {
                 if (char.IsUpper(longstring[i]))
                 {
+                    Capitals++;
                     reversefound = false;
-                    for (int j = pos; j < shortstring.Length; j++)
+                    if(longstring[i] == char.ToUpper(shortstring[pos]))
                     {
-                        if (longstring[i] == char.ToUpper(shortstring[j]))
-                        {
-                            reversefound = true;
-                            pos = j;
-                            break;
-                        }
+                        reversefound = true;
+                        pos++;
                     }
-                    if (!reversefound)
+                    else
                     {
                         break;
                     }
                 }
             }
+            if (Capitals < 2) reversefound = false;
             //if everything matched or atleast 70% on longer strings matched or atleast 40% of the start of longer strings matched, return true
             if ((shortstring.Length<10 && found) || (shortstring.Length >= 10 && ((float)matches / ((float)shortstring.Length) > 0.7)||startmatches>0.4*shortstring.Length))
             {
