@@ -480,6 +480,8 @@ namespace Renamer
         /// <returns>true if longstring contains shortstring</returns>
         public static bool InitialsMatch(string longstring, string shortstring)
         {
+            //treat all word starts as capitals
+            longstring = Helper.UpperEveryFirst(longstring);
             //remove spaces, because we want to match strings which are equal except of some spaces
             shortstring = shortstring.Replace(" ", "");
             longstring = longstring.Replace(" ", "");
@@ -488,18 +490,20 @@ namespace Renamer
             string pattern = " [iI]+[ $]";
             shortstring = Regex.Replace(shortstring, pattern, "");
             int matches = 0;
-
+            int loopcount = 0;
             //startmatches are the matches on the long string at the start (without additional characters in between, they are weighted stronger)
             int startmatches = 0;
             bool found = false;
             int pos = 0;
             for(int j=0;j<shortstring.Length;j++){
+                loopcount++;
                 char c = shortstring[j];
                 if (c != ' ' && !Char.IsDigit(c))
                 {
                     found = false;
                     for (int i = pos; i < longstring.Length; i++)
                     {
+                        loopcount++;
                         char c2 = longstring[i];
                         if (Char.ToLower(c) == Char.ToLower(c2))
                         {
@@ -519,6 +523,59 @@ namespace Renamer
                     }
                 }
             }
+
+            //check for single words contained in both strings, example: "MrBrooks-DerMörderInDir" and "Asp-brooks"
+            int maxwordlength=0;
+            int tempwordlength=0;
+            pos=0;
+            string longestword = "";
+            string longtempword = "";
+            for (int j = 0; j < shortstring.Length; j++)
+            {
+                loopcount++;
+                char c = shortstring[j];
+                if (c != ' ' && !Char.IsDigit(c))
+                {
+                    for (int i = 0; i < longstring.Length; i++)
+                    {
+                        loopcount++;
+                        char c2 = longstring[i];
+                        if (Char.ToLower(c) == Char.ToLower(c2))
+                        {
+                            tempwordlength=1;
+                            longtempword = c2.ToString();
+                            int shortpos = 1;
+                            for (int k = i+1; k < longstring.Length&&j+shortpos<shortstring.Length; k++)
+                            {
+                                loopcount++;
+                                char c4 = shortstring[j+shortpos];
+                                char c3 = longstring[k];
+                                if (Char.ToLower(c4) == Char.ToLower(c3))
+                                {
+                                    tempwordlength++;
+                                    longtempword += c4;
+                                    if (maxwordlength < tempwordlength)
+                                    {
+                                        maxwordlength = tempwordlength;
+                                        longestword = longtempword;
+                                    }
+                                }
+                                else
+                                {
+                                    tempwordlength = 0;
+                                    break;
+                                }
+                                shortpos++;
+                            }
+                        }
+                        else
+                        {
+                            tempwordlength = 0;
+                        }
+                    }
+                }
+            }
+
             //check in opposite direction, if short string consists of garbage mostly, check if the captial letters of long string are included in short string
             pos=0;
             bool reversefound=false;
@@ -526,6 +583,7 @@ namespace Renamer
             int Capitals = 0;
             for (int i = 0; i < longstring.Length; i++)
             {
+                loopcount++;
                 if (char.IsUpper(longstring[i]))
                 {
                     Capitals++;
@@ -543,12 +601,12 @@ namespace Renamer
             }
             if (Capitals < 2) reversefound = false;
             //if everything matched or atleast 70% on longer strings matched or atleast 40% of the start of longer strings matched, return true
-            if ((shortstring.Length<10 && found) || (shortstring.Length >= 10 && ((float)matches / ((float)shortstring.Length) > 0.7)||startmatches>0.4*shortstring.Length))
+            if ((shortstring.Length<10 && found) || (shortstring.Length >= 10 && ((float)matches / ((float)shortstring.Length) > 0.7)||startmatches>3))
             {
                 return true;
             }
-            if (reversefound) return true;
-            return false;
+            Logger.Instance.LogMessage("Loopcount=" + loopcount, LogLevel.LOG);
+            return reversefound || maxwordlength > 3;
         }
 
         /// <summary>
