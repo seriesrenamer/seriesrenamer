@@ -46,7 +46,9 @@ namespace Renamer.Classes
             //if filename too short, it might be a part of the real name, so skip it
             if (filename.Length > 5)
             {
-                return Regex.Replace(Regex.Replace(filename, "^(([^\\p{Lu}]\\p{Ll}{1,3})|(\\p{Lu}{2,2}\\w))-", ""), "-\\w{2,4}$", "");
+                filename=Regex.Replace(filename, "^(([^\\p{Lu}]\\p{Ll}{1,3})|(\\p{Lu}{2,2}\\w))-", "");
+                filename = Regex.Replace(filename, "-\\w{2,4}$", "");
+                return filename;
             }
             else return filename;
         }   
