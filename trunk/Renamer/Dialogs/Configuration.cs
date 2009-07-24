@@ -105,6 +105,7 @@ namespace Renamer.Dialogs
 
             //Get some ints
             nudTimeout.Value = Helper.ReadInt(Config.Timeout);
+            nudFilename.Value = Helper.ReadInt(Config.MaxFilenameLength);
 
             //Get some bools
             chkCreateDirectoryStructure.Checked = Helper.ReadBool(Config.CreateDirectoryStructure);
@@ -147,6 +148,7 @@ namespace Renamer.Dialogs
         /// <param name="e"></param>
         private void btnOK_Click(object sender, EventArgs e) {
             Helper.WriteProperty(Config.Timeout, nudTimeout.Value.ToString());
+            Helper.WriteProperty(Config.MaxFilenameLength, nudFilename.Value.ToString());
             Helper.WriteProperty(Config.MaxDepth, nudSearchDepth.Value.ToString());
             Helper.WriteProperty(Config.InvalidCharReplace, txtReplace.Text);
             Helper.WriteProperty(Config.DestinationDirectory, txtDestination.Text);
