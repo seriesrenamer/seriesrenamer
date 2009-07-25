@@ -490,6 +490,7 @@ namespace Renamer
             string pattern = " [iI]+[ $]";
             shortstring = Regex.Replace(shortstring, pattern, "");
             int matches = 0;
+            //only for statistics
             int loopcount = 0;
             //startmatches are the matches on the long string at the start (without additional characters in between, they are weighted stronger)
             int startmatches = 0;
@@ -605,7 +606,7 @@ namespace Renamer
             {
                 return true;
             }
-            Logger.Instance.LogMessage("Loopcount=" + loopcount, LogLevel.LOG);
+            //Logger.Instance.LogMessage("Loopcount=" + loopcount, LogLevel.LOG);
             return reversefound || maxwordlength > 3;
         }
 
