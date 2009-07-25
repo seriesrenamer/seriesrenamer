@@ -147,6 +147,7 @@ namespace Renamer.Dialogs
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void btnOK_Click(object sender, EventArgs e) {
+            bool Clearlog = false;
             Helper.WriteProperty(Config.Timeout, nudTimeout.Value.ToString());
             Helper.WriteProperty(Config.MaxFilenameLength, nudFilename.Value.ToString());
             Helper.WriteProperty(Config.MaxDepth, nudSearchDepth.Value.ToString());
@@ -169,6 +170,12 @@ namespace Renamer.Dialogs
             string[] extract = txtExtract.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             Helper.WriteProperties(Config.Extract, extract);
 
+            if (Helper.ReadProperty(Config.LogFileLevel) != cbLogfile.SelectedIndex.ToString()
+                ||Helper.ReadProperty(Config.LogTextBoxLevel)!=cbLogwindow.SelectedIndex.ToString()
+                ||Helper.ReadProperty(Config.LogMessageBoxLevel)!=cbLogmessagebox.SelectedIndex.ToString())
+            {
+                Clearlog = true;
+            }
             Helper.WriteProperty(Config.LogFileLevel, cbLogfile.SelectedIndex.ToString());
             Helper.WriteProperty(Config.LogTextBoxLevel, cbLogwindow.SelectedIndex.ToString());
             Helper.WriteProperty(Config.LogMessageBoxLevel, cbLogmessagebox.SelectedIndex.ToString());
@@ -191,6 +198,11 @@ namespace Renamer.Dialogs
             Helper.WriteProperties(Config.IgnoreFiles, txtIgnoreFiles.Text);
             Helper.WriteProperty(Config.LastProvider, cbProviders.SelectedItem.ToString());
             DialogResult = DialogResult.OK;
+            if (Clearlog)
+            {
+                Form1.Instance.initMyLoggers();
+                Logger.Instance.LogMessage("Cleared log window because logging settings changed.", LogLevel.INFO);
+            }
             Close();
         }
 

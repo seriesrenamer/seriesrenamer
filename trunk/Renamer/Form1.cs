@@ -674,7 +674,7 @@ namespace Renamer
             }
         }
 
-        private void initMyLoggers()
+        public void initMyLoggers()
         {
             Logger logger = Logger.Instance;
             logger.removeAllLoggers();
@@ -691,6 +691,7 @@ namespace Renamer
             }
             else
             {
+                rtbLog.Text = "";
                 logger.addLogger(new RichTextBoxLogger(rtbLog, Helper.ReadEnum<LogLevel>(Config.LogTextBoxLevel)));
             }
         }
@@ -699,8 +700,7 @@ namespace Renamer
         private void btnConfig_Click(object sender, EventArgs e) {
             Configuration cfg = new Configuration();
             if (cfg.ShowDialog() == DialogResult.OK) {
-                UpdateList(true);
-                this.initMyLoggers();
+                UpdateList(true);                
             }
         }
 
