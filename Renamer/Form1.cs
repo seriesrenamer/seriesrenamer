@@ -819,6 +819,35 @@ namespace Renamer
             editSubtitleToolStripMenuItem.Visible = false;
             viewToolStripMenuItem.Visible = false;
             renamingToolStripMenuItem.Visible = false;
+            markAsMovieToolStripMenuItem.Visible = true;
+            markAsTVSeriesToolStripMenuItem.Visible = true;
+            selectToolStripMenuItem.Visible = true;
+            checkToolStripMenuItem.Visible = true;
+            renamingToolStripMenuItem.Visible = true;
+            setDestinationToolStripMenuItem.Visible = true;
+            setEpisodesFromtoToolStripMenuItem.Visible = true;
+            setSeasonToolStripMenuItem.Visible = true;
+            setShownameToolStripMenuItem.Visible = true;
+            deleteToolStripMenuItem.Visible = true;
+            toolStripSeparator2.Visible = true;
+            toolStripSeparator3.Visible = true;
+            toolStripSeparator4.Visible = true;
+            if (lstEntries.SelectedIndices.Count == 0)
+            {
+                markAsMovieToolStripMenuItem.Visible = false;
+                markAsTVSeriesToolStripMenuItem.Visible = false;
+                selectToolStripMenuItem.Visible = false;
+                checkToolStripMenuItem.Visible = false;
+                renamingToolStripMenuItem.Visible = false;
+                setDestinationToolStripMenuItem.Visible = false;
+                setEpisodesFromtoToolStripMenuItem.Visible = false;
+                setSeasonToolStripMenuItem.Visible = false;
+                setShownameToolStripMenuItem.Visible = false;
+                deleteToolStripMenuItem.Visible = false;
+                toolStripSeparator2.Visible = false;
+                toolStripSeparator3.Visible = false;
+                toolStripSeparator4.Visible = false;
+            }
             if (lstEntries.SelectedIndices.Count == 1)
             {
                 //if selected file is a subtitle
