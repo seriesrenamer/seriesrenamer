@@ -1067,7 +1067,11 @@ namespace Renamer
                     count++;
                 }
             }
-            int EstimatedSeason = (int)Math.Round(((float)sum / (float)count));
+            int EstimatedSeason =1;
+            if (count > 0)
+            {
+                EstimatedSeason = (int)Math.Round(((float)sum / (float)count));
+            }
             EnterSeason es = new EnterSeason(EstimatedSeason);
             if (es.ShowDialog() == DialogResult.OK) {
                 string basepath = Helper.ReadProperty(Config.LastDirectory);
