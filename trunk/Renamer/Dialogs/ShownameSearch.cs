@@ -59,12 +59,19 @@ namespace Renamer.Dialogs
                     {
                         cb.Items.Add(key);
                     }
+                    cb.SelectedIndex = 0;
+                    if (provider.SelectedResults.ContainsKey(ps.SearchString) && cb.Items.Contains(provider.SelectedResults[ps.SearchString]))
+                    {
+                        cb.SelectedIndex = cb.Items.IndexOf(provider.SelectedResults[ps.SearchString]);
+                    }
                 }
                 else
                 {
                     cb.Items.Add("No results found");
+                    cb.SelectedIndex = 0;
                 }
-                cb.SelectedIndex = 0;
+                
+                
                 cb.Anchor = AnchorStyles.Left | AnchorStyles.Right;
                 tableLayoutPanel1.Controls.Add(cb, 4, i + 1);
             }
@@ -107,27 +114,47 @@ namespace Renamer.Dialogs
             DataGenerator.ParsedSearch Search=DataGenerator.Search(RelationProvider.GetProviderByName(ProviderBox.SelectedItem.ToString()), SearchBox.Text, ShownameLabel.Text);
             ComboBox cbResults = (ComboBox)tableLayoutPanel1.Controls["ComboBox " + row];
             cbResults.Items.Clear();
+            RelationProvider provider = RelationProvider.GetCurrentProvider();
+            
             if (Search.Results != null && Search.Results.Count!=0)
             {
                 foreach (string s in Search.Results.Keys)
                 {
                     cbResults.Items.Add(s);
                 }
+                cbResults.SelectedIndex = 0;
+                if (provider.SelectedResults.ContainsKey(Search.SearchString) && cbResults.Items.Contains(provider.SelectedResults[Search.SearchString]))
+                {
+                    cbResults.SelectedIndex = cbResults.Items.IndexOf(provider.SelectedResults[Search.SearchString]);
+                }
             }
             else
             {
                 cbResults.Items.Add("No results found");
+                cbResults.SelectedIndex = 0;
             }
-            cbResults.SelectedIndex=0;
             Results[row] = Search;
         }
 
         private void btnOK_Click(object sender, EventArgs e)
         {
+            RelationProvider provider = RelationProvider.GetCurrentProvider();
             for (int i = 0; i < Results.Count; i++)
             {
                 ComboBox cbResults = (ComboBox)tableLayoutPanel1.Controls["ComboBox " + i];
+                TextBox SearchBox = (TextBox)tableLayoutPanel1.Controls["TextBox " + i];
                 Results[i].SelectedResult = cbResults.SelectedItem.ToString() ;
+                if (SearchBox.Text != "No results found")
+                {
+                    if (provider.SelectedResults.ContainsKey(SearchBox.Text))
+                    {
+                        provider.SelectedResults[SearchBox.Text] = cbResults.SelectedItem.ToString();
+                    }
+                    else
+                    {
+                        provider.SelectedResults.Add(SearchBox.Text, cbResults.SelectedItem.ToString());
+                    }
+                }
             }
             this.DialogResult = DialogResult.OK;
             Close();

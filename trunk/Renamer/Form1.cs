@@ -808,6 +808,8 @@ namespace Renamer
             }
             Helper.WriteProperties(Config.WindowSize, WindowSize);
 
+            //Also flush values stored directly in RelationProvider classd
+            RelationProvider.Flush();
             foreach (DictionaryEntry dict in settings) {
                 ((ConfigFile)dict.Value).Flush();
             }

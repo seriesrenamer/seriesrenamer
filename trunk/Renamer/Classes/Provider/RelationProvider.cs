@@ -19,6 +19,7 @@ using System.IO;
 using Renamer.Classes.Configuration.Keywords;
 using Renamer.Logging;
 using Renamer.Classes.Configuration;
+using System.Collections;
 
 namespace Renamer.Classes.Provider
 {
@@ -32,6 +33,7 @@ namespace Renamer.Classes.Provider
 
         private static List<RelationProvider> list;
 
+        public Dictionary<string,string> SelectedResults = new Dictionary<string,string>();
         private static List<RelationProvider> List{
             get {
                 if (list == null) {
@@ -79,8 +81,31 @@ namespace Renamer.Classes.Provider
             this.RelationsStart = Helper.ReadProperty(ProviderConfig.Relations.RelationsStart, filename);
             this.RelationsEnd = Helper.ReadProperty(ProviderConfig.Relations.RelationsEnd, filename);
             this.RelationsRightToLeft = Helper.ReadBool(ProviderConfig.Relations.RelationsRightToLeft, filename);
+            List<string> tempresults = new List<string>(Helper.ReadProperties(ProviderConfig.Relations.SelectedResults, filename));
+            foreach (string str in tempresults)
+            {
+                string[] both = str.Split(new char[] { ',' }, 2, StringSplitOptions.RemoveEmptyEntries);
+                if (both.Length == 2)
+                {
+                    SelectedResults.Add(both[0], both[1]);
+                }
+            }
             List.Add(this);
         }
+
+        public static void Flush()
+        {
+            foreach (RelationProvider provider in List)
+            {
+                List<string> tempResults = new List<string>();
+                foreach (KeyValuePair<string, string> kvp in provider.SelectedResults)
+                {
+                    tempResults.Add(kvp.Key + "," + kvp.Value);
+                }
+                Helper.WriteProperties(ProviderConfig.Relations.SelectedResults, tempResults.ToArray(), provider.filename);
+            }
+        }
+        
 
         /// <summary>
         /// Gets currently selected provider

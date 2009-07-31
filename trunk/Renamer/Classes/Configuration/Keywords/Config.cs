@@ -217,11 +217,6 @@ namespace Renamer.Classes.Configuration.Keywords
         /// </summary>
         public const string DestinationDirectory = "DestinationDirectory";
 
-        /// <summary>
-        /// If filenames are meant to be limited in length, it can be set here
-        /// </summary>
-        public const string MaxFilenameLength = "MaxFilenameLength";
-
         public static class RegexMarker
         {
 

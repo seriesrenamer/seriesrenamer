@@ -178,6 +178,11 @@ namespace Renamer.Classes.Configuration.Keywords
             /// start regex for relations pages from end of file
             /// </summary>
             public const string RelationsRightToLeft = "RelationsRightToLeft";
+
+            /// <summary>
+            /// Last selected results
+            /// </summary>
+            public const string SelectedResults = "SelectedResults";
         }
 
     }
