@@ -833,7 +833,7 @@ namespace Renamer.Classes
 
                 //Remove extension from target filename (if existant) and add properly cased one
                 tmpname = Regex.Replace(tmpname, "\\." + extension, "", RegexOptions.IgnoreCase);
-                
+                tmpname += "." + extension;
 
                 tmpname = tmpname.Replace("%T", seriesname);
                 tmpname = tmpname.Replace("%N", epname);
@@ -851,10 +851,6 @@ namespace Renamer.Classes
                     }
                 }
 
-                //Limit filename length
-                tmpname = LimitLength(tmpname);
-
-                tmpname += "." + extension;
                 //set new filename if renaming process is required
                 if (Filename == tmpname) {
                     NewFilename = "";
@@ -864,15 +860,7 @@ namespace Renamer.Classes
                 }
             }
         }
-        private string LimitLength(string str)
-        {
-            int length = Helper.ReadInt(Config.MaxFilenameLength);
-            if (length > 0)
-            {
-                str = str.Substring(0, Math.Min(length,str.Length));
-            }
-            return str;
-        }
+
         public void RemoveVideoTags()
         {
             this.ProcessingRequested = false;

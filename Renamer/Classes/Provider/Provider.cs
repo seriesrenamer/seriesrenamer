@@ -30,6 +30,7 @@ namespace Renamer.Classes.Provider
         /// <see cref="Name"/>
         /// </summary>
         private string name = "";
+        public string filename = "";
         /// <summary>
         /// <see cref="SearchUrl"/>
         /// </summary>
@@ -51,6 +52,7 @@ namespace Renamer.Classes.Provider
         public Provider(string filename) {
 
             this.Name = Helper.ReadProperty(ProviderConfig.Name, filename);
+            this.filename = filename;
             this.SearchRegExp = Helper.ReadProperty(ProviderConfig.SearchRegExp, filename);
             this.SearchResultsUrl = Helper.ReadProperty(ProviderConfig.SearchResultsURL, filename);
             this.SearchUrl = Helper.ReadProperty(ProviderConfig.SearchURL, filename);
