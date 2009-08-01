@@ -507,7 +507,6 @@ namespace Renamer.Classes
                 bool InSomething = false;
                 if (dirs.Length > 1)
                 {
-
                     Match m = Regex.Match(dirs[dirs.Length - 1], aSeasondir);
                     int parsedSeason;
                     Int32.TryParse(m.Groups["Season"].Value, out parsedSeason);
@@ -610,6 +609,30 @@ namespace Renamer.Classes
         }
         
         private string addSeasonsDirIfDesired(string path) {
+            if (useSeasonSubDirs())
+            {
+                string[] dirs = path.Split(new char[] { Path.DirectorySeparatorChar });
+                //figure out if we are in a season dir
+                string[] seasondirs = Helper.ReadProperties(Config.Extract);
+                string aSeasondir = "";
+                string[] Directories = Directory.GetDirectories(path);
+                for (int i = 0; i < seasondirs.Length; i++)
+                {
+                    foreach (string dir in Directories)
+                    {
+                        aSeasondir = RegexConverter.replaceSeriesnameAndSeason(seasondirs[i], nameOfSeries, season);
+                        if (dirs.Length > 1)
+                        {
+                            Match m = Regex.Match(dir, aSeasondir);
+
+                            if (m.Success)
+                            {
+                                return path + System.IO.Path.DirectorySeparatorChar + Path.GetFileName(dir);
+                            }
+                        }
+                    }
+                }
+            }
             return path + ((useSeasonSubDirs())?seasonsSubDir():"");
         }
  
