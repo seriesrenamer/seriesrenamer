@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using Renamer.Classes.Provider;
 using Renamer.Logging;
+using Renamer.Classes.Configuration.Keywords;
+using System.Text.RegularExpressions;
 
 namespace Renamer.Dialogs
 {
@@ -53,6 +55,7 @@ namespace Renamer.Dialogs
                 ComboBox cb = new ComboBox();
                 cb.DropDownStyle = ComboBoxStyle.DropDownList;
                 cb.Name = "ComboBox " + i;
+
                 if (ps.Results != null && ps.Results.Count!=0)
                 {
                     foreach (string key in ps.Results.Keys)
@@ -60,9 +63,26 @@ namespace Renamer.Dialogs
                         cb.Items.Add(key);
                     }
                     cb.SelectedIndex = 0;
+                    //Restore previously selected result
                     if (provider.SelectedResults.ContainsKey(ps.SearchString) && cb.Items.Contains(provider.SelectedResults[ps.SearchString]))
                     {
                         cb.SelectedIndex = cb.Items.IndexOf(provider.SelectedResults[ps.SearchString]);
+                    }
+                    else
+                    {
+                        List<string> languages = new List<string>(Helper.ReadProperties(Config.Languages));
+                        if (languages.Count > 0)
+                        {
+                            for (int j = 0; j < cb.Items.Count; j++)
+                            {
+                                string str = cb.Items[j].ToString();
+                                if (Regex.IsMatch(str, languages[0]))
+                                {
+                                    cb.SelectedIndex = j;
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
                 else
@@ -126,6 +146,22 @@ namespace Renamer.Dialogs
                 if (provider.SelectedResults.ContainsKey(Search.SearchString) && cbResults.Items.Contains(provider.SelectedResults[Search.SearchString]))
                 {
                     cbResults.SelectedIndex = cbResults.Items.IndexOf(provider.SelectedResults[Search.SearchString]);
+                }
+                else
+                {
+                    List<string> languages = new List<string>(Helper.ReadProperties(Config.Languages));
+                    if (languages.Count > 0)
+                    {
+                        for (int j = 0; j < cbResults.Items.Count; j++)
+                        {
+                            string str = cbResults.Items[j].ToString();
+                            if (Regex.IsMatch(str, languages[0]))
+                            {
+                                cbResults.SelectedIndex = j;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
             else

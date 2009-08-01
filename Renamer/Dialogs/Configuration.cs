@@ -118,6 +118,17 @@ namespace Renamer.Dialogs
             //relation provider combobox
             cbProviders.Items.AddRange(RelationProvider.ProviderNames);
 
+            //Languages
+            List<string> Languages = new List<string>(Helper.ReadProperties(Config.Languages));
+            foreach (string lang in Languages)
+            {
+                cbLanguage.Items.Add(lang.Substring(0, lang.IndexOf("|")));
+            }
+            if (Languages.Count > 0)
+            {
+                cbLanguage.SelectedIndex = 0;
+            }
+
             string LastProvider = Helper.ReadProperty(Config.LastProvider);
             if (LastProvider == null)
                 LastProvider = "";
@@ -184,7 +195,24 @@ namespace Renamer.Dialogs
             Helper.WriteProperties(Config.Replace, replace);
             string[] tags = txtTags.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             Helper.WriteProperties(Config.Tags, tags);
-            
+
+            List<string> Languages = new List<string>(Helper.ReadProperties(Config.Languages));
+            bool found = false;
+            for (int i = 0; i < Languages.Count; i++)
+            {
+                string lang = Languages[i];
+                if (lang.StartsWith(cbLanguage.Text))
+                {
+                    Languages.RemoveAt(i);
+                    Languages.Insert(0, lang);
+                    found=true;
+                }
+            }
+            if (!found)
+            {
+                Languages.Insert(0, cbLanguage.Text);
+            }
+
             Helper.WriteBool(Config.CreateDirectoryStructure, chkCreateDirectoryStructure.Checked);
             Helper.WriteBool(Config.DeleteEmptyFolders, chkDeleteEmptyFolders.Checked);
             Helper.WriteBool(Config.DeleteAllEmptyFolders, chkDeleteAllEmptyFolders.Checked);
