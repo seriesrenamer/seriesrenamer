@@ -217,6 +217,11 @@ namespace Renamer.Classes.Configuration.Keywords
         /// </summary>
         public const string DestinationDirectory = "DestinationDirectory";
 
+        /// <summary>
+        /// Languages used for preselecting search results
+        /// </summary>
+        public const string Languages = "Languages";
+
         public static class RegexMarker
         {
 

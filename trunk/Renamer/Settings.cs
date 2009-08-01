@@ -201,6 +201,7 @@ namespace Renamer
             defaults[Config.FilenameBlacklist] = new List<string>(new string[] { "AVSEQ01" });
             defaults[Config.MovieIndicator] = new List<string>(new string[] { "Movies", "Moviez", "Films", "Filme", "Film", "Movie" });
             defaults[Config.DestinationDirectory] = "";
+            defaults[Config.Languages]=new List<string>(new string[]{"English|en","German|Deutsch|ger|de","Italian|Italiano|it"});
         }
 
         public bool fileLoaded(string filePath) {

@@ -104,6 +104,8 @@ namespace Renamer.Dialogs
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.cbProviders = new System.Windows.Forms.ComboBox();
             this.lblTitlesFrom = new System.Windows.Forms.Label();
+            this.cbLanguage = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudTimeout)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSearchDepth)).BeginInit();
             this.tabPage1.SuspendLayout();
@@ -146,7 +148,7 @@ namespace Renamer.Dialogs
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 67);
+            this.label5.Location = new System.Drawing.Point(12, 123);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(103, 13);
             this.label5.TabIndex = 4;
@@ -156,7 +158,7 @@ namespace Renamer.Dialogs
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(350, 67);
+            this.label6.Location = new System.Drawing.Point(350, 123);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(147, 13);
             this.label6.TabIndex = 5;
@@ -201,19 +203,19 @@ namespace Renamer.Dialogs
             // 
             // txtExtensions
             // 
-            this.txtExtensions.Location = new System.Drawing.Point(15, 83);
+            this.txtExtensions.Location = new System.Drawing.Point(15, 139);
             this.txtExtensions.Multiline = true;
             this.txtExtensions.Name = "txtExtensions";
-            this.txtExtensions.Size = new System.Drawing.Size(163, 164);
+            this.txtExtensions.Size = new System.Drawing.Size(163, 108);
             this.txtExtensions.TabIndex = 10;
             this.toolTip.SetToolTip(this.txtExtensions, "File extensions to include in renaming process");
             // 
             // txtPattern
             // 
-            this.txtPattern.Location = new System.Drawing.Point(353, 83);
+            this.txtPattern.Location = new System.Drawing.Point(353, 139);
             this.txtPattern.Multiline = true;
             this.txtPattern.Name = "txtPattern";
-            this.txtPattern.Size = new System.Drawing.Size(201, 164);
+            this.txtPattern.Size = new System.Drawing.Size(201, 108);
             this.txtPattern.TabIndex = 11;
             this.toolTip.SetToolTip(this.txtPattern, resources.GetString("txtPattern.ToolTip"));
             // 
@@ -327,17 +329,17 @@ namespace Renamer.Dialogs
             // 
             // txtSubs
             // 
-            this.txtSubs.Location = new System.Drawing.Point(184, 83);
+            this.txtSubs.Location = new System.Drawing.Point(184, 139);
             this.txtSubs.Multiline = true;
             this.txtSubs.Name = "txtSubs";
-            this.txtSubs.Size = new System.Drawing.Size(163, 164);
+            this.txtSubs.Size = new System.Drawing.Size(163, 108);
             this.txtSubs.TabIndex = 23;
             this.toolTip.SetToolTip(this.txtSubs, "File extensions used for subtitles");
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(181, 67);
+            this.label11.Location = new System.Drawing.Point(181, 123);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(111, 13);
             this.label11.TabIndex = 24;
@@ -434,6 +436,10 @@ namespace Renamer.Dialogs
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.label2);
+            this.tabPage1.Controls.Add(this.cbLanguage);
+            this.tabPage1.Controls.Add(this.cbProviders);
+            this.tabPage1.Controls.Add(this.lblTitlesFrom);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.label4);
             this.tabPage1.Controls.Add(this.label5);
@@ -455,8 +461,6 @@ namespace Renamer.Dialogs
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.cbProviders);
-            this.tabPage2.Controls.Add(this.lblTitlesFrom);
             this.tabPage2.Controls.Add(this.txtTags);
             this.tabPage2.Controls.Add(this.label21);
             this.tabPage2.Controls.Add(this.lblReplace);
@@ -759,19 +763,36 @@ namespace Renamer.Dialogs
             // 
             this.cbProviders.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbProviders.FormattingEnabled = true;
-            this.cbProviders.Location = new System.Drawing.Point(368, 11);
+            this.cbProviders.Location = new System.Drawing.Point(368, 64);
             this.cbProviders.Name = "cbProviders";
             this.cbProviders.Size = new System.Drawing.Size(186, 21);
-            this.cbProviders.TabIndex = 32;
+            this.cbProviders.TabIndex = 34;
             // 
             // lblTitlesFrom
             // 
             this.lblTitlesFrom.AutoSize = true;
-            this.lblTitlesFrom.Location = new System.Drawing.Point(15, 14);
+            this.lblTitlesFrom.Location = new System.Drawing.Point(12, 67);
             this.lblTitlesFrom.Name = "lblTitlesFrom";
             this.lblTitlesFrom.Size = new System.Drawing.Size(130, 13);
-            this.lblTitlesFrom.TabIndex = 31;
+            this.lblTitlesFrom.TabIndex = 33;
             this.lblTitlesFrom.Text = "Default title search source";
+            // 
+            // cbLanguage
+            // 
+            this.cbLanguage.FormattingEnabled = true;
+            this.cbLanguage.Location = new System.Drawing.Point(368, 91);
+            this.cbLanguage.Name = "cbLanguage";
+            this.cbLanguage.Size = new System.Drawing.Size(186, 21);
+            this.cbLanguage.TabIndex = 35;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 94);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(116, 13);
+            this.label2.TabIndex = 36;
+            this.label2.Text = "Preferred title language";
             // 
             // Configuration
             // 
@@ -870,5 +891,7 @@ namespace Renamer.Dialogs
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.ComboBox cbProviders;
         private System.Windows.Forms.Label lblTitlesFrom;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox cbLanguage;
     }
 }

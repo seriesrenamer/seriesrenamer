@@ -542,7 +542,7 @@ namespace Renamer
         public static void UpdateList(bool clear) {
 
             InfoEntryManager infoManager = InfoEntryManager.Instance;
-
+           
             // Clear list if desired, remove deleted files otherwise
             if (clear) {
                 infoManager.Clear();
@@ -554,10 +554,9 @@ namespace Renamer
             // read path from config && remove tailing slashes
             string path = Helper.ReadProperty(Config.LastDirectory);
             path = path.TrimEnd(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
-
+            Logger.Instance.LogMessage("Opening folder " + path, LogLevel.DEBUG);
             bool CreateDirectoryStructure = Helper.ReadBool(Config.CreateDirectoryStructure);
             bool UseSeasonSubdirs = Helper.ReadBool(Config.UseSeasonSubDir);
-
 
             if (Directory.Exists(path)) {
                 //scan for new files
@@ -704,13 +703,14 @@ namespace Renamer
             Match m = null;
             int episode = -1;
             int season = -1;
-
+            Logger.Instance.LogMessage("Extracting season and episode from " + ie.FilePath + Path.DirectorySeparatorChar+ie.Filename, LogLevel.DEBUG);
             foreach (string pattern in patterns)
             {
                 //Try to match. If it works, get the season and the episode from the match
                 m = Regex.Match(ie.Filename, pattern, RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
                 if (m.Success)
                 {
+                    Logger.Instance.LogMessage("This pattern produced a match: " + pattern, LogLevel.DEBUG);
                     strSeason = "";
                     strEpisode = "";
                     //ignore numbers like 2063, chance is higher they're a year than a valid season/ep combination
