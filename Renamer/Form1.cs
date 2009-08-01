@@ -1130,6 +1130,7 @@ namespace Renamer
                 try {
                     File.Delete(ie.FilePath.Path + Path.DirectorySeparatorChar + ie.Filename);
                     InfoEntryManager.Instance.Remove(ie);
+                    lstEntries.RemoveObject(ie);
                 }
                 catch (Exception ex) {
                     Logger.Instance.LogMessage("Error deleting file: " + ex.Message, LogLevel.ERROR);
