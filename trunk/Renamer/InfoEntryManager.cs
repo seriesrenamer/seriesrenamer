@@ -295,7 +295,7 @@ namespace Renamer
                 //Delete all empty folders code
                 Helper.DeleteAllEmptyFolders(Helper.ReadProperty(Config.LastDirectory), new List<string>(Helper.ReadProperties(Config.IgnoreFiles)));
             }
-            
+            Logger.Instance.LogMessage("Renaming (and possibly moving and deleting) finished!", LogLevel.INFO);
         }
 
         public void RenameShow(string from, string to)

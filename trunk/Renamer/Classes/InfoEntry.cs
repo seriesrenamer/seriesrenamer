@@ -615,19 +615,23 @@ namespace Renamer.Classes
                 //figure out if we are in a season dir
                 string[] seasondirs = Helper.ReadProperties(Config.Extract);
                 string aSeasondir = "";
-                string[] Directories = Directory.GetDirectories(path);
-                for (int i = 0; i < seasondirs.Length; i++)
+                
+                if (Directory.Exists(path))
                 {
-                    foreach (string dir in Directories)
+                    string[] Directories = Directory.GetDirectories(path);                
+                    for (int i = 0; i < seasondirs.Length; i++)
                     {
-                        aSeasondir = RegexConverter.replaceSeriesnameAndSeason(seasondirs[i], nameOfSeries, season);
-                        if (dirs.Length > 1)
+                        foreach (string dir in Directories)
                         {
-                            Match m = Regex.Match(dir, aSeasondir);
-
-                            if (m.Success)
+                            aSeasondir = RegexConverter.replaceSeriesnameAndSeason(seasondirs[i], nameOfSeries, season);
+                            if (dirs.Length > 1)
                             {
-                                return path + System.IO.Path.DirectorySeparatorChar + Path.GetFileName(dir);
+                                Match m = Regex.Match(dir, aSeasondir);
+
+                                if (m.Success)
+                                {
+                                    return path + System.IO.Path.DirectorySeparatorChar + Path.GetFileName(dir);
+                                }
                             }
                         }
                     }
