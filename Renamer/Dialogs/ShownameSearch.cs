@@ -62,28 +62,7 @@ namespace Renamer.Dialogs
                     {
                         cb.Items.Add(key);
                     }
-                    cb.SelectedIndex = 0;
-                    //Restore previously selected result
-                    if (provider.SelectedResults.ContainsKey(ps.SearchString) && cb.Items.Contains(provider.SelectedResults[ps.SearchString]))
-                    {
-                        cb.SelectedIndex = cb.Items.IndexOf(provider.SelectedResults[ps.SearchString]);
-                    }
-                    else
-                    {
-                        List<string> languages = new List<string>(Helper.ReadProperties(Config.Languages));
-                        if (languages.Count > 0)
-                        {
-                            for (int j = 0; j < cb.Items.Count; j++)
-                            {
-                                string str = cb.Items[j].ToString();
-                                if (Regex.IsMatch(str, languages[0]))
-                                {
-                                    cb.SelectedIndex = j;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    FindBestSearchResult(cb, ps.SearchString);
                 }
                 else
                 {
@@ -115,6 +94,39 @@ namespace Renamer.Dialogs
             BringToFront();
         }
 
+        public void FindBestSearchResult(ComboBox cbResults, string SearchString)
+        {
+            RelationProvider provider = RelationProvider.GetCurrentProvider();
+            cbResults.SelectedIndex = 0;
+            //Restore previously selected result
+            if (provider.SelectedResults.ContainsKey(SearchString) && cbResults.Items.Contains(provider.SelectedResults[SearchString]))
+            {
+                cbResults.SelectedIndex = cbResults.Items.IndexOf(provider.SelectedResults[SearchString]);
+            }
+            else
+            {
+                List<string> languages = new List<string>(Helper.ReadProperties(Config.Languages));
+                if (languages.Count > 0)
+                {
+                    //get a list of matching results with correct language, then use shortest one
+                    int minlength = Int32.MaxValue;
+                    int pos = 0;
+                    for (int j = 0; j < cbResults.Items.Count; j++)
+                    {
+                        string str = cbResults.Items[j].ToString();
+                        if (Regex.IsMatch(str, languages[0]))
+                        {
+                            if (str.Length < minlength)
+                            {
+                                minlength = str.Length;
+                                pos = j;
+                            }
+                        }
+                    }                    
+                    cbResults.SelectedIndex = pos;
+                }
+            }
+        }
         public void SearchBoxKeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -142,27 +154,7 @@ namespace Renamer.Dialogs
                 {
                     cbResults.Items.Add(s);
                 }
-                cbResults.SelectedIndex = 0;
-                if (provider.SelectedResults.ContainsKey(Search.SearchString) && cbResults.Items.Contains(provider.SelectedResults[Search.SearchString]))
-                {
-                    cbResults.SelectedIndex = cbResults.Items.IndexOf(provider.SelectedResults[Search.SearchString]);
-                }
-                else
-                {
-                    List<string> languages = new List<string>(Helper.ReadProperties(Config.Languages));
-                    if (languages.Count > 0)
-                    {
-                        for (int j = 0; j < cbResults.Items.Count; j++)
-                        {
-                            string str = cbResults.Items[j].ToString();
-                            if (Regex.IsMatch(str, languages[0]))
-                            {
-                                cbResults.SelectedIndex = j;
-                                break;
-                            }
-                        }
-                    }
-                }
+                FindBestSearchResult(cbResults, Search.SearchString);
             }
             else
             {
