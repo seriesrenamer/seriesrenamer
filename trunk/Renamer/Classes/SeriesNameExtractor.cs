@@ -118,20 +118,22 @@ namespace Renamer.Classes
                     m = Regex.Match(str, pattern, RegexOptions.IgnoreCase);
                     if (m.Success) // && filename.Length != matchedname.Length + m.Groups["pos"].Value.Length)
                     {
+                        //try to use the part of the name that goes from 0 to pos as showname
                         string matchedname = str.Substring(0, m.Groups["pos"].Index);
-                        if (m.Groups["pos"].Index == 0) {
-                            int startOfName = m.Groups["pos"].Index + m.Groups["pos"].Length;
-                            string seperator = str.Substring(startOfName - 1, 1);
-                            matchedname = str.Substring(startOfName, str.IndexOf(seperator, startOfName) - startOfName);
+                        //if pos is 0, this means that there is no name :(
+                        if (m.Groups["pos"].Index != 0)
+                        {
+                            if (Regex.Match(matchedname, pathBlacklist, RegexOptions.IgnoreCase).Success)
+                            {
+                                matchedname = null;
+                                seriesNameFromDirectory = false;
+                            }
+                            if (name == null)
+                            {
+                                name = matchedname;
+                            }
+                            break;
                         }
-                        if (Regex.Match(matchedname, pathBlacklist, RegexOptions.IgnoreCase).Success) {
-                            matchedname = null;
-                            seriesNameFromDirectory = false;
-                        }
-                        if (name == null) {
-                            name = matchedname;
-                        }
-                        break;
                     }
                 }
             }
