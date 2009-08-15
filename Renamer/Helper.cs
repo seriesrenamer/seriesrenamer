@@ -462,26 +462,31 @@ namespace Renamer
             List<FileSystemInfo> all = new List<FileSystemInfo>(dir.GetFileSystemInfos());
             if (depth >= Convert.ToInt32(Helper.ReadProperty(Config.MaxDepth))) return files;
             foreach (FileSystemInfo f in all) {
-                if (f is DirectoryInfo) {
+                if (f is DirectoryInfo)
+                {
                     List<FileSystemInfo> deeperfiles = GetAllFilesRecursively((DirectoryInfo)f, pattern, depth + 1, ref count, worker);
-                    if (deeperfiles != null) {
-                        files.AddRange(deeperfiles);                        
+                    if (deeperfiles != null)
+                    {
+                        files.AddRange(deeperfiles);
                     }
                 }
-            }
-            count += files.Count;
+                else
+                {
+                    count++;
+                }
+            }            
             //weird threading issues force me to create a new var here which is no reference
             int count2 = count;
             if (Form1.Instance.lblFileListingProgress.InvokeRequired)
             {
                 Form1.Instance.lblFileListingProgress.Invoke(new EventHandler(delegate
                 {
-                    Form1.Instance.lblFileListingProgress.Text = "Found " + count2 + " files so far.";
+                    Form1.Instance.lblFileListingProgress.Text = "Found " + count2 + " files so far...";
                 }));
             }
             else
             {
-                Form1.Instance.lblFileListingProgress.Text = "Found " + count2 + " files so far.";
+                Form1.Instance.lblFileListingProgress.Text = "Found " + count2 + " files so far...";
             }
             return files;
         }

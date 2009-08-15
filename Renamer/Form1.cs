@@ -1778,7 +1778,6 @@ namespace Renamer
 
 
         #region Functions remaining in Form1
-        bool working = false;
         private void UpdateList(bool clear)
         {
             lstEntries.ClearObjects();
@@ -1794,6 +1793,8 @@ namespace Renamer
             btnConfig.Enabled = false;
             btnRename.Enabled = false;
             txtTarget.Enabled = false;
+            lstEntries.Enabled = false;
+            lblFolder.Visible = false;
             backgroundWorker1.RunWorkerAsync(clear);
             //DataGenerator.UpdateList(clear);
 
@@ -1948,6 +1949,7 @@ namespace Renamer
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             progressBar1.Visible = false;
+            lblFolder.Visible = true;
             btnCancel.Visible = false;
             btnCancel.Enabled = false;
             btnPath.Enabled = true;
@@ -1959,6 +1961,8 @@ namespace Renamer
             btnConfig.Enabled = true;
             btnRename.Enabled = true;
             txtTarget.Enabled = true;
+            lstEntries.Enabled = true;
+            lstEntries.Focus();
             if (!e.Cancelled)
             {
                 FillListView();

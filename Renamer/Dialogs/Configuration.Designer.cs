@@ -74,6 +74,10 @@ namespace Renamer.Dialogs
             this.chkCreateDirectoryStructure = new System.Windows.Forms.CheckBox();
             this.label15 = new System.Windows.Forms.Label();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cbLanguage = new System.Windows.Forms.ComboBox();
+            this.cbProviders = new System.Windows.Forms.ComboBox();
+            this.lblTitlesFrom = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.txtTags = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
@@ -102,10 +106,6 @@ namespace Renamer.Dialogs
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.btnDefaults = new System.Windows.Forms.Button();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-            this.cbProviders = new System.Windows.Forms.ComboBox();
-            this.lblTitlesFrom = new System.Windows.Forms.Label();
-            this.cbLanguage = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudTimeout)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSearchDepth)).BeginInit();
             this.tabPage1.SuspendLayout();
@@ -459,6 +459,41 @@ namespace Renamer.Dialogs
             this.toolTip.SetToolTip(this.tabPage1, "General settings which don\'t fit anywhere else");
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 94);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(116, 13);
+            this.label2.TabIndex = 36;
+            this.label2.Text = "Preferred title language";
+            // 
+            // cbLanguage
+            // 
+            this.cbLanguage.FormattingEnabled = true;
+            this.cbLanguage.Location = new System.Drawing.Point(368, 91);
+            this.cbLanguage.Name = "cbLanguage";
+            this.cbLanguage.Size = new System.Drawing.Size(186, 21);
+            this.cbLanguage.TabIndex = 35;
+            // 
+            // cbProviders
+            // 
+            this.cbProviders.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbProviders.FormattingEnabled = true;
+            this.cbProviders.Location = new System.Drawing.Point(368, 64);
+            this.cbProviders.Name = "cbProviders";
+            this.cbProviders.Size = new System.Drawing.Size(186, 21);
+            this.cbProviders.TabIndex = 34;
+            // 
+            // lblTitlesFrom
+            // 
+            this.lblTitlesFrom.AutoSize = true;
+            this.lblTitlesFrom.Location = new System.Drawing.Point(12, 67);
+            this.lblTitlesFrom.Name = "lblTitlesFrom";
+            this.lblTitlesFrom.Size = new System.Drawing.Size(130, 13);
+            this.lblTitlesFrom.TabIndex = 33;
+            this.lblTitlesFrom.Text = "Default title search source";
+            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.txtTags);
@@ -758,41 +793,6 @@ namespace Renamer.Dialogs
             this.btnDefaults.Text = "Defaults";
             this.btnDefaults.UseVisualStyleBackColor = true;
             this.btnDefaults.Click += new System.EventHandler(this.btnDefaults_Click);
-            // 
-            // cbProviders
-            // 
-            this.cbProviders.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbProviders.FormattingEnabled = true;
-            this.cbProviders.Location = new System.Drawing.Point(368, 64);
-            this.cbProviders.Name = "cbProviders";
-            this.cbProviders.Size = new System.Drawing.Size(186, 21);
-            this.cbProviders.TabIndex = 34;
-            // 
-            // lblTitlesFrom
-            // 
-            this.lblTitlesFrom.AutoSize = true;
-            this.lblTitlesFrom.Location = new System.Drawing.Point(12, 67);
-            this.lblTitlesFrom.Name = "lblTitlesFrom";
-            this.lblTitlesFrom.Size = new System.Drawing.Size(130, 13);
-            this.lblTitlesFrom.TabIndex = 33;
-            this.lblTitlesFrom.Text = "Default title search source";
-            // 
-            // cbLanguage
-            // 
-            this.cbLanguage.FormattingEnabled = true;
-            this.cbLanguage.Location = new System.Drawing.Point(368, 91);
-            this.cbLanguage.Name = "cbLanguage";
-            this.cbLanguage.Size = new System.Drawing.Size(186, 21);
-            this.cbLanguage.TabIndex = 35;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 94);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(116, 13);
-            this.label2.TabIndex = 36;
-            this.label2.Text = "Preferred title language";
             // 
             // Configuration
             // 
