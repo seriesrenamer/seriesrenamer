@@ -159,8 +159,9 @@ namespace Renamer.Classes
 
                 //scan for subtitle files in temp folder             
                 List<FileSystemInfo> Files = new List<FileSystemInfo>();
+                int count = 0;
                 foreach (string ex in extensions) {
-                    List<FileSystemInfo> fsi = Helper.GetAllFilesRecursively(folder, "*." + ex);
+                    List<FileSystemInfo> fsi = Helper.GetAllFilesRecursively(folder, "*." + ex, ref count, null);
                     Files.AddRange(fsi);
                 }
                 string[] patterns = Helper.ReadProperties(Config.EpIdentifier);

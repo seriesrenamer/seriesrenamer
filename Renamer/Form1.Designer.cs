@@ -45,6 +45,15 @@ namespace Renamer
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.scContainer = new System.Windows.Forms.SplitContainer();
+            this.lstEntries = new BrightIdeasSoftware.FastObjectListView();
+            this.ColumnSource = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnFilepath = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnShowname = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnSeason = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnEpisode = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnEpisodeName = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnDestination = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnNewFilename = new BrightIdeasSoftware.OLVColumn();
             this.contextFiles = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editSubtitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -110,20 +119,14 @@ namespace Renamer
             this.rtbLog = new System.Windows.Forms.RichTextBox();
             this.fbdPath = new System.Windows.Forms.FolderBrowserDialog();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.lstEntries = new BrightIdeasSoftware.FastObjectListView();
-            this.ColumnSource = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnFilepath = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnShowname = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnSeason = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnEpisode = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnEpisodeName = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnDestination = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnNewFilename = new BrightIdeasSoftware.OLVColumn();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.btnCancel = new System.Windows.Forms.Button();
+            this.lblFileListingProgress = new System.Windows.Forms.Label();
             this.scContainer.Panel1.SuspendLayout();
             this.scContainer.Panel2.SuspendLayout();
             this.scContainer.SuspendLayout();
-            this.contextFiles.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lstEntries)).BeginInit();
+            this.contextFiles.SuspendLayout();
             this.SuspendLayout();
             // 
             // scContainer
@@ -138,6 +141,8 @@ namespace Renamer
             // 
             // scContainer.Panel1
             // 
+            this.scContainer.Panel1.Controls.Add(this.lblFileListingProgress);
+            this.scContainer.Panel1.Controls.Add(this.btnCancel);
             this.scContainer.Panel1.Controls.Add(this.lstEntries);
             this.scContainer.Panel1.Controls.Add(this.progressBar1);
             this.scContainer.Panel1.Controls.Add(this.btnOpen);
@@ -168,6 +173,96 @@ namespace Renamer
             this.scContainer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.scContainer_MouseDown);
             this.scContainer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.scContainer_MouseUp);
             // 
+            // lstEntries
+            // 
+            this.lstEntries.AllColumns.Add(this.ColumnSource);
+            this.lstEntries.AllColumns.Add(this.ColumnFilepath);
+            this.lstEntries.AllColumns.Add(this.ColumnShowname);
+            this.lstEntries.AllColumns.Add(this.ColumnSeason);
+            this.lstEntries.AllColumns.Add(this.ColumnEpisode);
+            this.lstEntries.AllColumns.Add(this.ColumnEpisodeName);
+            this.lstEntries.AllColumns.Add(this.ColumnDestination);
+            this.lstEntries.AllColumns.Add(this.ColumnNewFilename);
+            this.lstEntries.AllowColumnReorder = true;
+            this.lstEntries.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lstEntries.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
+            this.lstEntries.CheckBoxes = true;
+            this.lstEntries.CheckedAspectName = "";
+            this.lstEntries.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.ColumnSource,
+            this.ColumnFilepath,
+            this.ColumnShowname,
+            this.ColumnSeason,
+            this.ColumnEpisode,
+            this.ColumnEpisodeName,
+            this.ColumnDestination,
+            this.ColumnNewFilename});
+            this.lstEntries.ContextMenuStrip = this.contextFiles;
+            this.lstEntries.EmptyListMsg = "No matching files in this folder";
+            this.lstEntries.EmptyListMsgFont = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lstEntries.FullRowSelect = true;
+            this.lstEntries.Location = new System.Drawing.Point(12, 33);
+            this.lstEntries.Name = "lstEntries";
+            this.lstEntries.SelectColumnsOnRightClick = false;
+            this.lstEntries.ShowGroups = false;
+            this.lstEntries.ShowImagesOnSubItems = true;
+            this.lstEntries.ShowItemToolTips = true;
+            this.lstEntries.Size = new System.Drawing.Size(996, 427);
+            this.lstEntries.TabIndex = 17;
+            this.lstEntries.UseCompatibleStateImageBehavior = false;
+            this.lstEntries.View = System.Windows.Forms.View.Details;
+            this.lstEntries.VirtualMode = true;
+            this.lstEntries.CellEditFinishing += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditFinishing);
+            this.lstEntries.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstEntries_KeyDown);
+            this.lstEntries.CellEditStarting += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditStarting);
+            this.lstEntries.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstEntries_DragDrop);
+            this.lstEntries.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstEntries_DragEnter);
+            // 
+            // ColumnSource
+            // 
+            this.ColumnSource.AspectName = "Filename";
+            this.ColumnSource.IsEditable = false;
+            this.ColumnSource.Text = "Old Filename";
+            // 
+            // ColumnFilepath
+            // 
+            this.ColumnFilepath.AspectName = "FilePath.Path";
+            this.ColumnFilepath.IsEditable = false;
+            this.ColumnFilepath.Text = "Filepath";
+            // 
+            // ColumnShowname
+            // 
+            this.ColumnShowname.AspectName = "ShowName";
+            this.ColumnShowname.Text = "Showname";
+            // 
+            // ColumnSeason
+            // 
+            this.ColumnSeason.AspectName = "Season";
+            this.ColumnSeason.Text = "Season";
+            // 
+            // ColumnEpisode
+            // 
+            this.ColumnEpisode.AspectName = "Episode";
+            this.ColumnEpisode.Text = "Episode";
+            // 
+            // ColumnEpisodeName
+            // 
+            this.ColumnEpisodeName.Text = "Episode Title";
+            // 
+            // ColumnDestination
+            // 
+            this.ColumnDestination.AspectName = "Destination";
+            this.ColumnDestination.Text = "Destination";
+            this.ColumnDestination.Width = 295;
+            // 
+            // ColumnNewFilename
+            // 
+            this.ColumnNewFilename.AspectName = "NewFilename";
+            this.ColumnNewFilename.Text = "New Filename";
+            this.ColumnNewFilename.Width = 150;
+            // 
             // contextFiles
             // 
             this.contextFiles.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -191,41 +286,41 @@ namespace Renamer
             this.regexTesterToolStripMenuItem});
             this.contextFiles.Name = "contextFiles";
             this.contextFiles.ShowImageMargin = false;
-            this.contextFiles.Size = new System.Drawing.Size(241, 374);
+            this.contextFiles.Size = new System.Drawing.Size(239, 352);
             this.contextFiles.Opening += new System.ComponentModel.CancelEventHandler(this.contextFiles_Opening);
             // 
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.viewToolStripMenuItem.Text = "Open";
             this.viewToolStripMenuItem.Click += new System.EventHandler(this.viewToolStripMenuItem_Click);
             // 
             // editSubtitleToolStripMenuItem
             // 
             this.editSubtitleToolStripMenuItem.Name = "editSubtitleToolStripMenuItem";
-            this.editSubtitleToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.editSubtitleToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.editSubtitleToolStripMenuItem.Text = "Edit Subtitle";
             this.editSubtitleToolStripMenuItem.Click += new System.EventHandler(this.editSubtitleToolStripMenuItem_Click);
             // 
             // markAsMovieToolStripMenuItem
             // 
             this.markAsMovieToolStripMenuItem.Name = "markAsMovieToolStripMenuItem";
-            this.markAsMovieToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.markAsMovieToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.markAsMovieToolStripMenuItem.Text = "Mark as Movie";
             this.markAsMovieToolStripMenuItem.Click += new System.EventHandler(this.markAsMovieToolStripMenuItem_Click);
             // 
             // markAsTVSeriesToolStripMenuItem
             // 
             this.markAsTVSeriesToolStripMenuItem.Name = "markAsTVSeriesToolStripMenuItem";
-            this.markAsTVSeriesToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.markAsTVSeriesToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.markAsTVSeriesToolStripMenuItem.Text = "Mark as TV series";
             this.markAsTVSeriesToolStripMenuItem.Click += new System.EventHandler(this.markAsTVSeriesToolStripMenuItem_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(237, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(235, 6);
             // 
             // renamingToolStripMenuItem
             // 
@@ -235,7 +330,7 @@ namespace Renamer
             this.caseToolStripMenuItem,
             this.replaceInPathToolStripMenuItem});
             this.renamingToolStripMenuItem.Name = "renamingToolStripMenuItem";
-            this.renamingToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.renamingToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.renamingToolStripMenuItem.Text = "Renaming";
             // 
             // createDirectoryStructureToolStripMenuItem
@@ -244,20 +339,20 @@ namespace Renamer
             this.createDirectoryStructureToolStripMenuItem1,
             this.dontCreateDirectoryStructureToolStripMenuItem});
             this.createDirectoryStructureToolStripMenuItem.Name = "createDirectoryStructureToolStripMenuItem";
-            this.createDirectoryStructureToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+            this.createDirectoryStructureToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.createDirectoryStructureToolStripMenuItem.Text = "Create DirectoryStructure";
             // 
             // createDirectoryStructureToolStripMenuItem1
             // 
             this.createDirectoryStructureToolStripMenuItem1.Name = "createDirectoryStructureToolStripMenuItem1";
-            this.createDirectoryStructureToolStripMenuItem1.Size = new System.Drawing.Size(237, 22);
+            this.createDirectoryStructureToolStripMenuItem1.Size = new System.Drawing.Size(238, 22);
             this.createDirectoryStructureToolStripMenuItem1.Text = "Create directory structure";
             this.createDirectoryStructureToolStripMenuItem1.Click += new System.EventHandler(this.createDirectoryStructureToolStripMenuItem1_Click);
             // 
             // dontCreateDirectoryStructureToolStripMenuItem
             // 
             this.dontCreateDirectoryStructureToolStripMenuItem.Name = "dontCreateDirectoryStructureToolStripMenuItem";
-            this.dontCreateDirectoryStructureToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
+            this.dontCreateDirectoryStructureToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.dontCreateDirectoryStructureToolStripMenuItem.Text = "Don\'t create directory structure";
             this.dontCreateDirectoryStructureToolStripMenuItem.Click += new System.EventHandler(this.dontCreateDirectoryStructureToolStripMenuItem_Click);
             // 
@@ -268,27 +363,27 @@ namespace Renamer
             this.dontUseUmlautsToolStripMenuItem,
             this.useProvidedNamesToolStripMenuItem});
             this.useUmlautsToolStripMenuItem.Name = "useUmlautsToolStripMenuItem";
-            this.useUmlautsToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+            this.useUmlautsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.useUmlautsToolStripMenuItem.Text = "Use umlauts";
             // 
             // useUmlautsToolStripMenuItem1
             // 
             this.useUmlautsToolStripMenuItem1.Name = "useUmlautsToolStripMenuItem1";
-            this.useUmlautsToolStripMenuItem1.Size = new System.Drawing.Size(182, 22);
+            this.useUmlautsToolStripMenuItem1.Size = new System.Drawing.Size(181, 22);
             this.useUmlautsToolStripMenuItem1.Text = "Use umlauts";
             this.useUmlautsToolStripMenuItem1.Click += new System.EventHandler(this.useUmlautsToolStripMenuItem1_Click);
             // 
             // dontUseUmlautsToolStripMenuItem
             // 
             this.dontUseUmlautsToolStripMenuItem.Name = "dontUseUmlautsToolStripMenuItem";
-            this.dontUseUmlautsToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.dontUseUmlautsToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.dontUseUmlautsToolStripMenuItem.Text = "Don\'t use umlauts";
             this.dontUseUmlautsToolStripMenuItem.Click += new System.EventHandler(this.dontUseUmlautsToolStripMenuItem_Click);
             // 
             // useProvidedNamesToolStripMenuItem
             // 
             this.useProvidedNamesToolStripMenuItem.Name = "useProvidedNamesToolStripMenuItem";
-            this.useProvidedNamesToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.useProvidedNamesToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.useProvidedNamesToolStripMenuItem.Text = "Use provided names";
             this.useProvidedNamesToolStripMenuItem.Click += new System.EventHandler(this.useProvidedNamesToolStripMenuItem_Click);
             // 
@@ -300,34 +395,34 @@ namespace Renamer
             this.igNorEToolStripMenuItem,
             this.cAPSLOCKToolStripMenuItem});
             this.caseToolStripMenuItem.Name = "caseToolStripMenuItem";
-            this.caseToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+            this.caseToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.caseToolStripMenuItem.Text = "Case";
             // 
             // largeToolStripMenuItem
             // 
             this.largeToolStripMenuItem.Name = "largeToolStripMenuItem";
-            this.largeToolStripMenuItem.Size = new System.Drawing.Size(137, 22);
+            this.largeToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.largeToolStripMenuItem.Text = "Large";
             this.largeToolStripMenuItem.Click += new System.EventHandler(this.largeToolStripMenuItem_Click);
             // 
             // smallToolStripMenuItem
             // 
             this.smallToolStripMenuItem.Name = "smallToolStripMenuItem";
-            this.smallToolStripMenuItem.Size = new System.Drawing.Size(137, 22);
+            this.smallToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.smallToolStripMenuItem.Text = "small";
             this.smallToolStripMenuItem.Click += new System.EventHandler(this.smallToolStripMenuItem_Click);
             // 
             // igNorEToolStripMenuItem
             // 
             this.igNorEToolStripMenuItem.Name = "igNorEToolStripMenuItem";
-            this.igNorEToolStripMenuItem.Size = new System.Drawing.Size(137, 22);
+            this.igNorEToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.igNorEToolStripMenuItem.Text = "IgNorE";
             this.igNorEToolStripMenuItem.Click += new System.EventHandler(this.igNorEToolStripMenuItem_Click);
             // 
             // cAPSLOCKToolStripMenuItem
             // 
             this.cAPSLOCKToolStripMenuItem.Name = "cAPSLOCKToolStripMenuItem";
-            this.cAPSLOCKToolStripMenuItem.Size = new System.Drawing.Size(137, 22);
+            this.cAPSLOCKToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.cAPSLOCKToolStripMenuItem.Text = "CAPSLOCK";
             this.cAPSLOCKToolStripMenuItem.Click += new System.EventHandler(this.cAPSLOCKToolStripMenuItem_Click);
             // 
@@ -335,7 +430,7 @@ namespace Renamer
             // 
             this.replaceInPathToolStripMenuItem.Name = "replaceInPathToolStripMenuItem";
             this.replaceInPathToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
-            this.replaceInPathToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+            this.replaceInPathToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.replaceInPathToolStripMenuItem.Text = "Replace";
             this.replaceInPathToolStripMenuItem.Click += new System.EventHandler(this.replaceInPathToolStripMenuItem_Click);
             // 
@@ -347,13 +442,13 @@ namespace Renamer
             this.selectByKeywordToolStripMenuItem,
             this.selectSimilarToolStripMenuItem});
             this.selectToolStripMenuItem.Name = "selectToolStripMenuItem";
-            this.selectToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.selectToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.selectToolStripMenuItem.Text = "Select";
             // 
             // invertSelectionToolStripMenuItem
             // 
             this.invertSelectionToolStripMenuItem.Name = "invertSelectionToolStripMenuItem";
-            this.invertSelectionToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.invertSelectionToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.invertSelectionToolStripMenuItem.Text = "Invert selection";
             this.invertSelectionToolStripMenuItem.Click += new System.EventHandler(this.invertSelectionToolStripMenuItem_Click);
             // 
@@ -361,7 +456,7 @@ namespace Renamer
             // 
             this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
             this.selectAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.selectAllToolStripMenuItem.Text = "Select all";
             this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
             // 
@@ -369,14 +464,14 @@ namespace Renamer
             // 
             this.selectByKeywordToolStripMenuItem.Name = "selectByKeywordToolStripMenuItem";
             this.selectByKeywordToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.selectByKeywordToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.selectByKeywordToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.selectByKeywordToolStripMenuItem.Text = "Select by keyword";
             this.selectByKeywordToolStripMenuItem.Click += new System.EventHandler(this.selectByKeywordToolStripMenuItem_Click);
             // 
             // selectSimilarToolStripMenuItem
             // 
             this.selectSimilarToolStripMenuItem.Name = "selectSimilarToolStripMenuItem";
-            this.selectSimilarToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.selectSimilarToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.selectSimilarToolStripMenuItem.Text = "Select similar by name";
             this.selectSimilarToolStripMenuItem.Click += new System.EventHandler(this.byNameToolStripMenuItem_Click);
             // 
@@ -387,67 +482,67 @@ namespace Renamer
             this.uncheckAllToolStripMenuItem,
             this.invertCheckToolStripMenuItem});
             this.checkToolStripMenuItem.Name = "checkToolStripMenuItem";
-            this.checkToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.checkToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.checkToolStripMenuItem.Text = "Check";
             // 
             // checkAllToolStripMenuItem
             // 
             this.checkAllToolStripMenuItem.Name = "checkAllToolStripMenuItem";
-            this.checkAllToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.checkAllToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.checkAllToolStripMenuItem.Text = "Check all";
             this.checkAllToolStripMenuItem.Click += new System.EventHandler(this.checkAllToolStripMenuItem_Click);
             // 
             // uncheckAllToolStripMenuItem
             // 
             this.uncheckAllToolStripMenuItem.Name = "uncheckAllToolStripMenuItem";
-            this.uncheckAllToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.uncheckAllToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.uncheckAllToolStripMenuItem.Text = "Uncheck all";
             this.uncheckAllToolStripMenuItem.Click += new System.EventHandler(this.uncheckAllToolStripMenuItem_Click);
             // 
             // invertCheckToolStripMenuItem
             // 
             this.invertCheckToolStripMenuItem.Name = "invertCheckToolStripMenuItem";
-            this.invertCheckToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.invertCheckToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.invertCheckToolStripMenuItem.Text = "Invert Check";
             this.invertCheckToolStripMenuItem.Click += new System.EventHandler(this.invertCheckToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(237, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(235, 6);
             // 
             // setShownameToolStripMenuItem
             // 
             this.setShownameToolStripMenuItem.Name = "setShownameToolStripMenuItem";
-            this.setShownameToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.setShownameToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.setShownameToolStripMenuItem.Text = "Set Showname";
             this.setShownameToolStripMenuItem.Click += new System.EventHandler(this.setShownameToolStripMenuItem_Click);
             // 
             // setSeasonToolStripMenuItem
             // 
             this.setSeasonToolStripMenuItem.Name = "setSeasonToolStripMenuItem";
-            this.setSeasonToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.setSeasonToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.setSeasonToolStripMenuItem.Text = "Set Season";
             this.setSeasonToolStripMenuItem.Click += new System.EventHandler(this.setSeasonToolStripMenuItem_Click);
             // 
             // setEpisodesFromtoToolStripMenuItem
             // 
             this.setEpisodesFromtoToolStripMenuItem.Name = "setEpisodesFromtoToolStripMenuItem";
-            this.setEpisodesFromtoToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.setEpisodesFromtoToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.setEpisodesFromtoToolStripMenuItem.Text = "Set Episodes from...to...";
             this.setEpisodesFromtoToolStripMenuItem.Click += new System.EventHandler(this.setEpisodesFromtoToolStripMenuItem_Click);
             // 
             // setDestinationToolStripMenuItem
             // 
             this.setDestinationToolStripMenuItem.Name = "setDestinationToolStripMenuItem";
-            this.setDestinationToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.setDestinationToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.setDestinationToolStripMenuItem.Text = "Set Destination";
             this.setDestinationToolStripMenuItem.Click += new System.EventHandler(this.setDestinationToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(237, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(235, 6);
             // 
             // copyToolStripMenuItem
             // 
@@ -459,49 +554,49 @@ namespace Renamer
             this.destinationNewFileNameToolStripMenuItem,
             this.operationToolStripMenuItem});
             this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.copyToolStripMenuItem.Text = "Copy...";
             // 
             // originalNameToolStripMenuItem
             // 
             this.originalNameToolStripMenuItem.Name = "originalNameToolStripMenuItem";
             this.originalNameToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.originalNameToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
+            this.originalNameToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.originalNameToolStripMenuItem.Text = "Original Name";
             this.originalNameToolStripMenuItem.Click += new System.EventHandler(this.originalNameToolStripMenuItem_Click);
             // 
             // pathOrigNameToolStripMenuItem
             // 
             this.pathOrigNameToolStripMenuItem.Name = "pathOrigNameToolStripMenuItem";
-            this.pathOrigNameToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
+            this.pathOrigNameToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.pathOrigNameToolStripMenuItem.Text = "Path + Orig. Name";
             this.pathOrigNameToolStripMenuItem.Click += new System.EventHandler(this.pathOrigNameToolStripMenuItem_Click);
             // 
             // titleToolStripMenuItem
             // 
             this.titleToolStripMenuItem.Name = "titleToolStripMenuItem";
-            this.titleToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
+            this.titleToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.titleToolStripMenuItem.Text = "Title";
             this.titleToolStripMenuItem.Click += new System.EventHandler(this.titleToolStripMenuItem_Click);
             // 
             // newFileNameToolStripMenuItem
             // 
             this.newFileNameToolStripMenuItem.Name = "newFileNameToolStripMenuItem";
-            this.newFileNameToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
+            this.newFileNameToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.newFileNameToolStripMenuItem.Text = "New Filename";
             this.newFileNameToolStripMenuItem.Click += new System.EventHandler(this.newFileNameToolStripMenuItem_Click);
             // 
             // destinationNewFileNameToolStripMenuItem
             // 
             this.destinationNewFileNameToolStripMenuItem.Name = "destinationNewFileNameToolStripMenuItem";
-            this.destinationNewFileNameToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
+            this.destinationNewFileNameToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.destinationNewFileNameToolStripMenuItem.Text = "Destination + New Filename";
             this.destinationNewFileNameToolStripMenuItem.Click += new System.EventHandler(this.destinationNewFileNameToolStripMenuItem_Click);
             // 
             // operationToolStripMenuItem
             // 
             this.operationToolStripMenuItem.Name = "operationToolStripMenuItem";
-            this.operationToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
+            this.operationToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.operationToolStripMenuItem.Text = "Operation";
             this.operationToolStripMenuItem.Click += new System.EventHandler(this.operationToolStripMenuItem_Click);
             // 
@@ -509,7 +604,7 @@ namespace Renamer
             // 
             this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
             this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.refreshToolStripMenuItem.Text = "Refresh";
             this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
@@ -517,7 +612,7 @@ namespace Renamer
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
             this.deleteToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.deleteToolStripMenuItem.Text = "Delete";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
             // 
@@ -526,7 +621,7 @@ namespace Renamer
             this.regexTesterToolStripMenuItem.Name = "regexTesterToolStripMenuItem";
             this.regexTesterToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
                         | System.Windows.Forms.Keys.R)));
-            this.regexTesterToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.regexTesterToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.regexTesterToolStripMenuItem.Text = "RegexTester";
             this.regexTesterToolStripMenuItem.Visible = false;
             this.regexTesterToolStripMenuItem.Click += new System.EventHandler(this.regexTesterToolStripMenuItem_Click);
@@ -744,95 +839,35 @@ namespace Renamer
             this.fbdPath.Description = "Browse for folder containing series.";
             this.fbdPath.ShowNewFolderButton = false;
             // 
-            // lstEntries
+            // backgroundWorker1
             // 
-            this.lstEntries.AllColumns.Add(this.ColumnSource);
-            this.lstEntries.AllColumns.Add(this.ColumnFilepath);
-            this.lstEntries.AllColumns.Add(this.ColumnShowname);
-            this.lstEntries.AllColumns.Add(this.ColumnSeason);
-            this.lstEntries.AllColumns.Add(this.ColumnEpisode);
-            this.lstEntries.AllColumns.Add(this.ColumnEpisodeName);
-            this.lstEntries.AllColumns.Add(this.ColumnDestination);
-            this.lstEntries.AllColumns.Add(this.ColumnNewFilename);
-            this.lstEntries.AllowColumnReorder = true;
-            this.lstEntries.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.lstEntries.CellEditActivation = BrightIdeasSoftware.ObjectListView.CellEditActivateMode.DoubleClick;
-            this.lstEntries.CheckBoxes = true;
-            this.lstEntries.CheckedAspectName = "";
-            this.lstEntries.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.ColumnSource,
-            this.ColumnFilepath,
-            this.ColumnShowname,
-            this.ColumnSeason,
-            this.ColumnEpisode,
-            this.ColumnEpisodeName,
-            this.ColumnDestination,
-            this.ColumnNewFilename});
-            this.lstEntries.ContextMenuStrip = this.contextFiles;
-            this.lstEntries.EmptyListMsg = "No matching files in this folder";
-            this.lstEntries.EmptyListMsgFont = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lstEntries.FullRowSelect = true;
-            this.lstEntries.Location = new System.Drawing.Point(12, 33);
-            this.lstEntries.Name = "lstEntries";
-            this.lstEntries.SelectColumnsOnRightClick = false;
-            this.lstEntries.ShowGroups = false;
-            this.lstEntries.ShowImagesOnSubItems = true;
-            this.lstEntries.ShowItemToolTips = true;
-            this.lstEntries.Size = new System.Drawing.Size(996, 427);
-            this.lstEntries.TabIndex = 17;
-            this.lstEntries.UseCompatibleStateImageBehavior = false;
-            this.lstEntries.View = System.Windows.Forms.View.Details;
-            this.lstEntries.VirtualMode = true;
-            this.lstEntries.CellEditFinishing += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditFinishing);
-            this.lstEntries.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstEntries_KeyDown);
-            this.lstEntries.CellEditStarting += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditStarting);
-            this.lstEntries.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstEntries_DragDrop);
-            this.lstEntries.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstEntries_DragEnter);
+            this.backgroundWorker1.WorkerReportsProgress = true;
+            this.backgroundWorker1.WorkerSupportsCancellation = true;
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
+            this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
             // 
-            // ColumnSource
+            // btnCancel
             // 
-            this.ColumnSource.AspectName = "Filename";
-            this.ColumnSource.IsEditable = false;
-            this.ColumnSource.Text = "Old Filename";
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCancel.Enabled = false;
+            this.btnCancel.Location = new System.Drawing.Point(379, 4);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(153, 23);
+            this.btnCancel.TabIndex = 18;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Visible = false;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
-            // ColumnFilepath
+            // lblFileListingProgress
             // 
-            this.ColumnFilepath.AspectName = "FilePath.Path";
-            this.ColumnFilepath.IsEditable = false;
-            this.ColumnFilepath.Text = "Filepath";
-            // 
-            // ColumnShowname
-            // 
-            this.ColumnShowname.AspectName = "ShowName";
-            this.ColumnShowname.Text = "Showname";
-            // 
-            // ColumnSeason
-            // 
-            this.ColumnSeason.AspectName = "Season";
-            this.ColumnSeason.Text = "Season";
-            // 
-            // ColumnEpisode
-            // 
-            this.ColumnEpisode.AspectName = "Episode";
-            this.ColumnEpisode.Text = "Episode";
-            // 
-            // ColumnEpisodeName
-            // 
-            this.ColumnEpisodeName.Text = "Episode Title";
-            // 
-            // ColumnDestination
-            // 
-            this.ColumnDestination.AspectName = "Destination";
-            this.ColumnDestination.Text = "Destination";
-            this.ColumnDestination.Width = 295;
-            // 
-            // ColumnNewFilename
-            // 
-            this.ColumnNewFilename.AspectName = "NewFilename";
-            this.ColumnNewFilename.Text = "New Filename";
-            this.ColumnNewFilename.Width = 150;
+            this.lblFileListingProgress.AutoSize = true;
+            this.lblFileListingProgress.Location = new System.Drawing.Point(12, 9);
+            this.lblFileListingProgress.Name = "lblFileListingProgress";
+            this.lblFileListingProgress.Size = new System.Drawing.Size(0, 13);
+            this.lblFileListingProgress.TabIndex = 19;
+            this.lblFileListingProgress.Visible = false;
             // 
             // Form1
             // 
@@ -854,8 +889,8 @@ namespace Renamer
             this.scContainer.Panel2.ResumeLayout(false);
             this.scContainer.Panel2.PerformLayout();
             this.scContainer.ResumeLayout(false);
-            this.contextFiles.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.lstEntries)).EndInit();
+            this.contextFiles.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -936,6 +971,9 @@ namespace Renamer
         private BrightIdeasSoftware.OLVColumn ColumnNewFilename;
         private System.Windows.Forms.ToolStripMenuItem markAsMovieToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem markAsTVSeriesToolStripMenuItem;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.Button btnCancel;
+        public System.Windows.Forms.Label lblFileListingProgress;
     }
 }
 

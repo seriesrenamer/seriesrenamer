@@ -13,6 +13,7 @@ using Renamer.Dialogs;
 using System.Runtime.InteropServices;
 using Renamer.Classes.Configuration.Keywords;
 using Renamer.Classes.Provider;
+using System.ComponentModel;
 
 namespace Renamer
 {
@@ -539,8 +540,8 @@ namespace Renamer
         /// </summary>
         /// <param name="clear">if true, list is cleared first and unconnected subtitle files are scheduled to be renamed</param>
         /// <param name="KeepShowName">if set, show name isn't altered</param>
-        public static void UpdateList(bool clear) {
-
+        public static void UpdateList(bool clear, BackgroundWorker worker, DoWorkEventArgs e) {
+            worker.ReportProgress(0);
             InfoEntryManager infoManager = InfoEntryManager.Instance;
            
             // Clear list if desired, remove deleted files otherwise
@@ -572,10 +573,32 @@ namespace Renamer
                 }
                 //read all files with matching extension
                 List<FileSystemInfo> Files = new List<FileSystemInfo>();
+                int count = 0;
                 foreach (string ex in extensions) {
-                    Files.AddRange(Helper.GetAllFilesRecursively(path, "*." + ex));
+                    Files.AddRange(Helper.GetAllFilesRecursively(path, "*." + ex, ref count,worker));
                 }
 
+
+                if (worker.CancellationPending)
+                {
+                    e.Cancel = true;
+                    Logger.Instance.LogMessage("Cancelled opening folder.", LogLevel.INFO);
+                    return;
+                }
+
+                if (Form1.Instance.InvokeRequired)
+                {
+                    Form1.Instance.Invoke(new EventHandler(delegate
+                    {
+                        Form1.Instance.lblFileListingProgress.Visible = false;
+                        Form1.Instance.progressBar1.Visible = true;
+                    }));
+                }
+                else
+                {
+                    Form1.Instance.lblFileListingProgress.Visible = false;
+                    Form1.Instance.progressBar1.Visible = true;
+                }
 
                 //some declarations already for speed
                 string[] patterns = Helper.ReadProperties(Config.EpIdentifier);
@@ -589,9 +612,16 @@ namespace Renamer
                 DateTime dt;
                 string currentpath = "";
                 string MovieIndicator = String.Join("|", Helper.ReadProperties(Config.MovieIndicator));
-                Form1.Instance.progressBar1.Maximum = Files.Count;
+                //Form1.Instance.progressBar1.Maximum = Files.Count;
                 for(int f=0;f<Files.Count;f++){
-                    Form1.Instance.progressBar1.Value=f;
+                    if (worker.CancellationPending)
+                    {
+                        e.Cancel = true;
+                        Logger.Instance.LogMessage("Cancelled opening folder.", LogLevel.INFO);
+                        return;
+                    }
+                    //Form1.Instance.progressBar1.Value=f;
+                    worker.ReportProgress((int) ((double)f/((double)Files.Count)*100));
                     FileSystemInfo file=Files[f];
                     //showname and season recognized from path
                     DirectorySeason = -1;
