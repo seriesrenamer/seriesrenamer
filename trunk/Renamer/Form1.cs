@@ -1782,52 +1782,22 @@ namespace Renamer
         private void UpdateList(bool clear)
         {
             lstEntries.ClearObjects();
-            progressBar1.Visible = true;
-            DataGenerator.UpdateList(clear);
             progressBar1.Visible = false;
-            FillListView();
-            //also update some gui elements for the sake of it
-            txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
-            txtPath.Text = Helper.ReadProperty(Config.LastDirectory);            
-            string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
-            if (LastSubProvider == null)
-                LastSubProvider = "";
-            cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
-            btnTitles.Enabled = InfoEntryManager.Instance.Count > 0;
-            btnRename.Enabled = InfoEntryManager.Instance.Count > 0;
-            //make sure get titles and rename button are only enabled if there are recognized shownames of series
-            if(btnTitles.Enabled){
-                btnTitles.Enabled=false;
-                btnRename.Enabled = false;
-                foreach (InfoEntry ie in InfoEntryManager.Instance)
-                {
-                    if (!string.IsNullOrEmpty(ie.Showname))
-                    {
+            lblFileListingProgress.Visible = true;
+            txtPath.Visible = false;
+            btnCancel.Visible = true;
+            btnCancel.Enabled = true;
+            btnPath.Enabled = false;
+            btnOpen.Enabled = false;
+            btnPath.Visible = false;
+            btnOpen.Visible = false;
+            btnConfig.Enabled = false;
+            btnRename.Enabled = false;
+            txtTarget.Enabled = false;
+            backgroundWorker1.RunWorkerAsync(clear);
+            //DataGenerator.UpdateList(clear);
 
-                        btnRename.Enabled = true;
-                    }
-                    if (!ie.Movie && !string.IsNullOrEmpty(ie.Showname))
-                    {
-                        btnTitles.Enabled = true;
-                        break;
-                    }                    
-                }
-            }
-            btnSubs.Enabled = InfoEntryManager.Instance.Count > 0;
-            //make sure subtitle button is only enabled if there are video files to get subtitles for
-            if (btnSubs.Enabled)
-            {
-                btnSubs.Enabled = false;
-                foreach (InfoEntry ie in InfoEntryManager.Instance)
-                {
-                    if (ie.IsVideofile && !string.IsNullOrEmpty(ie.Showname))
-                    {
-                        btnSubs.Enabled = true;
-                        break;
-                    }
-                }
-            }
-            lstEntries.Refresh();
+            
         }
         #endregion        
 
@@ -1962,6 +1932,89 @@ namespace Renamer
         private void markAsTVSeriesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MarkAsTVShow();
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            DataGenerator.UpdateList((bool)e.Argument, worker,e);
+        }
+
+        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            this.progressBar1.Value = this.progressBar1.Maximum * e.ProgressPercentage/100;
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            progressBar1.Visible = false;
+            btnCancel.Visible = false;
+            btnCancel.Enabled = false;
+            btnPath.Enabled = true;
+            btnOpen.Enabled = true;
+            btnPath.Visible = true;
+            btnOpen.Visible = true;
+            lblFileListingProgress.Visible = false;
+            txtPath.Visible = true;
+            btnConfig.Enabled = true;
+            btnRename.Enabled = true;
+            txtTarget.Enabled = true;
+            if (!e.Cancelled)
+            {
+                FillListView();
+            }
+            else
+            {
+                InfoEntryManager.Instance.Clear();
+            }
+            //also update some gui elements for the sake of it
+            txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
+            txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
+            string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
+            if (LastSubProvider == null)
+                LastSubProvider = "";
+            cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
+            btnTitles.Enabled = InfoEntryManager.Instance.Count > 0;
+            btnRename.Enabled = InfoEntryManager.Instance.Count > 0;
+            //make sure get titles and rename button are only enabled if there are recognized shownames of series
+            if (btnTitles.Enabled)
+            {
+                btnTitles.Enabled = false;
+                btnRename.Enabled = false;
+                foreach (InfoEntry ie in InfoEntryManager.Instance)
+                {
+                    if (!string.IsNullOrEmpty(ie.Showname))
+                    {
+
+                        btnRename.Enabled = true;
+                    }
+                    if (!ie.Movie && !string.IsNullOrEmpty(ie.Showname))
+                    {
+                        btnTitles.Enabled = true;
+                        break;
+                    }
+                }
+            }
+            btnSubs.Enabled = InfoEntryManager.Instance.Count > 0;
+            //make sure subtitle button is only enabled if there are video files to get subtitles for
+            if (btnSubs.Enabled)
+            {
+                btnSubs.Enabled = false;
+                foreach (InfoEntry ie in InfoEntryManager.Instance)
+                {
+                    if (ie.IsVideofile && !string.IsNullOrEmpty(ie.Showname))
+                    {
+                        btnSubs.Enabled = true;
+                        break;
+                    }
+                }
+            }
+            lstEntries.Refresh();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            backgroundWorker1.CancelAsync();
         }
 
     }

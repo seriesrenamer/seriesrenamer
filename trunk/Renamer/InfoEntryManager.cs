@@ -400,6 +400,8 @@ namespace Renamer
             }
             DirectoryInfo currentpath = new DirectoryInfo(path);
 
+            //Skip this for now, it causes problems with networks
+            /*
             //fix casing of the path if user entered it
             string fixedpath = "";
             while (currentpath.Parent != null) {
@@ -414,8 +416,9 @@ namespace Renamer
                 }
             }
             path = fixedpath;
+             */
             //Same path, ignore
-            if (Helper.ReadProperty(Config.LastDirectory) == path) {
+            if (Helper.ReadProperty(Config.LastDirectory).ToLower() == path.ToLower()) {
                 return;
             }
             else {

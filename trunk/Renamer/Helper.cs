@@ -24,6 +24,7 @@ using Renamer.Classes;
 using Renamer.Classes.Configuration.Keywords;
 using Renamer.Classes.Configuration;
 using Renamer.Logging;
+using System.ComponentModel;
 namespace Renamer
 {
     /// <summary>
@@ -430,9 +431,9 @@ namespace Renamer
         /// <param name="directory">root folder</param>
         /// <param name="pattern">Pattern for file matching, "*" for all</param>
         /// <returns>List of FileSystemInfo classes from all matched files</returns>
-        public static List<FileSystemInfo> GetAllFilesRecursively(string directory, string pattern) {
+        public static List<FileSystemInfo> GetAllFilesRecursively(string directory, string pattern, ref int count, BackgroundWorker worker) {
             DirectoryInfo dir = new DirectoryInfo(directory);
-            return GetAllFilesRecursively(dir, pattern, 0);
+            return GetAllFilesRecursively(dir, pattern, 0, ref count, worker);
         }
 
         /// <summary>
@@ -441,8 +442,10 @@ namespace Renamer
         /// <param name="dir">current recursive root folder</param>
         /// <param name="pattern">Pattern for file matching, "*" for all</param>
         /// <param name="depth">Current recursive depth for cancelling recursion</param>
+        /// <param name="count">Total count of all listed files</param>
         /// <returns>List of FileSystemInfo classes from all matched files</returns>
-        private static List<FileSystemInfo> GetAllFilesRecursively(DirectoryInfo dir, string pattern, int depth) {
+        private static List<FileSystemInfo> GetAllFilesRecursively(DirectoryInfo dir, string pattern, int depth, ref int count, BackgroundWorker worker) {
+            if (worker!=null && worker.CancellationPending) return new List<FileSystemInfo>();
             List<FileSystemInfo> files;
             try {
                 files = new List<FileSystemInfo>(dir.GetFileSystemInfos(pattern));
@@ -460,11 +463,25 @@ namespace Renamer
             if (depth >= Convert.ToInt32(Helper.ReadProperty(Config.MaxDepth))) return files;
             foreach (FileSystemInfo f in all) {
                 if (f is DirectoryInfo) {
-                    List<FileSystemInfo> deeperfiles = GetAllFilesRecursively((DirectoryInfo)f, pattern, depth + 1);
+                    List<FileSystemInfo> deeperfiles = GetAllFilesRecursively((DirectoryInfo)f, pattern, depth + 1, ref count, worker);
                     if (deeperfiles != null) {
-                        files.AddRange(deeperfiles);
+                        files.AddRange(deeperfiles);                        
                     }
                 }
+            }
+            count += files.Count;
+            //weird threading issues force me to create a new var here which is no reference
+            int count2 = count;
+            if (Form1.Instance.lblFileListingProgress.InvokeRequired)
+            {
+                Form1.Instance.lblFileListingProgress.Invoke(new EventHandler(delegate
+                {
+                    Form1.Instance.lblFileListingProgress.Text = "Found " + count2 + " files so far.";
+                }));
+            }
+            else
+            {
+                Form1.Instance.lblFileListingProgress.Text = "Found " + count2 + " files so far.";
             }
             return files;
         }
