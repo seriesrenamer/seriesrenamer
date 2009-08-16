@@ -32,7 +32,6 @@ namespace Renamer
     /// </summary>
     public class Helper
     {
-
         public enum Languages : int { None, German, English, French, Italian };
 
         /// <summary>
@@ -502,6 +501,7 @@ namespace Renamer
         /// <returns>true if longstring contains shortstring</returns>
         public static bool InitialsMatch(string longstring, string shortstring)
         {
+            if (longstring != null && shortstring != null && longstring.ToLower() == shortstring.ToLower()) return true;
             //treat all word starts as capitals
             longstring = Helper.UpperEveryFirst(longstring);
             //remove spaces, because we want to match strings which are equal except of some spaces
@@ -637,7 +637,7 @@ namespace Renamer
         /// </summary>
         /// <param name="path">Path from which to delete folders</param>
         /// <param name="IgnoredFiletypes">List of extensions(without '.' at start) of filetypes which may be deleted</param>
-        public static void DeleteAllEmptyFolders(string path, List<string> IgnoredFiletypes)
+        public static void DeleteAllEmptyFolders(string path, List<string> IgnoredFiletypes,BackgroundWorker worker, DoWorkEventArgs e)
         {
             bool delete = true;
             string[] folders = Directory.GetDirectories(path);
@@ -645,7 +645,17 @@ namespace Renamer
             {
                 foreach (string folder in folders)
                 {
-                    DeleteAllEmptyFolders(folder, IgnoredFiletypes);
+                    if (worker.CancellationPending)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+                    DeleteAllEmptyFolders(folder, IgnoredFiletypes, worker, e);
+                    if (worker.CancellationPending)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
                 }
             }
             folders = Directory.GetDirectories(path);
@@ -658,7 +668,6 @@ namespace Renamer
             {
                 foreach (string s in files)
                 {
-
                     if (Path.GetExtension(s) == "" || !IgnoredFiletypes.Contains(Path.GetExtension(s).Substring(1)))
                     {
                         delete = false;

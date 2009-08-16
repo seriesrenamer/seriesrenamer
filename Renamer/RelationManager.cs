@@ -62,6 +62,7 @@ namespace Renamer
         /// <returns>The RelationCollection, or null if not found</returns>
         public void RemoveRelationCollection(string showname) {
             this.relations.Remove(this.GetRelationCollection(showname));
+            InfoEntryManager.Instance.ClearRelation(showname);
         }
 
         public void AddRelationCollection(RelationCollection rc) {
@@ -74,6 +75,7 @@ namespace Renamer
         }
         public void Clear() {
             this.relations.Clear();
+            InfoEntryManager.Instance.ClearRelations();
         }
         #endregion
 

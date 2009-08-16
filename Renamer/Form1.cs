@@ -69,7 +69,7 @@ namespace Renamer
 
         protected static Form1 instance;
         private static object m_lock = new object();
-
+        
         public static Form1 Instance
         {
             get
@@ -84,6 +84,18 @@ namespace Renamer
             {
                 instance = value;
             }
+        }
+
+        /// <summary>
+        /// Tasks for the BackgroundWorker thread
+        /// </summary>
+        public enum Task : int { OpenDirectory, DownloadData, CreateRelations, Rename };
+        public Task LastTask;
+
+        public struct WorkerArguments
+        {
+            public Task t;
+            public object[] args;
         }
         /// <summary>
         /// GUI constructor
@@ -146,9 +158,23 @@ namespace Renamer
         /// Main Rename function
         /// </summary>
         private void Rename() {
-            InfoEntryManager.Instance.Rename();
-            //Get a list of all involved folders
-            FillListView();
+            //Treat colliding files
+            foreach (InfoEntry ie in InfoEntryManager.Instance)
+            {
+                if (ie.ProcessingRequested)
+                {
+                    InfoEntry ieColliding = InfoEntryManager.Instance.GetCollidingInfoEntry(ie);
+                    while (ieColliding != null)
+                    {
+                        CollidingFiles cf = new CollidingFiles(ie, ieColliding);
+                        cf.ShowDialog();
+                        ieColliding = InfoEntryManager.Instance.GetCollidingInfoEntry(ie);
+                    }
+                }
+            }
+            WorkerArguments wa = new WorkerArguments();
+            wa.t = Task.Rename;
+            backgroundWorker1.RunWorkerAsync(wa);
         }
 
         #endregion
@@ -706,11 +732,11 @@ namespace Renamer
 
         //Fetch all title information etc yada yada yada blalblabla
         private void btnTitles_Click(object sender, EventArgs e) {
-            DataGenerator.GetAllTitles();
-            FillListView();
+            WorkerArguments wa=new WorkerArguments();
+            wa.t=Task.DownloadData;
+            SetBusyGUI();
+            backgroundWorker1.RunWorkerAsync(wa);
         }
-
-
 
         /*//Enter = Click "Get Titles" button
         private void cbTitle_KeyDown(object sender, KeyEventArgs e)
@@ -732,10 +758,17 @@ namespace Renamer
             if (e.KeyCode == Keys.Enter) {
                 //need to update the displayed path because it might be changed (tailing backlashes are removed, and added for drives ("C:\" instead of "C:"))
                 string path = txtPath.Text;
-                InfoEntryManager.Instance.SetPath(ref path);
-                txtPath.Text = path;
-                txtPath.SelectionStart = txtPath.Text.Length;
-                UpdateList(true);
+                if (Directory.Exists(path))
+                {
+                    InfoEntryManager.Instance.SetPath(ref path);
+                    txtPath.Text = path;
+                    txtPath.SelectionStart = txtPath.Text.Length;
+                    UpdateList(true);
+                }
+                else
+                {
+                    txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
+                }
             }
             else if (e.KeyCode == Keys.Escape) {
                 txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
@@ -750,7 +783,7 @@ namespace Renamer
 
         //Start renaming
         private void btnRename_Click(object sender, EventArgs e) {
-            Rename();
+            Rename();            
         }
 
         //Focus lost = store desired pattern and update names
@@ -1189,6 +1222,7 @@ namespace Renamer
         private void FillListView() {
             // TODO: show at least a progressbar while adding items, user can't see anything but processor utilization will be very high
             lstEntries.Items.Clear();
+            lstEntries.SetObjects(null);
             lstEntries.VirtualListSize = InfoEntryManager.Instance.Count;
             lstEntries.SetObjects(InfoEntryManager.Instance);
             lstEntries.Sort();
@@ -1781,22 +1815,14 @@ namespace Renamer
         private void UpdateList(bool clear)
         {
             lstEntries.ClearObjects();
+            SetBusyGUI();
             progressBar1.Visible = false;
             lblFileListingProgress.Visible = true;
-            txtPath.Visible = false;
-            btnCancel.Visible = true;
-            btnCancel.Enabled = true;
-            btnPath.Enabled = false;
-            btnOpen.Enabled = false;
-            btnPath.Visible = false;
-            btnOpen.Visible = false;
-            btnConfig.Enabled = false;
-            btnRename.Enabled = false;
-            txtTarget.Enabled = false;
-            lstEntries.Enabled = false;
-            lblFolder.Visible = false;
-            backgroundWorker1.RunWorkerAsync(clear);
-            //DataGenerator.UpdateList(clear);
+            
+            WorkerArguments wa = new WorkerArguments();
+            wa.t = Task.OpenDirectory;
+            wa.args = new object[] { clear };
+            backgroundWorker1.RunWorkerAsync(wa);
 
             
         }
@@ -1938,7 +1964,23 @@ namespace Renamer
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-            DataGenerator.UpdateList((bool)e.Argument, worker,e);
+            LastTask = ((WorkerArguments)e.Argument).t;
+            if (((WorkerArguments)e.Argument).t == Task.OpenDirectory)
+            {
+                DataGenerator.UpdateList((bool)((WorkerArguments)e.Argument).args[0], worker, e);
+            }
+            else if (((WorkerArguments)e.Argument).t == Task.DownloadData)
+            {
+                DataGenerator.GetAllTitles(worker,e);
+            }
+            else if (((WorkerArguments)e.Argument).t == Task.CreateRelations)
+            {
+                DataGenerator.GetAllRelations(worker, e);
+            }
+            else if (((WorkerArguments)e.Argument).t == Task.Rename)
+            {
+                InfoEntryManager.Instance.Rename(worker, e);
+            }
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -1947,6 +1989,120 @@ namespace Renamer
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            SetIdleGUI();
+            if (LastTask == Task.OpenDirectory)
+            {
+                if (!e.Cancelled)
+                {
+                    FillListView();
+                }
+                else
+                {
+                    InfoEntryManager.Instance.Clear();
+                }
+                //also update some gui elements for the sake of it
+                txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
+                txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
+                string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
+                if (LastSubProvider == null)
+                    LastSubProvider = "";
+                cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
+                btnTitles.Enabled = InfoEntryManager.Instance.Count > 0;
+                btnRename.Enabled = InfoEntryManager.Instance.Count > 0;
+                //make sure get titles and rename button are only enabled if there are recognized shownames of series
+                if (btnTitles.Enabled)
+                {
+                    btnTitles.Enabled = false;
+                    btnRename.Enabled = false;
+                    foreach (InfoEntry ie in InfoEntryManager.Instance)
+                    {
+                        if (!string.IsNullOrEmpty(ie.Showname))
+                        {
+                            btnRename.Enabled = true;
+                        }
+                        if (!ie.Movie && !string.IsNullOrEmpty(ie.Showname))
+                        {
+                            btnTitles.Enabled = true;
+                            break;
+                        }
+                    }
+                }
+                btnSubs.Enabled = InfoEntryManager.Instance.Count > 0;
+                //make sure subtitle button is only enabled if there are video files to get subtitles for
+                if (btnSubs.Enabled)
+                {
+                    btnSubs.Enabled = false;
+                    foreach (InfoEntry ie in InfoEntryManager.Instance)
+                    {
+                        if (ie.IsVideofile && !string.IsNullOrEmpty(ie.Showname))
+                        {
+                            btnSubs.Enabled = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (LastTask == Task.DownloadData && !e.Cancelled)
+            {
+                ShownameSearch ss = new ShownameSearch(DataGenerator.Results);
+                if (ss.ShowDialog(Form1.Instance) == DialogResult.OK)
+                {
+                    DataGenerator.Results = ss.Results;
+                    foreach (DataGenerator.ParsedSearch ps in DataGenerator.Results)
+                    {
+                        if (ps.SearchString != ps.Showname)
+                        {
+                            if (MessageBox.Show("Rename " + ps.Showname + " to " + ps.SearchString + "?", "Apply new Showname", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            {
+                                InfoEntryManager.Instance.RenameShow(ps.Showname, ps.SearchString);
+                            }
+                        }
+                        if (ps.Results != null && ps.Results.Count > 0)
+                        {
+                            //get rid of old relations
+                            RelationManager.Instance.RemoveRelationCollection(ps.Showname);
+                            foreach (InfoEntry ie in InfoEntryManager.Instance)
+                            {
+                                if (ie.Showname == ps.Showname && ie.ProcessingRequested)
+                                {
+                                    ie.Name = "";
+                                    ie.NewFilename = "";
+                                    ie.Language = ps.provider.Language;
+                                }
+                            }
+                        }
+                    }
+                    WorkerArguments wa = new WorkerArguments();
+                    wa.t = Task.CreateRelations;
+                    SetBusyGUI();
+                    backgroundWorker1.RunWorkerAsync(wa);
+                }
+            }
+            else if (LastTask == Task.CreateRelations && e.Cancelled)
+            {
+                RelationManager.Instance.Clear();
+            } 
+            FillListView();
+        }
+        public void SetBusyGUI()
+        {
+            progressBar1.Visible = true;
+            progressBar1.Value = 0;
+            lblFolder.Visible = false;
+            btnCancel.Visible = true;
+            btnCancel.Enabled = true;
+            btnPath.Enabled = false;
+            btnOpen.Enabled = false;
+            btnPath.Visible = false;
+            btnOpen.Visible = false;            
+            txtPath.Visible = false;
+            btnConfig.Enabled = false;
+            btnRename.Enabled = false;
+            txtTarget.Enabled = false;
+            lstEntries.Enabled = false;
+        }
+        public void SetIdleGUI()
         {
             progressBar1.Visible = false;
             lblFolder.Visible = true;
@@ -1963,59 +2119,7 @@ namespace Renamer
             txtTarget.Enabled = true;
             lstEntries.Enabled = true;
             lstEntries.Focus();
-            if (!e.Cancelled)
-            {
-                FillListView();
-            }
-            else
-            {
-                InfoEntryManager.Instance.Clear();
-            }
-            //also update some gui elements for the sake of it
-            txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
-            txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
-            string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
-            if (LastSubProvider == null)
-                LastSubProvider = "";
-            cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
-            btnTitles.Enabled = InfoEntryManager.Instance.Count > 0;
-            btnRename.Enabled = InfoEntryManager.Instance.Count > 0;
-            //make sure get titles and rename button are only enabled if there are recognized shownames of series
-            if (btnTitles.Enabled)
-            {
-                btnTitles.Enabled = false;
-                btnRename.Enabled = false;
-                foreach (InfoEntry ie in InfoEntryManager.Instance)
-                {
-                    if (!string.IsNullOrEmpty(ie.Showname))
-                    {
-
-                        btnRename.Enabled = true;
-                    }
-                    if (!ie.Movie && !string.IsNullOrEmpty(ie.Showname))
-                    {
-                        btnTitles.Enabled = true;
-                        break;
-                    }
-                }
-            }
-            btnSubs.Enabled = InfoEntryManager.Instance.Count > 0;
-            //make sure subtitle button is only enabled if there are video files to get subtitles for
-            if (btnSubs.Enabled)
-            {
-                btnSubs.Enabled = false;
-                foreach (InfoEntry ie in InfoEntryManager.Instance)
-                {
-                    if (ie.IsVideofile && !string.IsNullOrEmpty(ie.Showname))
-                    {
-                        btnSubs.Enabled = true;
-                        break;
-                    }
-                }
-            }
-            lstEntries.Refresh();
         }
-
         private void btnCancel_Click(object sender, EventArgs e)
         {
             backgroundWorker1.CancelAsync();

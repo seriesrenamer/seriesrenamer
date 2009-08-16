@@ -19,7 +19,8 @@ namespace Renamer
 {
     public class DataGenerator
     {
-        public static void GetAllTitles() {
+        public static List<ParsedSearch> Results;
+        public static void GetAllTitles(BackgroundWorker worker, DoWorkEventArgs e) {
             //make a list of shownames
             List<string> shownames = new List<string>();
             foreach (InfoEntry ie in InfoEntryManager.Instance) {
@@ -27,51 +28,39 @@ namespace Renamer
                     shownames.Add(ie.Showname);
                 }
             }
-            Form1.Instance.progressBar1.Maximum = shownames.Count;
-            Form1.Instance.progressBar1.Value = 0;
-            Form1.Instance.progressBar1.Visible = true;
             List<ParsedSearch> SearchResults = new List<ParsedSearch>();
+            int progress=0;
             // get titles for the entire list generated before
             foreach (string showname in shownames) {
-                SearchResults.Add(Search(RelationProvider.GetCurrentProvider(), showname, showname));
-                Form1.Instance.progressBar1.Value++;
-                //GetTitles(showname);
-            }
-            Form1.Instance.progressBar1.Visible = false;
-            ShownameSearch ss = new ShownameSearch(SearchResults);
-            if (ss.ShowDialog(Form1.Instance) == DialogResult.OK)
-            {
-                SearchResults = ss.Results;
-                Form1.Instance.progressBar1.Maximum = SearchResults.Count;
-                Form1.Instance.progressBar1.Value = 0;
-                Form1.Instance.progressBar1.Visible = true;
-                foreach (ParsedSearch ps in SearchResults)
+                if (worker.CancellationPending)
                 {
-                    if (ps.SearchString != ps.Showname)
-                    {
-                        if (MessageBox.Show("Rename " + ps.Showname + " to " + ps.SearchString + "?", "Apply new Showname", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                        {
-                            InfoEntryManager.Instance.RenameShow(ps.Showname, ps.SearchString);
-                        }
-                    }
-                    if (ps.Results != null && ps.Results.Count>0)
-                    {
-                        //get rid of old relations
-                        RelationManager.Instance.RemoveRelationCollection(ps.Showname);
-                        foreach (InfoEntry ie in InfoEntryManager.Instance)
-                        {
-                            if (ie.Showname == ps.Showname && ie.ProcessingRequested)
-                            {
-                                ie.Name = "";
-                                ie.NewFilename = "";
-                                ie.Language = ps.provider.Language;
-                            }
-                        }
-                        GetRelations((string)ps.Results[ps.SelectedResult], ps.Showname,ps.provider);                        
-                    }
-                    Form1.Instance.progressBar1.Value++;
+                    Results = null;
+                    e.Cancel = true;
+                    Logger.Instance.LogMessage("Cancelled searching for titles.", LogLevel.INFO);
+                    return;
                 }
-                Form1.Instance.progressBar1.Visible = false;
+                SearchResults.Add(Search(RelationProvider.GetCurrentProvider(), showname, showname));
+                progress++;
+                worker.ReportProgress((int)((double)progress / ((double)shownames.Count) * 100));
+            }
+            Results = SearchResults;
+        }
+            
+        public static void GetAllRelations(BackgroundWorker worker, DoWorkEventArgs e){            
+            int progress = 0;
+            foreach (ParsedSearch ps in Results)
+            {
+                if (ps.Results != null && ps.Results.Count > 0)
+                {
+                    if (worker.CancellationPending)
+                    {
+                        e.Cancel = true;
+                        break;
+                    }
+                    GetRelations((string)ps.Results[ps.SelectedResult], ps.Showname, ps.provider,worker,e);                    
+                }
+                progress++;
+                worker.ReportProgress((int)((double)progress / ((double)Results.Count) * 100));
             }
         }
 
@@ -400,7 +389,7 @@ namespace Renamer
         /// </summary>
         /// <param name="url">URL of the page to parse</param>
         /// <param name="Showname">Showname</param>
-        private static void GetRelations(string url, string Showname, RelationProvider provider) {
+        public static void GetRelations(string url, string Showname, RelationProvider provider,BackgroundWorker worker, DoWorkEventArgs dwea) {
             if (provider == null) {
                 Logger.Instance.LogMessage("GetRelations: No relation provider found/selected", LogLevel.ERROR);
                 return;
@@ -447,10 +436,10 @@ namespace Renamer
                 try {
                     responseHtml = (HttpWebResponse)(requestHtml.GetResponse());
                 }
-                catch (WebException e) {
+                catch (WebException ex) {
                     //Serienjunkies returns "(300) Mehrdeutige Umleitung" when an inexistant season is requested
-                    if (e.Message.Contains("(300)")) break;
-                    Logger.Instance.LogMessage(e.Message, LogLevel.ERROR);
+                    if (ex.Message.Contains("(300)")) break;
+                    Logger.Instance.LogMessage(ex.Message, LogLevel.ERROR);
                     if (responseHtml != null) {
                         responseHtml.Close();
                     }
@@ -541,7 +530,6 @@ namespace Renamer
         /// <param name="clear">if true, list is cleared first and unconnected subtitle files are scheduled to be renamed</param>
         /// <param name="KeepShowName">if set, show name isn't altered</param>
         public static void UpdateList(bool clear, BackgroundWorker worker, DoWorkEventArgs e) {
-            worker.ReportProgress(0);
             InfoEntryManager infoManager = InfoEntryManager.Instance;
            
             // Clear list if desired, remove deleted files otherwise
@@ -734,10 +722,11 @@ namespace Renamer
             int episode = -1;
             int season = -1;
             Logger.Instance.LogMessage("Extracting season and episode from " + ie.FilePath + Path.DirectorySeparatorChar+ie.Filename, LogLevel.DEBUG);
+            string cleanedname = Regex.Replace(ie.Filename, "\\[.*?\\]|\\(.{8}\\)", "");
             foreach (string pattern in patterns)
             {
                 //Try to match. If it works, get the season and the episode from the match
-                m = Regex.Match(ie.Filename, pattern, RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
+                m = Regex.Match(cleanedname, pattern, RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
                 if (m.Success)
                 {
                     Logger.Instance.LogMessage("This pattern produced a match: " + pattern, LogLevel.DEBUG);

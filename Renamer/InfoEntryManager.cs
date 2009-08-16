@@ -10,6 +10,7 @@ using Renamer.Dialogs;
 using System.Windows.Forms;
 using Renamer.Logging;
 using BrightIdeasSoftware;
+using System.ComponentModel;
 
 namespace Renamer
 {
@@ -255,24 +256,16 @@ namespace Renamer
         /// <summary>
         /// Main Rename function
         /// </summary>
-        public void Rename() {
-
-            //Treat colliding files
-            foreach (InfoEntry ie in this)
-            {
-                if (ie.ProcessingRequested)
-                {
-                    InfoEntry ieColliding = InfoEntryManager.Instance.GetCollidingInfoEntry(ie);
-                    while (ieColliding != null)
-                    {
-                        CollidingFiles cf = new CollidingFiles(ie, ieColliding);
-                        cf.ShowDialog();
-                        ieColliding = InfoEntryManager.Instance.GetCollidingInfoEntry(ie);
-                    }
-                }
-            }
+        public void Rename(BackgroundWorker worker, DoWorkEventArgs e) {
             //Go through all files and do stuff
             for (int i = 0; i < this.episodes.Count; i++) {
+                if (worker.CancellationPending)
+                {
+                    e.Cancel = true;
+                    Logger.Instance.LogMessage("Renaming Cancelled.", LogLevel.INFO);
+                    return;
+                }
+                worker.ReportProgress((int)((double)i / (double)this.episodes.Count * 100));
                 InfoEntry ie = InfoEntryManager.Instance[i];
                 if (ie.MarkedForDeletion&&ie.ProcessingRequested)
                 {
@@ -293,9 +286,16 @@ namespace Renamer
             }
             if (Helper.ReadBool(Config.DeleteEmptyFolders)) {
                 //Delete all empty folders code
-                Helper.DeleteAllEmptyFolders(Helper.ReadProperty(Config.LastDirectory), new List<string>(Helper.ReadProperties(Config.IgnoreFiles)));
+                Helper.DeleteAllEmptyFolders(Helper.ReadProperty(Config.LastDirectory), new List<string>(Helper.ReadProperties(Config.IgnoreFiles)),worker,e);
             }
-            Logger.Instance.LogMessage("Renaming (and possibly moving and deleting) finished!", LogLevel.INFO);
+            if (!e.Cancel)
+            {
+                Logger.Instance.LogMessage("Renaming (and possibly moving and deleting) finished!", LogLevel.INFO);
+            }
+            else
+            {
+                Logger.Instance.LogMessage("Renaming Cancelled.", LogLevel.INFO);
+            }
         }
 
         public void RenameShow(string from, string to)
@@ -400,23 +400,24 @@ namespace Renamer
             }
             DirectoryInfo currentpath = new DirectoryInfo(path);
 
-            //Skip this for now, it causes problems with networks
-            /*
-            //fix casing of the path if user entered it
-            string fixedpath = "";
-            while (currentpath.Parent != null) {
-                fixedpath = currentpath.Parent.GetDirectories(currentpath.Name)[0].Name + Path.DirectorySeparatorChar + fixedpath;
-                currentpath = currentpath.Parent;
-            }
-            fixedpath = currentpath.Name.ToUpper() + fixedpath;
-            fixedpath = fixedpath.TrimEnd(new char[] { Path.DirectorySeparatorChar });
-            if (fixedpath.Length == 2) {
-                if (char.IsLetter(fixedpath[0]) && fixedpath[1] == ':') {
-                    fixedpath = fixedpath + Path.DirectorySeparatorChar;
+            //Skip this for now on networks
+            
+            if(!path.StartsWith("\\\\")){
+                //fix casing of the path if user entered it
+                string fixedpath = "";
+                while (currentpath.Parent != null) {
+                    fixedpath = currentpath.Parent.GetDirectories(currentpath.Name)[0].Name + Path.DirectorySeparatorChar + fixedpath;
+                    currentpath = currentpath.Parent;
                 }
+                fixedpath = currentpath.Name.ToUpper() + fixedpath;
+                fixedpath = fixedpath.TrimEnd(new char[] { Path.DirectorySeparatorChar });
+                if (fixedpath.Length == 2) {
+                    if (char.IsLetter(fixedpath[0]) && fixedpath[1] == ':') {
+                        fixedpath = fixedpath + Path.DirectorySeparatorChar;
+                    }
+                }
+                path = fixedpath;
             }
-            path = fixedpath;
-             */
             //Same path, ignore
             if (Helper.ReadProperty(Config.LastDirectory).ToLower() == path.ToLower()) {
                 return;
@@ -487,5 +488,23 @@ namespace Renamer
             return count;
         }
         #endregion
+
+        public void ClearRelation(string showname)
+        {
+            foreach (InfoEntry ie in episodes)
+            {
+                if (ie.Showname == showname)
+                {
+                    ie.Name = "";
+                }
+            }
+        }
+        public void ClearRelations()
+        {
+            foreach (InfoEntry ie in episodes)
+            {
+                ie.Name = "";
+            }
+        }
     }
 }
