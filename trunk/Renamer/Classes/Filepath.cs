@@ -108,7 +108,7 @@ namespace Renamer.Classes
                 return;
             
             this.replaceAltDirectorySeperator();
-            path = path.Trim(DIRECTORY_SEPERATORS);
+            path = path.TrimEnd(DIRECTORY_SEPERATORS);
             if (this.path.Length == 2)
             {
                 this.trailingSlashCheck();
@@ -117,7 +117,7 @@ namespace Renamer.Classes
         }
         private void replaceDoubleSlashes()
         {
-            while (this.path.IndexOf(System.IO.Path.DirectorySeparatorChar.ToString() + System.IO.Path.DirectorySeparatorChar.ToString()) != -1)
+            while (this.path.IndexOf(System.IO.Path.DirectorySeparatorChar.ToString() + System.IO.Path.DirectorySeparatorChar.ToString()) >0)
             {
                 this.path = this.path.Replace(System.IO.Path.DirectorySeparatorChar.ToString() + System.IO.Path.DirectorySeparatorChar.ToString(), System.IO.Path.DirectorySeparatorChar.ToString());
             }

@@ -480,6 +480,7 @@ namespace Renamer.Classes
             }
             bool DifferentDestinationPath = FilePath.Path!=DestinationPath;
             //for placing files in directory structure, figure out if selected directory is show name, otherwise create one
+            bool isNetwork = FilePath.Path.StartsWith(""+Path.DirectorySeparatorChar + Path.DirectorySeparatorChar);
             string[] dirs = this.source.Folders;
             bool InSeriesDir = false;
             bool InSeasonDir = false;

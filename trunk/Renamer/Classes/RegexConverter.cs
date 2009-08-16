@@ -10,7 +10,7 @@ namespace Renamer.Classes
             easyRegex = easyRegex.Replace("%T", "*.?");
             if (easyRegex.Contains("%S%E")) {
                 easyRegex = easyRegex.Replace("%S", "(?<Season>\\d)");
-                easyRegex  = easyRegex.Replace("%E", "(?<Episode>\\d+)");
+                easyRegex  = easyRegex.Replace("%E", "(?<Episode>\\d\\d+)");
             }
             else {
                 easyRegex = easyRegex.Replace("%S", "(?<Season>\\d+)");
