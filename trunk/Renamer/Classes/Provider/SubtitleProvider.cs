@@ -65,7 +65,7 @@ namespace Renamer.Classes.Provider
                 }
             }
             status = status.TrimEnd(new char[] { ',' });
-            Logger.Instance.LogMessage(status, LogLevel.INFO);
+            //Logger.Instance.LogMessage(status, LogLevel.INFO);
         }
 
         public SubtitleProvider() {

@@ -22,6 +22,8 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
     <StartupObject>Renamer.Program</StartupObject>
     <ApplicationIcon>sr1.ico</ApplicationIcon>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
     <PublishUrl>C:\Projekte\C#\Renamer\Renamer\Publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Unc</InstallFrom>
@@ -73,6 +75,7 @@
   <ItemGroup>
     <Compile Include="Classes\Configuration\Keywords\Config.cs" />
     <Compile Include="Classes\Configuration\Keywords\ProviderConfig.cs" />
+    <Compile Include="Classes\FileCopy.cs" />
     <Compile Include="Classes\MovieNameExtractor.cs" />
     <Compile Include="Classes\NameCleanup.cs" />
     <Compile Include="Classes\RegexConverter.cs" />

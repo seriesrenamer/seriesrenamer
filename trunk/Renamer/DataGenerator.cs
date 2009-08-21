@@ -722,6 +722,7 @@ namespace Renamer
             int episode = -1;
             int season = -1;
             Logger.Instance.LogMessage("Extracting season and episode from " + ie.FilePath + Path.DirectorySeparatorChar+ie.Filename, LogLevel.DEBUG);
+            //[Tags] and (CRCXXXXX) are removed for recognition, since they might produce false positives
             string cleanedname = Regex.Replace(ie.Filename, "\\[.*?\\]|\\(.{8}\\)", "");
             foreach (string pattern in patterns)
             {

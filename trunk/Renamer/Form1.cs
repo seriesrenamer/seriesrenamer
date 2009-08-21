@@ -131,7 +131,7 @@ namespace Renamer
                 ie.NewFilename = "";
                 ie.RemoveVideoTags();
             }
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace Renamer
                 ie.NewFilename = "";
                 DataGenerator.ExtractSeasonAndEpisode(ie);
             }
-            lstEntries.Refresh();
+            UpdateGUI();
         }
         #endregion
 
@@ -172,6 +172,7 @@ namespace Renamer
                     }
                 }
             }
+            SetBusyGUI();
             WorkerArguments wa = new WorkerArguments();
             wa.t = Task.Rename;
             backgroundWorker1.RunWorkerAsync(wa);
@@ -781,6 +782,46 @@ namespace Renamer
             InfoEntryManager.Instance.SetPath(txtPath.Text);
         }
 
+        private void UpdateGUI()
+        {
+            //also update some gui elements for the sake of it
+            btnTitles.Enabled = InfoEntryManager.Instance.Count > 0;
+            btnRename.Enabled = InfoEntryManager.Instance.Count > 0;
+            //make sure get titles and rename button are only enabled if there are recognized shownames of series
+            if (btnTitles.Enabled)
+            {
+                btnTitles.Enabled = false;
+                btnRename.Enabled = false;
+                foreach (InfoEntry ie in InfoEntryManager.Instance)
+                {
+                    if (!string.IsNullOrEmpty(ie.Showname))
+                    {
+                        btnRename.Enabled = true;
+                    }
+                    if (!ie.Movie && !string.IsNullOrEmpty(ie.Showname))
+                    {
+                        btnTitles.Enabled = true;
+                        break;
+                    }
+                }
+            }
+            btnSubs.Enabled = InfoEntryManager.Instance.Count > 0;
+            //make sure subtitle button is only enabled if there are video files to get subtitles for
+            if (btnSubs.Enabled)
+            {
+                btnSubs.Enabled = false;
+                foreach (InfoEntry ie in InfoEntryManager.Instance)
+                {
+                    if (ie.IsVideofile && !string.IsNullOrEmpty(ie.Showname))
+                    {
+                        btnSubs.Enabled = true;
+                        break;
+                    }
+                }
+            }
+            lstEntries.Refresh();
+        }
+
         //Start renaming
         private void btnRename_Click(object sender, EventArgs e) {
             Rename();            
@@ -807,6 +848,20 @@ namespace Renamer
             else if (e.KeyCode == Keys.Escape) {
                 txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
                 txtTarget.SelectionStart = txtTarget.Text.Length;
+            }else if ((e.KeyCode == Keys.Back) && e.Control) {
+                e.SuppressKeyPress = true;
+                int selStart = txtTarget.SelectionStart;
+                while (selStart > 0 && txtTarget.Text.Substring(selStart - 1, 1) == " ")
+                {
+                    selStart--;
+                }
+                int prevSpacePos = -1;
+                if (selStart != 0)
+                {
+                    prevSpacePos = txtTarget.Text.LastIndexOf(' ', selStart - 1);
+                }
+                txtTarget.Select(prevSpacePos + 1, txtTarget.SelectionStart - prevSpacePos - 1);
+                txtTarget.SelectedText = "";
             }
         }
 
@@ -1090,57 +1145,71 @@ namespace Renamer
 
         //Set season property for selected items
         private void setSeasonToolStripMenuItem_Click(object sender, EventArgs e) {
-            //yes we are smart and guess the season from existing ones
-            int sum = 0;
-            int count = 0;
-            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            if (lstEntries.SelectedIndices.Count == 1)
             {
-                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
-                InfoEntry ie = (InfoEntry)lvi.RowObject;
-                if (ie.Season != -1) {
-                    sum += ie.Season;
-                    count++;
-                }
+                lstEntries.EditSubItem((OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]], 3);
             }
-            int EstimatedSeason =1;
-            if (count > 0)
+            else if (lstEntries.SelectedIndices.Count > 1)
             {
-                EstimatedSeason = (int)Math.Round(((float)sum / (float)count));
-            }
-            EnterSeason es = new EnterSeason(EstimatedSeason);
-            if (es.ShowDialog() == DialogResult.OK) {
-                string basepath = Helper.ReadProperty(Config.LastDirectory);
-                bool createdirectorystructure = (Helper.ReadInt(Config.CreateDirectoryStructure) > 0);
-                bool UseSeasonDir = (Helper.ReadInt(Config.UseSeasonSubDir) > 0);
+                //yes we are smart and guess the season from existing ones
+                int sum = 0;
+                int count = 0;
                 for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
                 {
                     OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
                     InfoEntry ie = (InfoEntry)lvi.RowObject;
-                    ie.Season = es.season;                    
-                    if (ie.Destination != "") {
-                        ie.ProcessingRequested = true;
+                    if (ie.Season != -1)
+                    {
+                        sum += ie.Season;
+                        count++;
                     }
-                    lstEntries.RefreshItem(lvi);
+                }
+                int EstimatedSeason = 1;
+                if (count > 0)
+                {
+                    EstimatedSeason = (int)Math.Round(((float)sum / (float)count));
+                }
+                EnterSeason es = new EnterSeason(EstimatedSeason);
+                if (es.ShowDialog() == DialogResult.OK)
+                {
+                    string basepath = Helper.ReadProperty(Config.LastDirectory);
+                    bool createdirectorystructure = (Helper.ReadInt(Config.CreateDirectoryStructure) > 0);
+                    bool UseSeasonDir = (Helper.ReadInt(Config.UseSeasonSubDir) > 0);
+                    for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                    {
+                        OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                        InfoEntry ie = (InfoEntry)lvi.RowObject;
+                        ie.Season = es.season;
+                        if (ie.Destination != "")
+                        {
+                            ie.ProcessingRequested = true;
+                        }
+                    }
+                    UpdateGUI();
                 }
             }
-
         }
 
         //Set episodes for selected items to a range
         private void setEpisodesFromtoToolStripMenuItem_Click(object sender, EventArgs e) {
-            SetEpisodes se = new SetEpisodes(lstEntries.SelectedIndices.Count);
-            if (se.ShowDialog() == DialogResult.OK) {
-                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            if (lstEntries.SelectedIndices.Count == 1)
+            {
+                lstEntries.EditSubItem((OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]], 4);
+            }
+            else if (lstEntries.SelectedIndices.Count > 1)
+            {
+                SetEpisodes se = new SetEpisodes(lstEntries.SelectedIndices.Count);
+                if (se.ShowDialog() == DialogResult.OK)
                 {
-                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
-                    InfoEntry ie = (InfoEntry)lvi.RowObject;
-                    ie.Episode = (i + se.From);
-                    lstEntries.RefreshItem(lvi);
+                    for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                    {
+                        OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                        InfoEntry ie = (InfoEntry)lvi.RowObject;
+                        ie.Episode = (i + se.From);
+                    }
+                    UpdateGUI();
                 }
             }
-
-
-
         }
 
         //Refresh file list
@@ -1169,7 +1238,7 @@ namespace Renamer
                     Logger.Instance.LogMessage("Error deleting file: " + ex.Message, LogLevel.ERROR);
                 }
             }
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         //Open file
@@ -1201,15 +1270,23 @@ namespace Renamer
 
         //Set Destination
         private void setDestinationToolStripMenuItem_Click(object sender, EventArgs e) {
-            InputBox ib = new InputBox("Set Destination", "Set Destination directory for selected files", Helper.ReadProperty(Config.LastDirectory), InputBox.BrowseType.Folder, true);
-            if (ib.ShowDialog(this) == DialogResult.OK) {
-                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            if (lstEntries.SelectedIndices.Count == 1)
+            {
+                lstEntries.EditSubItem((OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]], 6);
+            }
+            else if (lstEntries.SelectedIndices.Count > 1)
+            {
+                InputBox ib = new InputBox("Set Destination", "Set Destination directory for selected files", Helper.ReadProperty(Config.LastDirectory), InputBox.BrowseType.Folder, true);
+                if (ib.ShowDialog(this) == DialogResult.OK)
                 {
-                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
-                    InfoEntry ie = (InfoEntry)lvi.RowObject;
-                    string destination = ib.input;
-                    ie.Destination = destination;
-                    lstEntries.RefreshItem(lvi);
+                    for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                    {
+                        OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                        InfoEntry ie = (InfoEntry)lvi.RowObject;
+                        string destination = ib.input;
+                        ie.Destination = destination;
+                    }
+                    UpdateGUI();
                 }
             }
         }
@@ -1305,7 +1382,7 @@ namespace Renamer
             };
             this.ColumnShowname.AspectPutter = delegate(object x, object newValue) {
                 ((InfoEntry)x).Showname = (string)newValue;
-                lstEntries.Refresh();
+                UpdateGUI();
             };
 
             //Season
@@ -1315,7 +1392,7 @@ namespace Renamer
             };
             this.ColumnSeason.AspectPutter = delegate(object x, object newValue) {
                 ((InfoEntry)x).Season = (int)newValue;
-                lstEntries.Refresh();            
+                UpdateGUI();
             };
 
             //Episode
@@ -1325,7 +1402,7 @@ namespace Renamer
             };
             this.ColumnEpisode.AspectPutter = delegate(object x, object newValue) {
                 ((InfoEntry)x).Episode = (int)newValue;
-                lstEntries.Refresh();            
+                UpdateGUI();
             };
 
             //Episode Name
@@ -1337,16 +1414,17 @@ namespace Renamer
                 ((InfoEntry)x).Name=(string)newValue; 
                 //backtrack to see if entered text matches a season/episode
                 RelationCollection rc = RelationManager.Instance.GetRelationCollection(((InfoEntry)x).Showname);
-                    if (rc != null) {
-                        foreach (Relation rel in rc) {
-                            //if found, set season and episode in gui and sync back to data
-                            if ((string)newValue == rel.Name) {
-                                ((InfoEntry)x).Season=rel.Season;
-                                ((InfoEntry)x).Episode=rel.Episode;
-                                break;
-                            }
+                if (rc != null) {
+                    foreach (Relation rel in rc) {
+                        //if found, set season and episode in gui and sync back to data
+                        if ((string)newValue == rel.Name) {
+                            ((InfoEntry)x).Season=rel.Season;
+                            ((InfoEntry)x).Episode=rel.Episode;
+                            break;
                         }
                     }
+                }
+                UpdateGUI();
             };
 
             //Destination
@@ -1354,9 +1432,9 @@ namespace Renamer
             {
                 return ((InfoEntry)x).Destination;
             };
-            this.ColumnDestination.AspectPutter = delegate(object x, object newValue) { 
-                ((InfoEntry)x).Destination=(string)newValue;
-                lstEntries.Refresh();
+            this.ColumnDestination.AspectPutter = delegate(object x, object newValue) {
+                ((InfoEntry)x).Destination = (string)newValue;
+                UpdateGUI();
             };
 
             //Filename
@@ -1365,8 +1443,8 @@ namespace Renamer
                 return ((InfoEntry)x).NewFilename;
             };
             this.ColumnNewFilename.AspectPutter = delegate(object x, object newValue) {
-                ((InfoEntry)x).NewFilename=(string)newValue;
-                lstEntries.Refresh();
+                ((InfoEntry)x).NewFilename = (string)newValue;
+                UpdateGUI();
             };
         }
 
@@ -1586,7 +1664,7 @@ namespace Renamer
 
                 //mark files for processing
                 ie.ProcessingRequested = true;
-                lstEntries.Refresh();
+                UpdateGUI();
             }
             if (count > 0) {
                 Logger.Instance.LogMessage(SearchString + " was replaced with " + ReplaceString + " in " + count + " fields.", LogLevel.INFO);
@@ -1663,7 +1741,7 @@ namespace Renamer
             }
             ((ToolStripMenuItem)sender).Checked = true;
             dontCreateDirectoryStructureToolStripMenuItem.Checked = false;
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         private void dontCreateDirectoryStructureToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1675,7 +1753,7 @@ namespace Renamer
             }
             ((ToolStripMenuItem)sender).Checked = true;
             createDirectoryStructureToolStripMenuItem.Checked = false;
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         private void useUmlautsToolStripMenuItem1_Click(object sender, EventArgs e) {
@@ -1688,7 +1766,7 @@ namespace Renamer
             ((ToolStripMenuItem)sender).Checked = true;
             dontUseUmlautsToolStripMenuItem.Checked = false;
             useProvidedNamesToolStripMenuItem.Checked = false;
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         private void dontUseUmlautsToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1701,7 +1779,7 @@ namespace Renamer
             ((ToolStripMenuItem)sender).Checked = true;
             useUmlautsToolStripMenuItem.Checked = false;
             useProvidedNamesToolStripMenuItem.Checked = false;
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         private void useProvidedNamesToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1714,7 +1792,7 @@ namespace Renamer
             ((ToolStripMenuItem)sender).Checked = true;
             useUmlautsToolStripMenuItem.Checked = false;
             dontUseUmlautsToolStripMenuItem.Checked = false;
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         private void largeToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1728,7 +1806,7 @@ namespace Renamer
             smallToolStripMenuItem.Checked = false;
             igNorEToolStripMenuItem.Checked = false;
             cAPSLOCKToolStripMenuItem.Checked = false;
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         private void smallToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1742,7 +1820,7 @@ namespace Renamer
             largeToolStripMenuItem.Checked = false;
             igNorEToolStripMenuItem.Checked = false;
             cAPSLOCKToolStripMenuItem.Checked = false;
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         private void igNorEToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1756,7 +1834,7 @@ namespace Renamer
             smallToolStripMenuItem.Checked = false;
             largeToolStripMenuItem.Checked = false;
             cAPSLOCKToolStripMenuItem.Checked = false;
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         private void cAPSLOCKToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -1770,36 +1848,48 @@ namespace Renamer
             smallToolStripMenuItem.Checked = false;
             igNorEToolStripMenuItem.Checked = false;
             largeToolStripMenuItem.Checked = false;
-            lstEntries.Refresh();
+            UpdateGUI();
         }
 
         private void setShownameToolStripMenuItem_Click(object sender, EventArgs e) {
-            Dictionary<string, int> ht = new Dictionary<string, int>();
-            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            if (lstEntries.SelectedIndices.Count == 1)
             {
-                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
-                InfoEntry ie = (InfoEntry)lvi.RowObject;
-                if (!ht.ContainsKey(ie.Showname)) {
-                    ht.Add(ie.Showname, 1);
-                }
-                else {
-                    ht[ie.Showname] += 1;
-                }
+                lstEntries.EditSubItem((OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]], 2);
             }
-            int max = 0;
-            string Showname = "";
-            foreach (KeyValuePair<string, int> pair in ht) {
-                if (pair.Value > max) {
-                    Showname = pair.Key;
-                }
-            }
-            EnterShowname es = new EnterShowname(Showname);
-            if (es.ShowDialog() == DialogResult.OK) {
+            else if (lstEntries.SelectedIndices.Count > 1)
+            {
+                Dictionary<string, int> ht = new Dictionary<string, int>();
                 for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
                 {
                     OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
-                    ((InfoEntry)lvi.RowObject).Showname = es.SelectedName;
-                    lstEntries.RefreshItem(lvi);
+                    InfoEntry ie = (InfoEntry)lvi.RowObject;
+                    if (!ht.ContainsKey(ie.Showname))
+                    {
+                        ht.Add(ie.Showname, 1);
+                    }
+                    else
+                    {
+                        ht[ie.Showname] += 1;
+                    }
+                }
+                int max = 0;
+                string Showname = "";
+                foreach (KeyValuePair<string, int> pair in ht)
+                {
+                    if (pair.Value > max)
+                    {
+                        Showname = pair.Key;
+                    }
+                }
+                EnterShowname es = new EnterShowname(Showname);
+                if (es.ShowDialog() == DialogResult.OK)
+                {
+                    for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                    {
+                        OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                        ((InfoEntry)lvi.RowObject).Showname = es.SelectedName;
+                    }
+                    UpdateGUI();
                 }
             }
         }
@@ -1830,6 +1920,7 @@ namespace Renamer
 
         private void lstEntries_CellEditStarting(object sender, BrightIdeasSoftware.CellEditEventArgs e)
         {
+            deleteToolStripMenuItem.ShortcutKeys = Keys.None;
             InfoEntry ie = (InfoEntry)e.RowObject;
             if(e.Column==ColumnEpisode){
                 ((NumericUpDown)e.Control).Minimum = 1;
@@ -1838,6 +1929,7 @@ namespace Renamer
                 {
                     ((NumericUpDown)e.Control).Maximum = rc.FindMaxEpisode(ie.Season);    
                 }
+                ((NumericUpDown)e.Control).Select(0, e.Control.Text.Length);
             }
             else if (e.Column == ColumnSeason)
             {
@@ -1847,6 +1939,7 @@ namespace Renamer
                 {
                     ((NumericUpDown)e.Control).Maximum = rc.FindMaxSeason();
                 }
+                ((NumericUpDown)e.Control).Select(0, e.Control.Text.Length);
             }
             else if (e.Column == ColumnEpisodeName)
             {
@@ -1877,18 +1970,30 @@ namespace Renamer
                     e.Control = cb;
                 }
             }
+            else if (e.Column == ColumnNewFilename)
+            {
+                TextBox tb = (TextBox)e.Control;
+                int pos = tb.Text.LastIndexOf('.');
+                if (pos > 0)
+                {
+                    tb.SelectionStart = 0;
+                    tb.SelectionLength = pos;
+                }
+            }
         }
+
         private void cb_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (((ComboBox)sender).Tag.GetType() == typeof(InfoEntry))
             {
                 InfoEntry ie = (InfoEntry)((ComboBox)sender).Tag;
                 ie.Name = ((ComboBox)sender).Text;
-            }
+            }            
         }
 
         private void lstEntries_CellEditFinishing(object sender, CellEditEventArgs e)
         {
+            deleteToolStripMenuItem.ShortcutKeys = Keys.Delete;
             InfoEntry ie=(InfoEntry)e.RowObject;
             if (e.Control.GetType() == typeof(ComboBox))
             {
@@ -1904,7 +2009,7 @@ namespace Renamer
                 }
                 
             }
-            lstEntries.RefreshItem(e.ListViewItem);
+            UpdateGUI();
         }
 
         private void lstEntries_KeyDown(object sender, KeyEventArgs e)
@@ -2001,47 +2106,7 @@ namespace Renamer
                 {
                     InfoEntryManager.Instance.Clear();
                 }
-                //also update some gui elements for the sake of it
-                txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
-                txtPath.Text = Helper.ReadProperty(Config.LastDirectory);
-                string LastSubProvider = Helper.ReadProperty(Config.LastSubProvider);
-                if (LastSubProvider == null)
-                    LastSubProvider = "";
-                cbSubs.SelectedIndex = Math.Max(0, cbSubs.Items.IndexOf(LastSubProvider));
-                btnTitles.Enabled = InfoEntryManager.Instance.Count > 0;
-                btnRename.Enabled = InfoEntryManager.Instance.Count > 0;
-                //make sure get titles and rename button are only enabled if there are recognized shownames of series
-                if (btnTitles.Enabled)
-                {
-                    btnTitles.Enabled = false;
-                    btnRename.Enabled = false;
-                    foreach (InfoEntry ie in InfoEntryManager.Instance)
-                    {
-                        if (!string.IsNullOrEmpty(ie.Showname))
-                        {
-                            btnRename.Enabled = true;
-                        }
-                        if (!ie.Movie && !string.IsNullOrEmpty(ie.Showname))
-                        {
-                            btnTitles.Enabled = true;
-                            break;
-                        }
-                    }
-                }
-                btnSubs.Enabled = InfoEntryManager.Instance.Count > 0;
-                //make sure subtitle button is only enabled if there are video files to get subtitles for
-                if (btnSubs.Enabled)
-                {
-                    btnSubs.Enabled = false;
-                    foreach (InfoEntry ie in InfoEntryManager.Instance)
-                    {
-                        if (ie.IsVideofile && !string.IsNullOrEmpty(ie.Showname))
-                        {
-                            btnSubs.Enabled = true;
-                            break;
-                        }
-                    }
-                }
+                UpdateGUI();
             }
             else if (LastTask == Task.DownloadData && !e.Cancelled)
             {
@@ -2123,6 +2188,19 @@ namespace Renamer
         private void btnCancel_Click(object sender, EventArgs e)
         {
             backgroundWorker1.CancelAsync();
+        }
+
+        private void renameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lstEntries.SelectedIndices.Count == 1)
+            {
+                lstEntries.EditSubItem((OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]], 7);
+            }
+        }
+
+        private void aboutDialogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            btnAbout.PerformClick();
         }
 
     }

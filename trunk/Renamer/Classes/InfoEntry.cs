@@ -23,7 +23,7 @@ using System.Timers;
 using Renamer.Logging;
 using Renamer.Dialogs;
 using System.Windows.Forms;
-
+using System.ComponentModel;
 namespace Renamer.Classes
 {
     /// <summary>
@@ -462,7 +462,6 @@ namespace Renamer.Classes
         {
             return Showname.Substring(0, Showname.Length - 3);
         }
-
 
         // TODO: function is still tooooooo large
         private void SetSeriesPath() {
@@ -938,7 +937,7 @@ namespace Renamer.Classes
             }
             return dest;
         }
-        public void Rename() {
+        public void Rename(BackgroundWorker worker, DoWorkEventArgs e) {
             if (this.ProcessingRequested
                 && ((this.Filename != this.NewFilename && this.NewFilename != "")
                     || (this.Destination != this.FilePath.Path && this.Destination != ""))) {
@@ -966,7 +965,19 @@ namespace Renamer.Classes
 
                     if (target != "")
                     {
-                        File.Move(src, target);
+                        if (target.ToLower()[0] == src.ToLower()[0])
+                        {
+                            File.Move(src, target);
+                        }
+                        else
+                        {                            
+                            FileRoutines.CopyFile(new FileInfo(src), new FileInfo(target), CopyFileOptions.AllowDecryptedDestination | CopyFileOptions.FailIfDestinationExists, new CopyFileCallback(InfoEntryManager.Instance.ReportSingleFileProgress));
+                            if (worker.CancellationPending)
+                            {
+                                return;
+                            }
+                            File.Delete(src);
+                        }
                     }
 
                     //Refresh values
@@ -978,11 +989,21 @@ namespace Renamer.Classes
                     }
                     this.Destination = "";
                     this.NewFilename = "";
+                    //This will always be false, but might be needed elsewhere sometime
+                    ShouldBeProcessed();
                 }
                 catch (Exception ex) {
-                    Logger.Instance.LogMessage("Couldn't move "+this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename + " -> " + this.Destination + Path.DirectorySeparatorChar + this.NewFilename + ": " + ex.Message, LogLevel.ERROR);
+                    //if the user didn't want to cancel, this is an actualy error message and needs to be displayed
+                    if (!worker.CancellationPending)
+                    {
+                        Logger.Instance.LogMessage("Couldn't move " + this.FilePath.Path + Path.DirectorySeparatorChar + this.Filename + " -> " + this.Destination + Path.DirectorySeparatorChar + this.NewFilename + ": " + ex.Message, LogLevel.ERROR);
+                    }
                 }
             }
+        }
+        public void ShouldBeProcessed()
+        {
+            ProcessingRequested = Destination != "" || NewFilename != "";
         }
         public string ToString() {
             return Filename;
