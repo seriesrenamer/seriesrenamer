@@ -122,6 +122,8 @@ namespace Renamer
             this.fbdPath = new System.Windows.Forms.FolderBrowserDialog();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutDialogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scContainer.Panel1.SuspendLayout();
             this.scContainer.Panel2.SuspendLayout();
             this.scContainer.SuspendLayout();
@@ -301,14 +303,16 @@ namespace Renamer
             this.setSeasonToolStripMenuItem,
             this.setEpisodesFromtoToolStripMenuItem,
             this.setDestinationToolStripMenuItem,
+            this.renameToolStripMenuItem,
             this.toolStripSeparator3,
             this.copyToolStripMenuItem,
             this.refreshToolStripMenuItem,
             this.deleteToolStripMenuItem,
-            this.regexTesterToolStripMenuItem});
+            this.regexTesterToolStripMenuItem,
+            this.aboutDialogToolStripMenuItem});
             this.contextFiles.Name = "contextFiles";
             this.contextFiles.ShowImageMargin = false;
-            this.contextFiles.Size = new System.Drawing.Size(241, 352);
+            this.contextFiles.Size = new System.Drawing.Size(241, 418);
             this.contextFiles.Opening += new System.ComponentModel.CancelEventHandler(this.contextFiles_Opening);
             // 
             // viewToolStripMenuItem
@@ -870,6 +874,24 @@ namespace Renamer
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
             // 
+            // renameToolStripMenuItem
+            // 
+            this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
+            this.renameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
+            this.renameToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.renameToolStripMenuItem.Text = "Set Filename";
+            this.renameToolStripMenuItem.Visible = false;
+            this.renameToolStripMenuItem.Click += new System.EventHandler(this.renameToolStripMenuItem_Click);
+            // 
+            // aboutDialogToolStripMenuItem
+            // 
+            this.aboutDialogToolStripMenuItem.Name = "aboutDialogToolStripMenuItem";
+            this.aboutDialogToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
+            this.aboutDialogToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.aboutDialogToolStripMenuItem.Text = "AboutDialog";
+            this.aboutDialogToolStripMenuItem.Visible = false;
+            this.aboutDialogToolStripMenuItem.Click += new System.EventHandler(this.aboutDialogToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -975,6 +997,8 @@ namespace Renamer
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.Button btnCancel;
         public System.Windows.Forms.Label lblFileListingProgress;
+        private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutDialogToolStripMenuItem;
     }
 }
 

@@ -457,6 +457,10 @@ namespace Renamer
                 if (Directory.Exists(files[i].FullName)) {
                     files.RemoveAt(i);
                 }
+                else
+                {
+                    count++;
+                }
             }
             List<FileSystemInfo> all = new List<FileSystemInfo>(dir.GetFileSystemInfos());
             if (depth >= Convert.ToInt32(Helper.ReadProperty(Config.MaxDepth))) return files;
@@ -469,10 +473,7 @@ namespace Renamer
                         files.AddRange(deeperfiles);
                     }
                 }
-                else
-                {
-                    count++;
-                }
+                
             }            
             //weird threading issues force me to create a new var here which is no reference
             int count2 = count;

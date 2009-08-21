@@ -18,7 +18,10 @@ namespace Renamer
     {
         protected static InfoEntryManager instance;
         private static object m_lock = new object();
-
+        private BackgroundWorker worker = null;
+        private DoWorkEventArgs dwea = null;
+        private double ProgressAtCopyStart=0;
+        private double ProgressAtCopyEnd = 0;
         public static InfoEntryManager Instance {
             get {
                 if (instance == null) {
@@ -257,6 +260,19 @@ namespace Renamer
         /// Main Rename function
         /// </summary>
         public void Rename(BackgroundWorker worker, DoWorkEventArgs e) {
+            this.worker = worker;
+            this.dwea = e;
+
+            long TotalBytes = 0;
+            long Bytes = 0;
+            foreach (InfoEntry ie in episodes)
+            {
+                if (ie.ProcessingRequested && ie.Destination != "" && ie.FilePath.Fullfilename.ToLower()[0] != ie.Destination.ToLower()[0])
+                {
+                    FileInfo info = new FileInfo(ie.FilePath.Fullfilename);
+                    TotalBytes += info.Length;
+                }
+            }
             //Go through all files and do stuff
             for (int i = 0; i < this.episodes.Count; i++) {
                 if (worker.CancellationPending)
@@ -265,7 +281,7 @@ namespace Renamer
                     Logger.Instance.LogMessage("Renaming Cancelled.", LogLevel.INFO);
                     return;
                 }
-                worker.ReportProgress((int)((double)i / (double)this.episodes.Count * 100));
+                
                 InfoEntry ie = InfoEntryManager.Instance[i];
                 if (ie.MarkedForDeletion&&ie.ProcessingRequested)
                 {
@@ -282,7 +298,38 @@ namespace Renamer
                         Logger.Instance.LogMessage("Couldn't delete " + ie.FilePath.Fullfilename + ": " + ex.Message, LogLevel.ERROR);
                     }
                 }
-                ie.Rename();
+
+                //need to set before ie.Rename because it resets some conditions
+                bool copyfile = ie.ProcessingRequested && ie.Destination != "" && ie.FilePath.Fullfilename.ToLower()[0] != ie.Destination.ToLower()[0];
+
+                //if there are files which actually need to be copied since they're on a different drive, only count those for the progress bar status since they take much longer
+                if (TotalBytes > 0)
+                {
+                    ProgressAtCopyStart = ((double)Bytes / (double)TotalBytes * 100);
+                    if (copyfile)
+                    {
+                        ProgressAtCopyEnd = Math.Min(ProgressAtCopyStart + (long)(((double)new FileInfo(ie.FilePath.Fullfilename).Length) / (double)TotalBytes * 100), 100);
+                    }
+                    else
+                    {
+                        ProgressAtCopyEnd = ProgressAtCopyStart;
+                    }
+                }
+                else
+                {
+                    ProgressAtCopyStart = i;
+                    ProgressAtCopyEnd = i;
+                }
+                
+                worker.ReportProgress((int)ProgressAtCopyStart);
+                //this call will also report progress more detailed by calling ReportSingleFileProgress()
+                ie.Rename(worker, e);
+
+                //after file is (really) copied, add its size
+                if (copyfile)
+                {
+                    Bytes += new FileInfo(ie.FilePath.Fullfilename).Length;
+                }
             }
             if (Helper.ReadBool(Config.DeleteEmptyFolders)) {
                 //Delete all empty folders code
@@ -298,6 +345,17 @@ namespace Renamer
             }
         }
 
+        public CopyFileCallbackAction ReportSingleFileProgress(FileInfo source, FileInfo destination, object state,
+        long totalFileSize, long totalBytesTransferred)
+        {
+            worker.ReportProgress((int)(ProgressAtCopyStart + (double)totalBytesTransferred / (double)totalFileSize * (ProgressAtCopyEnd - ProgressAtCopyStart)));
+            if (worker.CancellationPending)
+            {
+                dwea.Cancel = true;
+                return CopyFileCallbackAction.Cancel;
+            }
+            return CopyFileCallbackAction.Continue;
+        }
         public void RenameShow(string from, string to)
         {
             from = from.ToLower();
