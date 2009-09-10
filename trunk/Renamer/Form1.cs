@@ -2242,14 +2242,6 @@ namespace Renamer
                     UpdateList(true);
                 }
             }
-            else if (lstEntries.SelectedIndices.Count == 0 && spacedown)
-            {
-                string path=Filepath.goUpwards(Helper.ReadProperties(Config.LastDirectory)[0],1);
-                InfoEntryManager.Instance.SetPath(path);
-                txtPath.Text = path;
-                UpdateList(true);
-            }
-            Logger.Instance.LogMessage("Blup", LogLevel.WARNING);
         }
 
         private void lstEntries_KeyUp(object sender, KeyEventArgs e)
