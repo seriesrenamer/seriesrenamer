@@ -63,6 +63,11 @@ namespace Renamer
         private Control focused = null;
 
         /// <summary>
+        /// bool for storing space key status
+        /// </summary>
+        private bool spacedown = false;
+
+        /// <summary>
         /// Program arguments
         /// </summary>
         private List<string> args;
@@ -2039,7 +2044,7 @@ namespace Renamer
             }
             UpdateGUI();
         }
-
+        
         private void lstEntries_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -2054,13 +2059,7 @@ namespace Renamer
             }
             else if (e.KeyCode == Keys.Space)
             {
-                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
-                {
-                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
-                    InfoEntry ie = (InfoEntry)lvi.RowObject;
-                    ie.ProcessingRequested = !ie.ProcessingRequested;
-                    lstEntries.RefreshObject(ie);
-                }
+                spacedown = true;                
             }
         }
         private void lstEntries_DragDrop(object sender, DragEventArgs e)
@@ -2229,6 +2228,43 @@ namespace Renamer
         private void aboutDialogToolStripMenuItem_Click(object sender, EventArgs e)
         {
             btnAbout.PerformClick();
+        }
+
+        private void lstEntries_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (lstEntries.SelectedIndices.Count == 1 && spacedown)
+            {
+                InfoEntry ie = (InfoEntry)((OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]]).RowObject;
+                if (Helper.ReadProperties(Config.LastDirectory)[0] != ie.FilePath.Path)
+                {
+                    InfoEntryManager.Instance.SetPath(ie.FilePath.Path);
+                    txtPath.Text=ie.FilePath.Path;
+                    UpdateList(true);
+                }
+            }
+            else if (lstEntries.SelectedIndices.Count == 0 && spacedown)
+            {
+                string path=Filepath.goUpwards(Helper.ReadProperties(Config.LastDirectory)[0],1);
+                InfoEntryManager.Instance.SetPath(path);
+                txtPath.Text = path;
+                UpdateList(true);
+            }
+            Logger.Instance.LogMessage("Blup", LogLevel.WARNING);
+        }
+
+        private void lstEntries_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Space)
+            {
+                spacedown = false;
+                for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+                {
+                    OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                    InfoEntry ie = (InfoEntry)lvi.RowObject;
+                    ie.ProcessingRequested = !ie.ProcessingRequested;
+                    lstEntries.RefreshObject(ie);
+                }
+            }
         }
 
     }
