@@ -82,7 +82,7 @@ namespace Renamer.Dialogs
             this.txtOutput.Multiline = true;
             this.txtOutput.Name = "txtOutput";
             this.txtOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtOutput.Size = new System.Drawing.Size(717, 190);
+            this.txtOutput.Size = new System.Drawing.Size(717, 208);
             this.txtOutput.TabIndex = 2;
             // 
             // btnMatch
@@ -109,8 +109,9 @@ namespace Renamer.Dialogs
             // 
             // chkCase
             // 
+            this.chkCase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkCase.AutoSize = true;
-            this.chkCase.Location = new System.Drawing.Point(12, 438);
+            this.chkCase.Location = new System.Drawing.Point(12, 442);
             this.chkCase.Name = "chkCase";
             this.chkCase.Size = new System.Drawing.Size(83, 17);
             this.chkCase.TabIndex = 6;
@@ -119,8 +120,9 @@ namespace Renamer.Dialogs
             // 
             // chkRtL
             // 
+            this.chkRtL.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkRtL.AutoSize = true;
-            this.chkRtL.Location = new System.Drawing.Point(101, 438);
+            this.chkRtL.Location = new System.Drawing.Point(101, 442);
             this.chkRtL.Name = "chkRtL";
             this.chkRtL.Size = new System.Drawing.Size(84, 17);
             this.chkRtL.TabIndex = 7;
@@ -129,8 +131,9 @@ namespace Renamer.Dialogs
             // 
             // chkShorter
             // 
+            this.chkShorter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkShorter.AutoSize = true;
-            this.chkShorter.Location = new System.Drawing.Point(275, 438);
+            this.chkShorter.Location = new System.Drawing.Point(275, 442);
             this.chkShorter.Name = "chkShorter";
             this.chkShorter.Size = new System.Drawing.Size(121, 17);
             this.chkShorter.TabIndex = 8;
@@ -139,8 +142,9 @@ namespace Renamer.Dialogs
             // 
             // chkSingle
             // 
+            this.chkSingle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkSingle.AutoSize = true;
-            this.chkSingle.Location = new System.Drawing.Point(191, 438);
+            this.chkSingle.Location = new System.Drawing.Point(191, 442);
             this.chkSingle.Name = "chkSingle";
             this.chkSingle.Size = new System.Drawing.Size(78, 17);
             this.chkSingle.TabIndex = 9;
@@ -161,6 +165,7 @@ namespace Renamer.Dialogs
             this.Controls.Add(this.txtOutput);
             this.Controls.Add(this.txtRegex);
             this.Controls.Add(this.txtText);
+            this.MinimumSize = new System.Drawing.Size(581, 347);
             this.Name = "RegexTester";
             this.Text = "RegexTester";
             this.ResumeLayout(false);

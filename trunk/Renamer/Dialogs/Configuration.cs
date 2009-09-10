@@ -212,7 +212,7 @@ namespace Renamer.Dialogs
             {
                 Languages.Insert(0, cbLanguage.Text);
             }
-
+            Helper.WriteProperties(Config.Languages, Languages.ToArray());
             Helper.WriteBool(Config.CreateDirectoryStructure, chkCreateDirectoryStructure.Checked);
             Helper.WriteBool(Config.DeleteEmptyFolders, chkDeleteEmptyFolders.Checked);
             Helper.WriteBool(Config.DeleteAllEmptyFolders, chkDeleteAllEmptyFolders.Checked);

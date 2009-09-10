@@ -222,6 +222,11 @@ namespace Renamer.Classes.Configuration.Keywords
         /// </summary>
         public const string Languages = "Languages";
 
+        /// <summary>
+        /// Visible columns
+        /// </summary>
+        public const string VisibleColumns = "Visible Columns";
+
         public static class RegexMarker
         {
 
