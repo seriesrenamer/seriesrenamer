@@ -55,7 +55,7 @@ namespace Renamer
         /// <summary>
         /// Column width ratios needed to keep them during resize
         /// </summary>
-        private float[] columnsizes;
+        private List<float> columnsizes;
 
         /// <summary>
         /// Temp variable to store a previously focused control
@@ -500,6 +500,22 @@ namespace Renamer
                 UpdateList(true);
             }
 
+            string[] visibleColumns = Helper.ReadProperties(Config.VisibleColumns);
+            for (int i = 0; i < visibleColumns.Length; i++)
+            {
+                string str = visibleColumns[i];
+                try
+                {
+                    int visible = 1;
+                    Int32.TryParse(str, out visible);
+                    if (visible == 0)
+                    {
+                        ((OLVColumn)lstEntries.AllColumns[i]).IsVisible = false;
+                    }
+                }
+                catch (Exception) { };
+            }
+            lstEntries.RebuildColumns();
 
             string[] ColumnWidths = Helper.ReadProperties(Config.ColumnWidths);
             string[] ColumnOrder = Helper.ReadProperties(Config.ColumnOrder);
@@ -536,30 +552,32 @@ namespace Renamer
                 //focus fix
                 txtPath.Focus();
                 txtPath.Select(txtPath.Text.Length, 0);
-            }
+            }            
         }
 
         //Auto column resize by storing column width ratios at resize start
         private void Form1_ResizeBegin(object sender, EventArgs e) {
             if (Helper.ReadBool(Config.ResizeColumns)) {
-                columnsizes = new float[]{
-                (float)(lstEntries.Columns[0].Width)/(float)(lstEntries.ClientRectangle.Width),
-                (float)(lstEntries.Columns[1].Width)/(float)(lstEntries.ClientRectangle.Width),
-                (float)(lstEntries.Columns[2].Width)/(float)(lstEntries.ClientRectangle.Width),
-                (float)(lstEntries.Columns[3].Width)/(float)(lstEntries.ClientRectangle.Width),
-                (float)(lstEntries.Columns[4].Width)/(float)(lstEntries.ClientRectangle.Width),
-                (float)(lstEntries.Columns[5].Width)/(float)(lstEntries.ClientRectangle.Width),
-                (float)(lstEntries.Columns[6].Width)/(float)(lstEntries.ClientRectangle.Width),
-                (float)(lstEntries.Columns[7].Width)/(float)(lstEntries.ClientRectangle.Width)};
-                float sum = 0;
-                for (int i = 0; i < lstEntries.Columns.Count; i++) {
-                    sum += columnsizes[i];
-                }
-                //some numeric correction to make ratios:
-                for (int i = 0; i < lstEntries.Columns.Count; i++)
-                {
-                    columnsizes[i] *= (float)1 / sum;
-                }
+                StoreColumnRatios();
+            }
+        }
+
+        private void StoreColumnRatios()
+        {
+            columnsizes = new List<float>();
+            foreach (OLVColumn olvc in lstEntries.Columns)
+            {
+                columnsizes.Add((float)(olvc.Width) / (float)(lstEntries.ClientRectangle.Width));
+            }
+            float sum = 0;
+            for (int i = 0; i < lstEntries.Columns.Count; i++)
+            {
+                sum += columnsizes[i];
+            }
+            //some numeric correction to make ratios:
+            for (int i = 0; i < lstEntries.Columns.Count; i++)
+            {
+                columnsizes[i] *= (float)1 / sum;
             }
         }
 
@@ -568,14 +586,10 @@ namespace Renamer
             if (Helper.ReadBool(Config.ResizeColumns)) {
                 if (lstEntries != null && lstEntries.Columns.Count > 0 && columnsizes != null)
                 {
-                    lstEntries.Columns[0].Width = (int)(columnsizes[0] * (float)(lstEntries.ClientRectangle.Width));
-                    lstEntries.Columns[1].Width = (int)(columnsizes[1] * (float)(lstEntries.ClientRectangle.Width));
-                    lstEntries.Columns[2].Width = (int)(columnsizes[2] * (float)(lstEntries.ClientRectangle.Width));
-                    lstEntries.Columns[3].Width = (int)(columnsizes[3] * (float)(lstEntries.ClientRectangle.Width));
-                    lstEntries.Columns[4].Width = (int)(columnsizes[4] * (float)(lstEntries.ClientRectangle.Width));
-                    lstEntries.Columns[5].Width = (int)(columnsizes[5] * (float)(lstEntries.ClientRectangle.Width));
-                    lstEntries.Columns[6].Width = (int)(columnsizes[6] * (float)(lstEntries.ClientRectangle.Width));
-                    lstEntries.Columns[7].Width = (int)(columnsizes[7] * (float)(lstEntries.ClientRectangle.Width));
+                    for (int i = 0; i < lstEntries.Columns.Count; i++)
+                    {
+                        lstEntries.Columns[i].Width = (int)(columnsizes[i] * (float)(lstEntries.ClientRectangle.Width));
+                    }
                 }
             }
         }
@@ -585,14 +599,10 @@ namespace Renamer
             if (this.Visible) {
                 if (Helper.ReadBool(Config.ResizeColumns)) {
                     if (lstEntries != null && lstEntries.Columns.Count >0 && columnsizes != null) {
-                        lstEntries.Columns[0].Width = (int)(columnsizes[0] * (float)(lstEntries.ClientRectangle.Width));
-                        lstEntries.Columns[1].Width = (int)(columnsizes[1] * (float)(lstEntries.ClientRectangle.Width));
-                        lstEntries.Columns[2].Width = (int)(columnsizes[2] * (float)(lstEntries.ClientRectangle.Width));
-                        lstEntries.Columns[3].Width = (int)(columnsizes[3] * (float)(lstEntries.ClientRectangle.Width));
-                        lstEntries.Columns[4].Width = (int)(columnsizes[4] * (float)(lstEntries.ClientRectangle.Width));
-                        lstEntries.Columns[5].Width = (int)(columnsizes[5] * (float)(lstEntries.ClientRectangle.Width));
-                        lstEntries.Columns[6].Width = (int)(columnsizes[6] * (float)(lstEntries.ClientRectangle.Width));
-                        lstEntries.Columns[7].Width = (int)(columnsizes[7] * (float)(lstEntries.ClientRectangle.Width));
+                        for (int i = 0; i < lstEntries.Columns.Count; i++)
+                        {
+                            lstEntries.Columns[i].Width = (int)(columnsizes[i] * (float)(lstEntries.ClientRectangle.Width));
+                        }
                     }
                 }
             }
@@ -895,6 +905,21 @@ namespace Renamer
                 WindowSize[1] = this.RestoreBounds.Height.ToString();
             }
             Helper.WriteProperties(Config.WindowSize, WindowSize);
+
+            List<string> VisibleColumns=new List<string>();
+            for (int i = 0; i < lstEntries.AllColumns.Count; i++)
+            {
+                OLVColumn olvc = (OLVColumn)lstEntries.AllColumns[i];
+                if (olvc.IsVisible)
+                {
+                    VisibleColumns.Add("1");
+                }
+                else
+                {
+                    VisibleColumns.Add("0");
+                }
+            }
+            Helper.WriteProperties(Config.VisibleColumns, VisibleColumns.ToArray());
 
             //Also flush values stored directly in RelationProvider classd
             RelationProvider.Flush();
@@ -1523,7 +1548,10 @@ namespace Renamer
             }
             clipboard = clipboard.Substring(0, Math.Max(clipboard.Length - Environment.NewLine.Length, 0));
             clipboard = clipboard.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
-            Clipboard.SetText(clipboard);
+            if (clipboard != "")
+            {
+                Clipboard.SetText(clipboard);
+            }
         }
 
         private void newFileNameToolStripMenuItem_Click(object sender, EventArgs e) {

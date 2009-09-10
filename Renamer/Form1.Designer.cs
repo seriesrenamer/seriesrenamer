@@ -90,6 +90,7 @@ namespace Renamer
             this.setSeasonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setEpisodesFromtoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setDestinationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.originalNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -101,6 +102,7 @@ namespace Renamer
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.regexTesterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutDialogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.btnOpen = new System.Windows.Forms.Button();
             this.btnRename = new System.Windows.Forms.Button();
@@ -122,8 +124,6 @@ namespace Renamer
             this.fbdPath = new System.Windows.Forms.FolderBrowserDialog();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutDialogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scContainer.Panel1.SuspendLayout();
             this.scContainer.Panel2.SuspendLayout();
             this.scContainer.SuspendLayout();
@@ -229,7 +229,6 @@ namespace Renamer
             this.lstEntries.FullRowSelect = true;
             this.lstEntries.Location = new System.Drawing.Point(12, 33);
             this.lstEntries.Name = "lstEntries";
-            this.lstEntries.SelectColumnsOnRightClick = false;
             this.lstEntries.ShowGroups = false;
             this.lstEntries.ShowImagesOnSubItems = true;
             this.lstEntries.ShowItemToolTips = true;
@@ -312,7 +311,7 @@ namespace Renamer
             this.aboutDialogToolStripMenuItem});
             this.contextFiles.Name = "contextFiles";
             this.contextFiles.ShowImageMargin = false;
-            this.contextFiles.Size = new System.Drawing.Size(241, 418);
+            this.contextFiles.Size = new System.Drawing.Size(241, 396);
             this.contextFiles.Opening += new System.ComponentModel.CancelEventHandler(this.contextFiles_Opening);
             // 
             // viewToolStripMenuItem
@@ -565,6 +564,15 @@ namespace Renamer
             this.setDestinationToolStripMenuItem.Text = "Set Destination";
             this.setDestinationToolStripMenuItem.Click += new System.EventHandler(this.setDestinationToolStripMenuItem_Click);
             // 
+            // renameToolStripMenuItem
+            // 
+            this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
+            this.renameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
+            this.renameToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.renameToolStripMenuItem.Text = "Set Filename";
+            this.renameToolStripMenuItem.Visible = false;
+            this.renameToolStripMenuItem.Click += new System.EventHandler(this.renameToolStripMenuItem_Click);
+            // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
@@ -651,6 +659,15 @@ namespace Renamer
             this.regexTesterToolStripMenuItem.Text = "RegexTester";
             this.regexTesterToolStripMenuItem.Visible = false;
             this.regexTesterToolStripMenuItem.Click += new System.EventHandler(this.regexTesterToolStripMenuItem_Click);
+            // 
+            // aboutDialogToolStripMenuItem
+            // 
+            this.aboutDialogToolStripMenuItem.Name = "aboutDialogToolStripMenuItem";
+            this.aboutDialogToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
+            this.aboutDialogToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
+            this.aboutDialogToolStripMenuItem.Text = "AboutDialog";
+            this.aboutDialogToolStripMenuItem.Visible = false;
+            this.aboutDialogToolStripMenuItem.Click += new System.EventHandler(this.aboutDialogToolStripMenuItem_Click);
             // 
             // progressBar1
             // 
@@ -873,24 +890,6 @@ namespace Renamer
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
-            // 
-            // renameToolStripMenuItem
-            // 
-            this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
-            this.renameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.renameToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
-            this.renameToolStripMenuItem.Text = "Set Filename";
-            this.renameToolStripMenuItem.Visible = false;
-            this.renameToolStripMenuItem.Click += new System.EventHandler(this.renameToolStripMenuItem_Click);
-            // 
-            // aboutDialogToolStripMenuItem
-            // 
-            this.aboutDialogToolStripMenuItem.Name = "aboutDialogToolStripMenuItem";
-            this.aboutDialogToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            this.aboutDialogToolStripMenuItem.Size = new System.Drawing.Size(240, 22);
-            this.aboutDialogToolStripMenuItem.Text = "AboutDialog";
-            this.aboutDialogToolStripMenuItem.Visible = false;
-            this.aboutDialogToolStripMenuItem.Click += new System.EventHandler(this.aboutDialogToolStripMenuItem_Click);
             // 
             // Form1
             // 

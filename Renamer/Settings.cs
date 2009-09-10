@@ -171,14 +171,14 @@ namespace Renamer
             defaults[Config.MaxDepth] = "2";
             defaults[Config.InvalidCharReplace] = "-";
             defaults[Config.EpIdentifier] = new List<string>(new string[] { "S%SE%E", "%Sx%E", "S%S.E%E", "- %S%E -", "-E%E-", ".%S%E.", "%S.%E", "%S%E" });
-            defaults[Config.TargetPattern] = "S%sE%E - %N";
+            defaults[Config.TargetPattern] = "S%SE%E - %N";
             defaults[Config.LastTitles] = new List<string>();
             defaults[Config.LastProvider] = "www.thetvdb.com";
             defaults[Config.LastDirectory] = "C:\\";
             defaults[Config.LastSubProvider] = "www.subtitles.de";
             defaults[Config.Timeout] = "10000";
             defaults[Config.Umlaute] = Renamer.Classes.InfoEntry.UmlautAction.Use.ToString();
-            defaults[Config.Case] = Renamer.Classes.InfoEntry.Case.UpperFirst.ToString();
+            defaults[Config.Case] = Renamer.Classes.InfoEntry.Case.Ignore.ToString();
             defaults[Config.Extract] = new List<string>(new string[] { "Season %S", "Season_%S", "Season%S", "Staffel %S", "Staffel_%S", "Staffel%S", "S%S" });
             defaults[Config.CreateDirectoryStructure] = "1";
             defaults[Config.DeleteEmptyFolders] = "1";
@@ -201,7 +201,7 @@ namespace Renamer
             defaults[Config.FilenameBlacklist] = new List<string>(new string[] { "AVSEQ01" });
             defaults[Config.MovieIndicator] = new List<string>(new string[] { "Movies", "Moviez", "Films", "Filme", "Film", "Movie" });
             defaults[Config.DestinationDirectory] = "";
-            defaults[Config.Languages]=new List<string>(new string[]{"English|en","German|Deutsch|ger|de","Italian|Italiano|it"});
+            defaults[Config.Languages]=new List<string>(new string[]{"English|en","German|Deutsch|ger|de","Italian|Italiano|it", "French|Francais|Français|fr","Spanish|Espanol|Hispanol|sp"});
         }
 
         public bool fileLoaded(string filePath) {
