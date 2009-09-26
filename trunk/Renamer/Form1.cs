@@ -712,6 +712,7 @@ namespace Renamer
             if (dr == DialogResult.OK) {
                 string path = fbdPath.SelectedPath;
                 InfoEntryManager.Instance.SetPath(ref path);
+                txtPath.Text = path;
                 UpdateList(true);
             }
         }
@@ -2249,6 +2250,7 @@ namespace Renamer
             if (e.KeyCode == Keys.Space)
             {
                 spacedown = false;
+                //Hotkey in context menu isn't set because this would make the control not receive the space key, which is also used as a modifier
                 for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
                 {
                     OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
@@ -2256,6 +2258,17 @@ namespace Renamer
                     ie.ProcessingRequested = !ie.ProcessingRequested;
                     lstEntries.RefreshObject(ie);
                 }
+            }
+        }
+
+        private void toggleSelectedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                ie.ProcessingRequested = !ie.ProcessingRequested;
+                lstEntries.RefreshObject(ie);
             }
         }
 
