@@ -124,6 +124,7 @@ namespace Renamer
             this.fbdPath = new System.Windows.Forms.FolderBrowserDialog();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.toggleSelectedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scContainer.Panel1.SuspendLayout();
             this.scContainer.Panel2.SuspendLayout();
             this.scContainer.SuspendLayout();
@@ -313,7 +314,7 @@ namespace Renamer
             this.aboutDialogToolStripMenuItem});
             this.contextFiles.Name = "contextFiles";
             this.contextFiles.ShowImageMargin = false;
-            this.contextFiles.Size = new System.Drawing.Size(239, 396);
+            this.contextFiles.Size = new System.Drawing.Size(239, 418);
             this.contextFiles.Opening += new System.ComponentModel.CancelEventHandler(this.contextFiles_Opening);
             // 
             // viewToolStripMenuItem
@@ -507,7 +508,8 @@ namespace Renamer
             this.checkToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.checkAllToolStripMenuItem,
             this.uncheckAllToolStripMenuItem,
-            this.invertCheckToolStripMenuItem});
+            this.invertCheckToolStripMenuItem,
+            this.toggleSelectedToolStripMenuItem});
             this.checkToolStripMenuItem.Name = "checkToolStripMenuItem";
             this.checkToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.checkToolStripMenuItem.Text = "Check";
@@ -515,21 +517,22 @@ namespace Renamer
             // checkAllToolStripMenuItem
             // 
             this.checkAllToolStripMenuItem.Name = "checkAllToolStripMenuItem";
-            this.checkAllToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.checkAllToolStripMenuItem.ShortcutKeyDisplayString = "Space";
+            this.checkAllToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.checkAllToolStripMenuItem.Text = "Check all";
             this.checkAllToolStripMenuItem.Click += new System.EventHandler(this.checkAllToolStripMenuItem_Click);
             // 
             // uncheckAllToolStripMenuItem
             // 
             this.uncheckAllToolStripMenuItem.Name = "uncheckAllToolStripMenuItem";
-            this.uncheckAllToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.uncheckAllToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.uncheckAllToolStripMenuItem.Text = "Uncheck all";
             this.uncheckAllToolStripMenuItem.Click += new System.EventHandler(this.uncheckAllToolStripMenuItem_Click);
             // 
             // invertCheckToolStripMenuItem
             // 
             this.invertCheckToolStripMenuItem.Name = "invertCheckToolStripMenuItem";
-            this.invertCheckToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.invertCheckToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.invertCheckToolStripMenuItem.Text = "Invert Check";
             this.invertCheckToolStripMenuItem.Click += new System.EventHandler(this.invertCheckToolStripMenuItem_Click);
             // 
@@ -893,6 +896,13 @@ namespace Renamer
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
             // 
+            // toggleSelectedToolStripMenuItem
+            // 
+            this.toggleSelectedToolStripMenuItem.Name = "toggleSelectedToolStripMenuItem";
+            this.toggleSelectedToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.toggleSelectedToolStripMenuItem.Text = "Toggle Selected";
+            this.toggleSelectedToolStripMenuItem.Click += new System.EventHandler(this.toggleSelectedToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1000,6 +1010,7 @@ namespace Renamer
         public System.Windows.Forms.Label lblFileListingProgress;
         private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutDialogToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toggleSelectedToolStripMenuItem;
     }
 }
 

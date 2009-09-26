@@ -287,7 +287,37 @@ namespace Renamer.Classes
             }
             return false;
         }
-#endregion
+
+        /// <summary>
+        /// figures out if a folder is a subdir of another folder, and how deep it is nested
+        /// </summary>
+        /// <param name="basepath">the base path</param>
+        /// <param name="PossibleSubdir">the path which is to be checked for subfolderity</param>
+        /// <returns>-1 if not a subfolder, >=0 otherwise</returns>
+        public static int GetSubdirectoryLevel(string basepath, string PossibleSubdir)
+        {
+            string[] basefolders = basepath.Split(new char[] { System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+            string[] possiblesubfolders = PossibleSubdir.Split(new char[] { System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+            if (basefolders.Length > possiblesubfolders.Length) return -1;
+            bool match=true;
+            for (int i = 0; i < Math.Min(basefolders.Length, possiblesubfolders.Length); i++)
+            {
+                if (basefolders[i] == possiblesubfolders[i])
+                {
+                    match = true;
+                }
+                else
+                {
+                    match = false;
+                }
+            }
+            if (match)
+            {
+                return possiblesubfolders.Length - basefolders.Length;
+            }
+            else return -1;
+        }
+        #endregion
 
     }
 }
