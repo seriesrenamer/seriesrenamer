@@ -309,6 +309,7 @@ namespace Renamer.Classes
                 else
                 {
                     match = false;
+                    break;
                 }
             }
             if (match)
