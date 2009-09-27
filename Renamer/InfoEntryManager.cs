@@ -324,7 +324,8 @@ namespace Renamer
                 worker.ReportProgress((int)ProgressAtCopyStart);
 
                 //if a InfoEntry is moved to a different destination directory that isn't visible in the current basedir, remove it
-                bool remove = Filepath.GetSubdirectoryLevel(Helper.ReadProperty(Config.LastDirectory), ie.Destination) > Helper.ReadInt(Config.MaxDepth);
+                int subdirlevel=Filepath.GetSubdirectoryLevel(Helper.ReadProperty(Config.LastDirectory), ie.Destination);
+                bool remove =  subdirlevel > Helper.ReadInt(Config.MaxDepth)||subdirlevel==-1;
                 //this call will also report progress more detailed by calling ReportSingleFileProgress()
                 ie.Rename(worker, e);
                 if (remove)
