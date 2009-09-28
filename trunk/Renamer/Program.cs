@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
+using Renamer.Classes;
 
 namespace Renamer
 {
@@ -36,6 +37,10 @@ namespace Renamer
         static void Main(string[] args)
         {
             if(args.Length>0){
+                if (File.Exists(args[0]))
+                {
+                    args[0] = Filepath.goUpwards(args[0], 1);
+                }
                 if (!Directory.Exists(args[0]))
                 {
                     AttachConsole(ATTACH_PARENT_PROCESS);
