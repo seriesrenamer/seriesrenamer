@@ -48,14 +48,14 @@ namespace Renamer
             this.lblFileListingProgress = new System.Windows.Forms.Label();
             this.btnCancel = new System.Windows.Forms.Button();
             this.lstEntries = new BrightIdeasSoftware.FastObjectListView();
-            this.ColumnSource = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnFilepath = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnShowname = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnSeason = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnEpisode = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnEpisodeName = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnDestination = new BrightIdeasSoftware.OLVColumn();
-            this.ColumnNewFilename = new BrightIdeasSoftware.OLVColumn();
+            this.ColumnSource = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.ColumnFilepath = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.ColumnShowname = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.ColumnSeason = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.ColumnEpisode = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.ColumnEpisodeName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.ColumnDestination = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.ColumnNewFilename = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.contextFiles = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editSubtitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -85,6 +85,7 @@ namespace Renamer
             this.checkAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uncheckAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.invertCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toggleSelectedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.setShownameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setSeasonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -124,7 +125,7 @@ namespace Renamer
             this.fbdPath = new System.Windows.Forms.FolderBrowserDialog();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.toggleSelectedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lookUpOnIMDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scContainer.Panel1.SuspendLayout();
             this.scContainer.Panel2.SuspendLayout();
             this.scContainer.SuspendLayout();
@@ -239,12 +240,12 @@ namespace Renamer
             this.lstEntries.View = System.Windows.Forms.View.Details;
             this.lstEntries.VirtualMode = true;
             this.lstEntries.CellEditFinishing += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditFinishing);
-            this.lstEntries.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstEntries_KeyDown);
             this.lstEntries.CellEditStarting += new BrightIdeasSoftware.CellEditEventHandler(this.lstEntries_CellEditStarting);
             this.lstEntries.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstEntries_DragDrop);
-            this.lstEntries.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstEntries_MouseDoubleClick);
-            this.lstEntries.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstEntries_KeyUp);
             this.lstEntries.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstEntries_DragEnter);
+            this.lstEntries.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lstEntries_KeyDown);
+            this.lstEntries.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstEntries_KeyUp);
+            this.lstEntries.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstEntries_MouseDoubleClick);
             // 
             // ColumnSource
             // 
@@ -296,6 +297,7 @@ namespace Renamer
             this.editSubtitleToolStripMenuItem,
             this.markAsMovieToolStripMenuItem,
             this.markAsTVSeriesToolStripMenuItem,
+            this.lookUpOnIMDBToolStripMenuItem,
             this.toolStripSeparator4,
             this.renamingToolStripMenuItem,
             this.selectToolStripMenuItem,
@@ -314,41 +316,41 @@ namespace Renamer
             this.aboutDialogToolStripMenuItem});
             this.contextFiles.Name = "contextFiles";
             this.contextFiles.ShowImageMargin = false;
-            this.contextFiles.Size = new System.Drawing.Size(239, 418);
+            this.contextFiles.Size = new System.Drawing.Size(186, 440);
             this.contextFiles.Opening += new System.ComponentModel.CancelEventHandler(this.contextFiles_Opening);
             // 
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.viewToolStripMenuItem.Text = "Open";
             this.viewToolStripMenuItem.Click += new System.EventHandler(this.viewToolStripMenuItem_Click);
             // 
             // editSubtitleToolStripMenuItem
             // 
             this.editSubtitleToolStripMenuItem.Name = "editSubtitleToolStripMenuItem";
-            this.editSubtitleToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.editSubtitleToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.editSubtitleToolStripMenuItem.Text = "Edit Subtitle";
             this.editSubtitleToolStripMenuItem.Click += new System.EventHandler(this.editSubtitleToolStripMenuItem_Click);
             // 
             // markAsMovieToolStripMenuItem
             // 
             this.markAsMovieToolStripMenuItem.Name = "markAsMovieToolStripMenuItem";
-            this.markAsMovieToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.markAsMovieToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.markAsMovieToolStripMenuItem.Text = "Mark as Movie";
             this.markAsMovieToolStripMenuItem.Click += new System.EventHandler(this.markAsMovieToolStripMenuItem_Click);
             // 
             // markAsTVSeriesToolStripMenuItem
             // 
             this.markAsTVSeriesToolStripMenuItem.Name = "markAsTVSeriesToolStripMenuItem";
-            this.markAsTVSeriesToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.markAsTVSeriesToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.markAsTVSeriesToolStripMenuItem.Text = "Mark as TV series";
             this.markAsTVSeriesToolStripMenuItem.Click += new System.EventHandler(this.markAsTVSeriesToolStripMenuItem_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(235, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(182, 6);
             // 
             // renamingToolStripMenuItem
             // 
@@ -358,7 +360,7 @@ namespace Renamer
             this.caseToolStripMenuItem,
             this.replaceInPathToolStripMenuItem});
             this.renamingToolStripMenuItem.Name = "renamingToolStripMenuItem";
-            this.renamingToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.renamingToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.renamingToolStripMenuItem.Text = "Renaming";
             // 
             // createDirectoryStructureToolStripMenuItem
@@ -470,13 +472,13 @@ namespace Renamer
             this.selectByKeywordToolStripMenuItem,
             this.selectSimilarToolStripMenuItem});
             this.selectToolStripMenuItem.Name = "selectToolStripMenuItem";
-            this.selectToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.selectToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.selectToolStripMenuItem.Text = "Select";
             // 
             // invertSelectionToolStripMenuItem
             // 
             this.invertSelectionToolStripMenuItem.Name = "invertSelectionToolStripMenuItem";
-            this.invertSelectionToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.invertSelectionToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
             this.invertSelectionToolStripMenuItem.Text = "Invert selection";
             this.invertSelectionToolStripMenuItem.Click += new System.EventHandler(this.invertSelectionToolStripMenuItem_Click);
             // 
@@ -484,7 +486,7 @@ namespace Renamer
             // 
             this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
             this.selectAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
             this.selectAllToolStripMenuItem.Text = "Select all";
             this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
             // 
@@ -492,14 +494,14 @@ namespace Renamer
             // 
             this.selectByKeywordToolStripMenuItem.Name = "selectByKeywordToolStripMenuItem";
             this.selectByKeywordToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.selectByKeywordToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.selectByKeywordToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
             this.selectByKeywordToolStripMenuItem.Text = "Select by keyword";
             this.selectByKeywordToolStripMenuItem.Click += new System.EventHandler(this.selectByKeywordToolStripMenuItem_Click);
             // 
             // selectSimilarToolStripMenuItem
             // 
             this.selectSimilarToolStripMenuItem.Name = "selectSimilarToolStripMenuItem";
-            this.selectSimilarToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.selectSimilarToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
             this.selectSimilarToolStripMenuItem.Text = "Select similar by name";
             this.selectSimilarToolStripMenuItem.Click += new System.EventHandler(this.byNameToolStripMenuItem_Click);
             // 
@@ -511,7 +513,7 @@ namespace Renamer
             this.invertCheckToolStripMenuItem,
             this.toggleSelectedToolStripMenuItem});
             this.checkToolStripMenuItem.Name = "checkToolStripMenuItem";
-            this.checkToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.checkToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.checkToolStripMenuItem.Text = "Check";
             // 
             // checkAllToolStripMenuItem
@@ -536,36 +538,43 @@ namespace Renamer
             this.invertCheckToolStripMenuItem.Text = "Invert Check";
             this.invertCheckToolStripMenuItem.Click += new System.EventHandler(this.invertCheckToolStripMenuItem_Click);
             // 
+            // toggleSelectedToolStripMenuItem
+            // 
+            this.toggleSelectedToolStripMenuItem.Name = "toggleSelectedToolStripMenuItem";
+            this.toggleSelectedToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.toggleSelectedToolStripMenuItem.Text = "Toggle Selected";
+            this.toggleSelectedToolStripMenuItem.Click += new System.EventHandler(this.toggleSelectedToolStripMenuItem_Click);
+            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(235, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(182, 6);
             // 
             // setShownameToolStripMenuItem
             // 
             this.setShownameToolStripMenuItem.Name = "setShownameToolStripMenuItem";
-            this.setShownameToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.setShownameToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.setShownameToolStripMenuItem.Text = "Set Showname";
             this.setShownameToolStripMenuItem.Click += new System.EventHandler(this.setShownameToolStripMenuItem_Click);
             // 
             // setSeasonToolStripMenuItem
             // 
             this.setSeasonToolStripMenuItem.Name = "setSeasonToolStripMenuItem";
-            this.setSeasonToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.setSeasonToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.setSeasonToolStripMenuItem.Text = "Set Season";
             this.setSeasonToolStripMenuItem.Click += new System.EventHandler(this.setSeasonToolStripMenuItem_Click);
             // 
             // setEpisodesFromtoToolStripMenuItem
             // 
             this.setEpisodesFromtoToolStripMenuItem.Name = "setEpisodesFromtoToolStripMenuItem";
-            this.setEpisodesFromtoToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.setEpisodesFromtoToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.setEpisodesFromtoToolStripMenuItem.Text = "Set Episodes from...to...";
             this.setEpisodesFromtoToolStripMenuItem.Click += new System.EventHandler(this.setEpisodesFromtoToolStripMenuItem_Click);
             // 
             // setDestinationToolStripMenuItem
             // 
             this.setDestinationToolStripMenuItem.Name = "setDestinationToolStripMenuItem";
-            this.setDestinationToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.setDestinationToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.setDestinationToolStripMenuItem.Text = "Set Destination";
             this.setDestinationToolStripMenuItem.Click += new System.EventHandler(this.setDestinationToolStripMenuItem_Click);
             // 
@@ -573,7 +582,7 @@ namespace Renamer
             // 
             this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
             this.renameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.renameToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.renameToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.renameToolStripMenuItem.Text = "Set Filename";
             this.renameToolStripMenuItem.Visible = false;
             this.renameToolStripMenuItem.Click += new System.EventHandler(this.renameToolStripMenuItem_Click);
@@ -581,7 +590,7 @@ namespace Renamer
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(235, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(182, 6);
             // 
             // copyToolStripMenuItem
             // 
@@ -593,7 +602,7 @@ namespace Renamer
             this.destinationNewFileNameToolStripMenuItem,
             this.operationToolStripMenuItem});
             this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.copyToolStripMenuItem.Text = "Copy...";
             // 
             // originalNameToolStripMenuItem
@@ -643,7 +652,7 @@ namespace Renamer
             // 
             this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
             this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.refreshToolStripMenuItem.Text = "Refresh";
             this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
@@ -651,7 +660,7 @@ namespace Renamer
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
             this.deleteToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.deleteToolStripMenuItem.Text = "Delete";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
             // 
@@ -660,7 +669,7 @@ namespace Renamer
             this.regexTesterToolStripMenuItem.Name = "regexTesterToolStripMenuItem";
             this.regexTesterToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
                         | System.Windows.Forms.Keys.R)));
-            this.regexTesterToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.regexTesterToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.regexTesterToolStripMenuItem.Text = "RegexTester";
             this.regexTesterToolStripMenuItem.Visible = false;
             this.regexTesterToolStripMenuItem.Click += new System.EventHandler(this.regexTesterToolStripMenuItem_Click);
@@ -669,7 +678,7 @@ namespace Renamer
             // 
             this.aboutDialogToolStripMenuItem.Name = "aboutDialogToolStripMenuItem";
             this.aboutDialogToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            this.aboutDialogToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.aboutDialogToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.aboutDialogToolStripMenuItem.Text = "AboutDialog";
             this.aboutDialogToolStripMenuItem.Visible = false;
             this.aboutDialogToolStripMenuItem.Click += new System.EventHandler(this.aboutDialogToolStripMenuItem_Click);
@@ -694,7 +703,6 @@ namespace Renamer
             this.btnOpen.Name = "btnOpen";
             this.btnOpen.Size = new System.Drawing.Size(28, 23);
             this.btnOpen.TabIndex = 15;
-            this.toolTip.SetToolTip(this.btnOpen, "Open Folder");
             this.btnOpen.UseVisualStyleBackColor = true;
             this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
             // 
@@ -719,8 +727,6 @@ namespace Renamer
             this.txtTarget.Size = new System.Drawing.Size(106, 20);
             this.txtTarget.TabIndex = 9;
             this.txtTarget.Text = "S%sE%E - %N";
-            this.toolTip.SetToolTip(this.txtTarget, "Valid variables: %S - Season, %E - Episode, %T - Title, %N - Name, Small letter=1" +
-                    " digit");
             this.txtTarget.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtTarget_KeyDown);
             this.txtTarget.Leave += new System.EventHandler(this.txtTarget_Leave);
             // 
@@ -754,8 +760,6 @@ namespace Renamer
             this.lblTargetFilename.Size = new System.Drawing.Size(80, 13);
             this.lblTargetFilename.TabIndex = 8;
             this.lblTargetFilename.Text = "Target filename";
-            this.toolTip.SetToolTip(this.lblTargetFilename, "Valid variables: %S - Season, %E - Episode, %T - Title, %N - Name, Small letter=1" +
-                    " digit");
             // 
             // btnSubs
             // 
@@ -832,7 +836,6 @@ namespace Renamer
             this.btnPath.Size = new System.Drawing.Size(28, 23);
             this.btnPath.TabIndex = 2;
             this.btnPath.Text = "...";
-            this.toolTip.SetToolTip(this.btnPath, "Browse");
             this.btnPath.UseVisualStyleBackColor = true;
             this.btnPath.Click += new System.EventHandler(this.btnPath_Click);
             // 
@@ -893,15 +896,15 @@ namespace Renamer
             this.backgroundWorker1.WorkerReportsProgress = true;
             this.backgroundWorker1.WorkerSupportsCancellation = true;
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
-            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
+            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             // 
-            // toggleSelectedToolStripMenuItem
+            // lookUpOnIMDBToolStripMenuItem
             // 
-            this.toggleSelectedToolStripMenuItem.Name = "toggleSelectedToolStripMenuItem";
-            this.toggleSelectedToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.toggleSelectedToolStripMenuItem.Text = "Toggle Selected";
-            this.toggleSelectedToolStripMenuItem.Click += new System.EventHandler(this.toggleSelectedToolStripMenuItem_Click);
+            this.lookUpOnIMDBToolStripMenuItem.Name = "lookUpOnIMDBToolStripMenuItem";
+            this.lookUpOnIMDBToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.lookUpOnIMDBToolStripMenuItem.Text = "Look up on IMDB";
+            this.lookUpOnIMDBToolStripMenuItem.Click += new System.EventHandler(this.lookUpOnIMDBToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -913,11 +916,11 @@ namespace Renamer
             this.MinimumSize = new System.Drawing.Size(944, 506);
             this.Name = "Form1";
             this.Text = "Series Renamer";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResizeBegin += new System.EventHandler(this.Form1_ResizeBegin);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Resize += new System.EventHandler(this.Form1_Resize);
             this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
+            this.Resize += new System.EventHandler(this.Form1_Resize);
             this.scContainer.Panel1.ResumeLayout(false);
             this.scContainer.Panel1.PerformLayout();
             this.scContainer.Panel2.ResumeLayout(false);
@@ -1011,6 +1014,7 @@ namespace Renamer
         private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutDialogToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toggleSelectedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem lookUpOnIMDBToolStripMenuItem;
     }
 }
 

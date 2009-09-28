@@ -953,6 +953,7 @@ namespace Renamer
             toolStripSeparator2.Visible = true;
             toolStripSeparator3.Visible = true;
             toolStripSeparator4.Visible = true;
+            lookUpOnIMDBToolStripMenuItem.Visible = false;
             if (lstEntries.SelectedIndices.Count == 0)
             {
                 markAsMovieToolStripMenuItem.Visible = false;
@@ -971,6 +972,7 @@ namespace Renamer
             }
             if (lstEntries.SelectedIndices.Count == 1)
             {
+                lookUpOnIMDBToolStripMenuItem.Visible = true;
                 //if selected file is a subtitle
                 List<string> subext = new List<string>(Helper.ReadProperties(Config.SubtitleExtensions));
                 OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[0]];
@@ -2272,6 +2274,21 @@ namespace Renamer
             }
         }
 
+        private void lookUpOnIMDBToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            if (lstEntries.SelectedIndices.Count == 1)
+            {
+                InfoEntry ie = GetInfoEntryFromOLVI(lstEntries.SelectedIndices[0]);
+                string SearchString = string.Format("http://us.imdb.com/find?s=tt&q={0};s=tt;site=aka",ie.Showname);
+                Process.Start(SearchString);
+            }
+                
+        }
+        private InfoEntry GetInfoEntryFromOLVI(int index){
+            if (lstEntries.GetItemCount() <= index) throw new IndexOutOfRangeException("count=" + lstEntries.GetItemCount() + " index=" + index);
+            return (InfoEntry)((OLVListItem)lstEntries.Items[index]).RowObject;
+        }
     }
 }
 
