@@ -2289,6 +2289,15 @@ namespace Renamer
             if (lstEntries.GetItemCount() <= index) throw new IndexOutOfRangeException("count=" + lstEntries.GetItemCount() + " index=" + index);
             return (InfoEntry)((OLVListItem)lstEntries.Items[index]).RowObject;
         }
+        private void Log_DoubleClick(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Would you like to open the Logfile?", "Open Logfile", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes)
+            {
+                Process.Start(Helper.GetLogfileDataPath());
+            }
+
+        }
     }
 }
 

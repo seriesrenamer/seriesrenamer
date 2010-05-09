@@ -688,5 +688,19 @@ namespace Renamer
                 }
             }
         }
+        static public string GetLogfileDataPath()
+        {
+            return GetUserDataPath() + Path.DirectorySeparatorChar + "Renamer.log";
+        }
+        static public string GetUserDataPath()
+        {
+            string dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            dir = System.IO.Path.Combine(dir,"SeriesRenamer");
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            return dir;
+        }
+
+
     }
 }
