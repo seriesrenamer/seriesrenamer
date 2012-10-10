@@ -1,0 +1,359 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2D5EBC88-E3DE-481C-888D-6CC9B84CF4AB}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Renamer</RootNamespace>
+    <AssemblyName>Series Renamer</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ManifestCertificateThumbprint>206CDC1FC5AC333DD019E5E56FC77306C048ECE3</ManifestCertificateThumbprint>
+    <ManifestKeyFile>Renamer_TemporaryKey.pfx</ManifestKeyFile>
+    <GenerateManifests>false</GenerateManifests>
+    <SignManifests>false</SignManifests>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+    <TargetZone>LocalIntranet</TargetZone>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+    <StartupObject>Renamer.Program</StartupObject>
+    <ApplicationIcon>sr1.ico</ApplicationIcon>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
+    <PublishUrl>C:\Projekte\C#\Renamer\Renamer\Publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Unc</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Background</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>\\127.0.0.1\c%24\Projekte\C#\Renamer\Renamer\Publish\</InstallUrl>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>false</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\Series Renamer.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>DLLs\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Classes\Configuration\Keywords\Config.cs" />
+    <Compile Include="Classes\Configuration\Keywords\ProviderConfig.cs" />
+    <Compile Include="Classes\FileCopy.cs" />
+    <Compile Include="Classes\MovieNameExtractor.cs" />
+    <Compile Include="Classes\NameCleanup.cs" />
+    <Compile Include="Classes\RegexConverter.cs" />
+    <Compile Include="Classes\RelationCollection.cs" />
+    <Compile Include="Classes\StringTools.cs" />
+    <Compile Include="Classes\SubtitleFileManager.cs" />
+    <Compile Include="Classes\WinHttpSafeNativeMethods.cs" />
+    <Compile Include="DataGenerator.cs" />
+    <Compile Include="Dialogs\AboutBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\AboutBox.designer.cs">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\Configuration\ConfigFile.cs" />
+    <Compile Include="Classes\InfoEntry.cs" />
+    <Compile Include="Classes\Provider\Provider.cs" />
+    <Compile Include="Classes\Relation.cs" />
+    <Compile Include="Classes\Provider\RelationProvider.cs" />
+    <Compile Include="Classes\SubtitleFile.cs" />
+    <Compile Include="Classes\Provider\SubtitleProvider.cs" />
+    <Compile Include="Dialogs\CollidingFiles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\CollidingFiles.Designer.cs">
+      <DependentUpon>CollidingFiles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\Configuration.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\Configuration.Designer.cs">
+      <DependentUpon>Configuration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\EditSubtitles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\EditSubtitles.Designer.cs">
+      <DependentUpon>EditSubtitles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\EnterSeason.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\EnterSeason.Designer.cs">
+      <DependentUpon>EnterSeason.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\FileSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\FileSelector.Designer.cs">
+      <DependentUpon>FileSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\Filter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\Filter.Designer.cs">
+      <DependentUpon>Filter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\EnterShowname.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\EnterShowname.Designer.cs">
+      <DependentUpon>EnterShowname.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\RegexTester.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\RegexTester.Designer.cs">
+      <DependentUpon>RegexTester.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\Filepath.cs" />
+    <Compile Include="Dialogs\SetNewFileName.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\SetNewFileName.Designer.cs">
+      <DependentUpon>SetNewFileName.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\ShownameSearch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\ShownameSearch.Designer.cs">
+      <DependentUpon>ShownameSearch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helper.cs" />
+    <Compile Include="Dialogs\InputBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\InputBox.Designer.cs">
+      <DependentUpon>InputBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InfoEntryManager.cs" />
+    <Compile Include="ListViewColumnSorter.cs" />
+    <Compile Include="ListViewEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Logging\AbstractLogger.cs" />
+    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\FileLogger.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\ListBoxLogger.cs" />
+    <Compile Include="Logging\MessageBoxLogger.cs" />
+    <Compile Include="Logging\RichTextBoxLogger.cs" />
+    <Compile Include="Logging\TextBoxLogger.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Dialogs\ReplaceWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\ReplaceWindow.Designer.cs">
+      <DependentUpon>ReplaceWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\SetEpisodes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\SetEpisodes.Designer.cs">
+      <DependentUpon>SetEpisodes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\SeriesNameExtractor.cs" />
+    <Compile Include="RelationManager.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Dialogs\AboutBox.resx">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\CollidingFiles.resx">
+      <DependentUpon>CollidingFiles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\Configuration.resx">
+      <DependentUpon>Configuration.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\EditSubtitles.resx">
+      <DependentUpon>EditSubtitles.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\EnterSeason.resx">
+      <DependentUpon>EnterSeason.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\FileSelector.resx">
+      <DependentUpon>FileSelector.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\Filter.resx">
+      <DependentUpon>Filter.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\EnterShowname.resx">
+      <DependentUpon>EnterShowname.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\RegexTester.resx">
+      <DependentUpon>RegexTester.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\SetNewFileName.resx">
+      <DependentUpon>SetNewFileName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ShownameSearch.resx">
+      <DependentUpon>ShownameSearch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\InputBox.resx">
+      <DependentUpon>InputBox.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ListViewEx.resx">
+      <DependentUpon>ListViewEx.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ReplaceWindow.resx">
+      <DependentUpon>ReplaceWindow.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\SelectResult.resx">
+      <DependentUpon>SelectResult.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\SetEpisodes.resx">
+      <DependentUpon>SetEpisodes.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="Databases\Subtitles\Subtitles.cfg" />
+    <None Include="Databases\Subtitles\TVSubtitles ger.cfg" />
+    <None Include="Databases\Subtitles\TVSubtitles.cfg" />
+    <None Include="Databases\Titles\EpGuides.cfg" />
+    <None Include="Databases\Titles\Episodeworld en.cfg" />
+    <None Include="Databases\Titles\Episodeworld ger.cfg" />
+    <None Include="Databases\Titles\IMDB.cfg" />
+    <None Include="Databases\Titles\Serienjunkies.cfg" />
+    <None Include="Databases\Titles\TheTVDb.cfg" />
+    <None Include="Properties\app.manifest" />
+    <Compile Include="Dialogs\SelectResult.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\SelectResult.Designer.cs">
+      <DependentUpon>SelectResult.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\SubtitleEdit\srtFile.cs" />
+    <Compile Include="Classes\SubtitleEdit\SubtitleEditFile.cs" />
+    <Compile Include="Unrar.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DLLs\ICSharpCode.SharpZipLib.dll" />
+    <Content Include="DLLs\unrar.dll" />
+    <Content Include="sr1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="ObjectListView\ObjectListView2008.csproj">
+      <Project>{18FEDA0C-D147-4286-B39A-01204808106A}</Project>
+      <Name>ObjectListView2008</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Classes\TitleCache\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(ProjectDir)Databases" "$(TargetDir)Databases" /S /Y /I
+xcopy "$(ProjectDir)DLLs" "$(TargetDir)" /S /Y /I</PostBuildEvent>
+  </PropertyGroup>
+</Project>
