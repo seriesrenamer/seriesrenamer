@@ -75,6 +75,7 @@ namespace Renamer.Dialogs
             nudTo.Value = nudFrom.Value + Count - 1;
             nudTo.Minimum = nudTo.Value;
             nudTo.Maximum = nudFrom.Maximum + Count - 1;
+            nudFrom.Select();
         }
     }
 }
