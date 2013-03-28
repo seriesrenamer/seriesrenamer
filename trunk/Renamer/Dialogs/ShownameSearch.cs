@@ -55,6 +55,7 @@ namespace Renamer.Dialogs
                 ComboBox cb = new ComboBox();
                 cb.DropDownStyle = ComboBoxStyle.DropDownList;
                 cb.Name = "ComboBox " + i;
+                cb.Sorted = true;
 
                 if (ps.Results != null && ps.Results.Count!=0)
                 {
