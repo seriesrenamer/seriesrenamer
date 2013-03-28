@@ -1231,7 +1231,13 @@ namespace Renamer
             }
             else if (lstEntries.SelectedIndices.Count > 1)
             {
-                SetEpisodes se = new SetEpisodes(lstEntries.SelectedIndices.Count);
+                // Here the episode nr of the first of the selected items is used to preset the dialog
+                // TODO: It would be better if there was a preference setting where you could decide for yourself
+                // which method to use (first item, always 1, lowest episode nr,...)
+                OLVListItem firstEpisodeEntry = (OLVListItem) lstEntries.Items[lstEntries.SelectedIndices[0]];
+                InfoEntry firstEpisodeInfo = (InfoEntry) firstEpisodeEntry.RowObject;
+                SetEpisodes se = new SetEpisodes(lstEntries.SelectedIndices.Count, firstEpisodeInfo.Episode);
+
                 if (se.ShowDialog() == DialogResult.OK)
                 {
                     for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
