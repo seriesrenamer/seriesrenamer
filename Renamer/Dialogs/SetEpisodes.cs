@@ -35,7 +35,7 @@ namespace Renamer.Dialogs
         /// <summary>
         /// start index
         /// </summary>
-        public int From = 0;
+        public int From = 1;
         
         /// <summary>
         /// end index

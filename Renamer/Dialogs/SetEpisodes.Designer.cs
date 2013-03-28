@@ -116,6 +116,7 @@ namespace Renamer.Dialogs
             this.nudFrom.Size = new System.Drawing.Size(120, 20);
             this.nudFrom.TabIndex = 5;
             this.nudFrom.ValueChanged += new System.EventHandler(this.nudFrom_ValueChanged);
+            this.nudFrom.Value = 1;
             // 
             // label3
             // 
@@ -124,7 +125,7 @@ namespace Renamer.Dialogs
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(177, 13);
             this.label3.TabIndex = 6;
-            this.label3.Text = "Set epsiode numbers of marked files";
+            this.label3.Text = "Set episode numbers of marked files";
             // 
             // SetEpisodes
             // 
