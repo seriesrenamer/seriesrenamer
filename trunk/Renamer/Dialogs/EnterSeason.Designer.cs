@@ -85,6 +85,11 @@ namespace Renamer.Dialogs
             this.nudSeason.Name = "nudSeason";
             this.nudSeason.Size = new System.Drawing.Size(156, 20);
             this.nudSeason.TabIndex = 3;
+            this.nudSeason.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // EnterSeason
             // 
