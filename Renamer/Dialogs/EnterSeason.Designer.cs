@@ -106,6 +106,7 @@ namespace Renamer.Dialogs
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "EnterSeason";
             this.Text = "Enter Season";
+            this.Load += new System.EventHandler(this.EnterSeason_Load);
             ((System.ComponentModel.ISupportInitialize)(this.nudSeason)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
