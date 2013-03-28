@@ -30,7 +30,7 @@ namespace Renamer.Dialogs
         /// <summary>
         /// Selected season
         /// </summary>
-        public int season = 0;
+        public int season = 1;
 
         /// <summary>
         /// standard constructor
