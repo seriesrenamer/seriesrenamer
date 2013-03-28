@@ -64,5 +64,10 @@ namespace Renamer.Dialogs
             DialogResult = DialogResult.Cancel;
             Close();
         }
+
+        private void EnterSeason_Load(object sender, EventArgs e)
+        {
+            nudSeason.Select();
+        }
     }
 }
