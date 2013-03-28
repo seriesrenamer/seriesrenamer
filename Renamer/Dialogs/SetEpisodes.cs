@@ -33,6 +33,12 @@ namespace Renamer.Dialogs
         int Count = 0;
 
         /// <summary>
+        /// first selected episode nr
+        /// </summary>
+        int firstEpNr = 1;
+
+
+        /// <summary>
         /// start index
         /// </summary>
         public int From = 1;
@@ -49,6 +55,14 @@ namespace Renamer.Dialogs
         public SetEpisodes(int SelectionCount)
         {
             Count = SelectionCount;
+            firstEpNr = 1;
+            InitializeComponent();
+        }
+
+        public SetEpisodes(int SelectionCount, int newFirstEpNr)
+        {
+            Count = SelectionCount;
+            firstEpNr = newFirstEpNr;
             InitializeComponent();
         }
 
@@ -72,6 +86,7 @@ namespace Renamer.Dialogs
 
         private void SetEpisodes_Load(object sender, EventArgs e)
         {
+            nudFrom.Value = firstEpNr;
             nudTo.Value = nudFrom.Value + Count - 1;
             nudTo.Minimum = nudTo.Value;
             nudTo.Maximum = nudFrom.Maximum + Count - 1;
