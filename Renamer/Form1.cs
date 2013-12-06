@@ -468,16 +468,16 @@ namespace Renamer
 
             // Init logging here:
 
-            
-
+            // enable drag and drop
+            this.AllowDrop = true;
+            this.DragEnter += new DragEventHandler(Form_DragEnter);
+            this.DragDrop += new DragEventHandler(Form_DragDrop);
 
             //and read a value to make sure it is loaded into memory
             Helper.ReadProperty(Config.Case);
 
             //lstFiles.ListViewItemSorter = lvwColumnSorter;
             txtTarget.Text = Helper.ReadProperty(Config.TargetPattern);
-
-            
 
             //subtitle provider combo box
             cbSubs.Items.AddRange(SubtitleProvider.ProviderNames);
@@ -558,6 +558,47 @@ namespace Renamer
                 txtPath.Focus();
                 txtPath.Select(txtPath.Text.Length, 0);
             }            
+        }
+
+        // mouse enter with a dragged item
+        private void Form_DragEnter(object sender, DragEventArgs e)
+        {
+            // accept only files
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Copy;
+            else
+                e.Effect = DragDropEffects.None;
+
+        }
+
+        // dropping an item on the form
+        private void Form_DragDrop(object sender, DragEventArgs e)
+        {
+            // path list
+            string[] FileList = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+
+            if (FileList.Length == 0)
+                return;
+
+            string path;
+
+            if (FileList.Length == 1 && Directory.Exists(FileList[0]))
+            {
+                // one directory selected - set this directory as path
+                path = FileList[0];
+            }
+            else
+            {
+                // more files selected: try to get the parent directory
+                if (FileList[0].LastIndexOf('\\') > 0)
+                    path = FileList[0].Substring(0, FileList[0].LastIndexOf('\\'));
+                else
+                    path = FileList[0];
+            }
+
+            InfoEntryManager.Instance.SetPath(ref path);
+            txtPath.Text = path;
+            UpdateList(true);
         }
 
         //Auto column resize by storing column width ratios at resize start
