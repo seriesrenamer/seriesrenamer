@@ -102,6 +102,7 @@ namespace Renamer
             this.destinationNewFileNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.operationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.regexTesterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutDialogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -311,6 +312,7 @@ namespace Renamer
             this.toolStripSeparator3,
             this.copyToolStripMenuItem,
             this.refreshToolStripMenuItem,
+            this.removeToolStripMenuItem,
             this.deleteToolStripMenuItem,
             this.regexTesterToolStripMenuItem,
             this.aboutDialogToolStripMenuItem});
@@ -663,10 +665,17 @@ namespace Renamer
             this.refreshToolStripMenuItem.Text = "Refresh";
             this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
+            // removeToolStripMenuItem
+            // 
+            this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
+            this.removeToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
+            this.removeToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.removeToolStripMenuItem.Text = "Remove from list";
+            this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
+            //  
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
             this.deleteToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.deleteToolStripMenuItem.Text = "Delete";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
@@ -955,6 +964,7 @@ namespace Renamer
         private System.Windows.Forms.ToolStripMenuItem setSeasonToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem refreshToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;

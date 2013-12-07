@@ -990,6 +990,7 @@ namespace Renamer
             setEpisodesFromtoToolStripMenuItem.Visible = true;
             setSeasonToolStripMenuItem.Visible = true;
             setShownameToolStripMenuItem.Visible = true;
+            removeToolStripMenuItem.Visible = true;
             deleteToolStripMenuItem.Visible = true;
             toolStripSeparator2.Visible = true;
             toolStripSeparator3.Visible = true;
@@ -1006,6 +1007,7 @@ namespace Renamer
                 setEpisodesFromtoToolStripMenuItem.Visible = false;
                 setSeasonToolStripMenuItem.Visible = false;
                 setShownameToolStripMenuItem.Visible = false;
+                removeToolStripMenuItem.Visible = false;
                 deleteToolStripMenuItem.Visible = false;
                 toolStripSeparator2.Visible = false;
                 toolStripSeparator3.Visible = false;
@@ -1297,9 +1299,27 @@ namespace Renamer
             UpdateList(true);
         }
 
+        //Remove from list
+        private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            List<InfoEntry> lie = new List<InfoEntry>();
+            for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
+            {
+                OLVListItem lvi = (OLVListItem)lstEntries.Items[lstEntries.SelectedIndices[i]];
+                InfoEntry ie = (InfoEntry)lvi.RowObject;
+                lie.Add(ie);
+            }
+            foreach (InfoEntry ie in lie)
+            {
+                InfoEntryManager.Instance.Remove(ie);
+                lstEntries.RemoveObject(ie);
+            }
+            UpdateGUI();
+        }
+
         //Delete file
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e) {
-            if (MessageBox.Show("Delete selected files?", "Delete selected files?", MessageBoxButtons.YesNo) == DialogResult.No)
+            if (MessageBox.Show("Delete selected files from the file system? This action cannot be undone!", "Delete selected files?", MessageBoxButtons.YesNo) == DialogResult.No)
                 return;
             List<InfoEntry> lie = new List<InfoEntry>();
             for (int i = 0; i < lstEntries.SelectedIndices.Count; i++)
@@ -2003,7 +2023,7 @@ namespace Renamer
 
         private void lstEntries_CellEditStarting(object sender, BrightIdeasSoftware.CellEditEventArgs e)
         {
-            deleteToolStripMenuItem.ShortcutKeys = Keys.None;
+            removeToolStripMenuItem.ShortcutKeys = Keys.None;
             InfoEntry ie = (InfoEntry)e.RowObject;
             if(e.Column==ColumnEpisode){
                 ((NumericUpDown)e.Control).Minimum = 1;
@@ -2076,7 +2096,7 @@ namespace Renamer
 
         private void lstEntries_CellEditFinishing(object sender, CellEditEventArgs e)
         {
-            deleteToolStripMenuItem.ShortcutKeys = Keys.Delete;
+            removeToolStripMenuItem.ShortcutKeys = Keys.Delete;
             InfoEntry ie=(InfoEntry)e.RowObject;
             if (e.Control.GetType() == typeof(ComboBox))
             {
