@@ -1,5 +1,7 @@
 ## Series Renamer
 
+[![Join the chat at https://gitter.im/seriesrenamer/seriesrenamer](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/seriesrenamer/seriesrenamer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Ever recorded/downloaded/ripped a TV show just to have lots of garbled filenames which don’t tell you anything? Too many files to rename them manually? That’s where this program kicks in. 
 
 Many filenames of series have something like "S1E05″ or similar in them, with S standing for season, and E for episode. This allows to search for this episode on the internet and figure out the title. Once the title is known, the file can be renamed to some meaningful name, like "Series Name - S1E05 - Series Title.avi" or similar. 
