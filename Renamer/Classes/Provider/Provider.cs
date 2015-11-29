@@ -70,11 +70,38 @@ namespace Renamer.Classes.Provider
 
 
         protected static string[] getFiles(string location){
-            return Directory.GetFiles(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + location, ConfigFile.filePattern);
+            try
+            {
+                string configPath = Program.configPath + location;
+                string[] paths = { };
+                try
+                {
+                    paths = Directory.GetFiles(configPath, ConfigFile.filePattern);
+                }
+                catch(Exception) { }
+                if (paths.Length == 0) //Database files might not have been copied to appdata directory yet
+                {
+                    string localPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + location;
+                    if (localPath != configPath) //No need to copy in same directory when running in portable mode
+                    {
+                        Helper.DirectoryCopy(localPath, configPath, true);
+                        return Directory.GetFiles(configPath, ConfigFile.filePattern);
+                    }
+                    else
+                    {
+                        Logging.Logger.Instance.LogMessage("No providers found in local directory", Logging.LogLevel.CRITICAL);
+                        return new string[] { };
+                    }
+                }
+                else
+                    return paths;
+            }
+            catch(Exception)
+            {
+                Logging.Logger.Instance.LogMessage("Failed to load providers", Logging.LogLevel.CRITICAL);
+                return new string[]{ };
+            }
         }
-
-
-        
 
         /// <summary>
         /// Name of the provider

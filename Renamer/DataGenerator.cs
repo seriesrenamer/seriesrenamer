@@ -70,7 +70,7 @@ namespace Renamer
             public RelationProvider provider;
             public Hashtable Results;
             public string SelectedResult = "";
-            public string ToString()
+            public override string ToString()
             {
                 return SelectedResult;
             }
@@ -1036,9 +1036,9 @@ namespace Renamer
 
                 ParseSubtitleSearch(ref source, responseHtml.ResponseUri.AbsoluteUri);
             }
-            int i;
             //TODO: here!!!
             /*
+            int i;
             if (info.SubtitleLinks.Count > 0) {
                 i = DownloadSubtitles();
                 ProcessSubtitles(i);

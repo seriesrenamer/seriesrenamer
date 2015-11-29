@@ -35,6 +35,9 @@ using Renamer.Logging;
 using Renamer.Classes.Provider;
 using System.Threading;
 using BrightIdeasSoftware;
+using System.Security;
+using System.Security.Permissions;
+
 namespace Renamer
 {
     /// <summary>
@@ -74,7 +77,7 @@ namespace Renamer
 
         protected static Form1 instance;
         private static object m_lock = new object();
-        
+
         public static Form1 Instance
         {
             get
@@ -276,194 +279,13 @@ namespace Renamer
        
         #endregion
         
-        //Since sorting after the last two selected columns is supported, we need some event handling here
-        private void lstFiles_ColumnClick(object sender, ColumnClickEventArgs e) {
-            // Determine if clicked column is already the column that is being sorted.
-            if (e.Column == lvwColumnSorter.SortColumn) {
-                // Reverse the current sort direction for this column.
-                if (lvwColumnSorter.Order == SortOrder.Ascending) {
-                    lvwColumnSorter.Order = SortOrder.Descending;
-                }
-                else {
-                    lvwColumnSorter.Order = SortOrder.Ascending;
-                }
-            }
-            else {
-                // Set the column number that is to be sorted; default to ascending.
-
-                lvwColumnSorter.SortColumn = e.Column;
-                lvwColumnSorter.Order = SortOrder.Ascending;
-            }
-
-            // Perform the sort with these new sort options.
-            //this.lstFiles.Sort();
-        }
-
-        //End editing with combo box data types
-        /*private void cbEdit_SelectedIndexChanged(object sender, EventArgs e) {
-            lstFiles.EndEditing(true);
-        }
-
-        //Start editing single values
-        private void lstFiles_SubItemClicked(object sender, ListViewEx.SubItemEventArgs e) {
-            if (e.SubItem != 0 && e.SubItem != 1) {
-                if (settings.IsMonoCompatibilityMode) {
-                    Logger.Instance.LogMessage("Editing Entries dynamically is not supported in Mono unfortunately :(", LogLevel.WARNING);
-                    return;
-                }
-                RelationCollection rc = RelationManager.Instance.GetRelationCollection(InfoEntryManager.Instance[(int)e.Item.Tag].Showname);
-                if (e.SubItem == 4) {
-                    //if season is valid and there are relations at all, show combobox. Otherwise, just show edit box
-                    if (rc != null && RelationManager.Instance.Count > 0 && Convert.ToInt32(e.Item.SubItems[2].Text) >= rc.FindMinSeason() && Convert.ToInt32(e.Item.SubItems[2].Text) <= rc.FindMaxSeason()) {
-                        comEdit.Items.Clear();
-                        foreach (Relation rel in rc) {
-                            if (rel.Season == InfoEntryManager.Instance[(int)e.Item.Tag].Season) {
-                                comEdit.Items.Add(rel.Name);
-                            }
-                        }
-                        lstFiles.StartEditing(comEdit, e.Item, e.SubItem);
-                    }
-                    else {
-                        lstFiles.StartEditing(txtEdit, e.Item, e.SubItem);
-                    }
-                }
-                else if (e.SubItem == 5 || e.SubItem == 6 || e.SubItem == 7) {
-                    lstFiles.StartEditing(txtEdit, e.Item, e.SubItem);
-                }
-                else {
-                    //clamp season and episode values to allowed values
-                    if (rc != null && rc.Count > 0) {
-                        if (e.SubItem == 2) {
-                            numEdit.Minimum = rc.FindMinSeason();
-                            numEdit.Maximum = rc.FindMaxSeason();
-                        }
-                        else if (e.SubItem == 3) {
-                            numEdit.Minimum = rc.FindMinEpisode(Convert.ToInt32(InfoEntryManager.Instance[(int)e.Item.Tag].Season));
-                            numEdit.Maximum = rc.FindMaxEpisode(Convert.ToInt32(InfoEntryManager.Instance[(int)e.Item.Tag].Season));
-                        }
-                    }
-                    else {
-                        numEdit.Minimum = 0;
-                        numEdit.Maximum = 10000;
-                    }
-                    lstFiles.StartEditing(numEdit, e.Item, e.SubItem);
-                }
-            }
-        }
-
-        //End editing a value, apply possible changes and process them
-        private void lstFiles_SubItemEndEditing(object sender, ListViewEx.SubItemEndEditingEventArgs e) {
-            string dir = Helper.ReadProperty(Config.LastDirectory);
-            bool CreateDirectoryStructure = Helper.ReadInt(Config.CreateDirectoryStructure) == 1;
-            bool UseSeasonSubdirs = Helper.ReadInt(Config.UseSeasonSubDir) == 1;
-            int tmp = -1;
-            InfoEntry ie = InfoEntryManager.Instance.GetByListViewItem(e.Item);
-            //add lots of stuff here
-            switch (e.SubItem) {
-                //season
-                case 2:
-                    try{
-                        tmp = Int32.Parse(e.DisplayText);
-                    }
-                    catch (Exception ex){
-                        Logger.Instance.LogMessage("Cannot parse '" + e.DisplayText + "' to an integer", LogLevel.WARNING);
-                    }
-                    ie.Season = tmp;
-                    if (e.DisplayText == "") {
-                        ie.Movie = true;
-                    }
-                    else {
-                        ie.Movie = false;
-                    }
-                    //SetupRelation((int)e.Item.Tag);
-                    //foreach (InfoEntry ie in InfoEntryManager.Episodes)
-                    //{
-                    //    SetDestinationPath(ie, dir, CreateDirectoryStructure, UseSeasonSubdirs);
-                    //}
-                    break;
-                //Episode
-                case 3:
-                    try {
-                        tmp = Int32.Parse(e.DisplayText);
-                    }
-                    catch (Exception ex) {
-                        Logger.Instance.LogMessage("Cannot parse '" + e.DisplayText + "' to an integer", LogLevel.WARNING);
-                    }
-                    ie.Episode = tmp;
-                    if (e.DisplayText == "") {
-                        ie.Movie = true;
-                    }
-                    else {
-                        ie.Movie = false;
-                    }
-                    //SetupRelation((int)e.Item.Tag);                    
-                    //SetDestinationPath(ie, dir, CreateDirectoryStructure, UseSeasonSubdirs);
-                    break;
-                //name
-                case 4:
-                    //backtrack to see if entered text matches a season/episode
-                    RelationCollection rc = RelationManager.Instance.GetRelationCollection(ie.Showname);
-                    if (rc != null) {
-                        foreach (Relation rel in rc) {
-                            //if found, set season and episode in gui and sync back to data
-                            if (e.DisplayText == rel.Name) {
-                                e.Item.SubItems[2].Text = rel.Season.ToString();
-                                e.Item.SubItems[3].Text = rel.Episode.ToString();
-                            }
-                        }
-                    }
-                    ie.Name = e.DisplayText;
-                    break;
-                //Filename
-                case 5:
-                    ie.NewFileName = e.DisplayText;
-                    if (ie.NewFileName != e.DisplayText)
-                    {
-                        e.Cancel = true;
-                        Logger.Instance.LogMessage("Changed entered Text from " + e.DisplayText + " to " + ie.NewFileName + " because of invalid filename characters.", LogLevel.INFO);
-                    }
-                    break;
-                //Destination
-                case 6:
-                    try {
-                        Path.GetDirectoryName(e.DisplayText);
-                        ie.Destination = e.DisplayText;
-                        if (ie.Destination != e.DisplayText)
-                        {
-                            e.Cancel = true;
-                            Logger.Instance.LogMessage("Changed entered Text from " + e.DisplayText + " to " + ie.Destination + " because of invalid path characters.", LogLevel.INFO);
-                        }
-                    }
-                    catch (Exception) {
-                        e.Cancel = true;
-                    }
-                    break;
-                case 7:                   
-                    ie.Showname = e.DisplayText;
-                    //Cancel editing since we want to set the subitem manually in SyncItem to a different value
-                    if (ie.Showname == "")
-                    {
-                        e.Cancel = true;
-                    }
-                    break;
-                default:
-                    throw new Exception("Unreachable code");
-            }
-            SyncItem((int)e.Item.Tag, false);
-        }
-
-        //Double click = Invert process flag
-        private void lstFiles_DoubleClick(object sender, EventArgs e) {
-            if (lstFiles.SelectedIndices.Count > 0)
-            {
-                lstFiles.Items[lstFiles.SelectedIndices[0]].Checked = !lstFiles.Items[lstFiles.SelectedIndices[0]].Checked;
-            }
-        }*/
-
+        
         #region GUI-Events
         //Main Initialization
         private void Form1_Load(object sender, EventArgs e) {
+
             settings = Settings.Instance;
+
             this.initMyLoggers();
 
             // Init logging here:
@@ -653,6 +475,194 @@ namespace Renamer
                 }
             }
         }
+        //Since sorting after the last two selected columns is supported, we need some event handling here
+        private void lstFiles_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            // Determine if clicked column is already the column that is being sorted.
+            if (e.Column == lvwColumnSorter.SortColumn)
+            {
+                // Reverse the current sort direction for this column.
+                if (lvwColumnSorter.Order == SortOrder.Ascending)
+                {
+                    lvwColumnSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    lvwColumnSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                // Set the column number that is to be sorted; default to ascending.
+
+                lvwColumnSorter.SortColumn = e.Column;
+                lvwColumnSorter.Order = SortOrder.Ascending;
+            }
+
+            // Perform the sort with these new sort options.
+            //this.lstFiles.Sort();
+        }
+
+        //End editing with combo box data types
+        /*private void cbEdit_SelectedIndexChanged(object sender, EventArgs e) {
+            lstFiles.EndEditing(true);
+        }
+
+        //Start editing single values
+        private void lstFiles_SubItemClicked(object sender, ListViewEx.SubItemEventArgs e) {
+            if (e.SubItem != 0 && e.SubItem != 1) {
+                if (settings.IsMonoCompatibilityMode) {
+                    Logger.Instance.LogMessage("Editing Entries dynamically is not supported in Mono unfortunately :(", LogLevel.WARNING);
+                    return;
+                }
+                RelationCollection rc = RelationManager.Instance.GetRelationCollection(InfoEntryManager.Instance[(int)e.Item.Tag].Showname);
+                if (e.SubItem == 4) {
+                    //if season is valid and there are relations at all, show combobox. Otherwise, just show edit box
+                    if (rc != null && RelationManager.Instance.Count > 0 && Convert.ToInt32(e.Item.SubItems[2].Text) >= rc.FindMinSeason() && Convert.ToInt32(e.Item.SubItems[2].Text) <= rc.FindMaxSeason()) {
+                        comEdit.Items.Clear();
+                        foreach (Relation rel in rc) {
+                            if (rel.Season == InfoEntryManager.Instance[(int)e.Item.Tag].Season) {
+                                comEdit.Items.Add(rel.Name);
+                            }
+                        }
+                        lstFiles.StartEditing(comEdit, e.Item, e.SubItem);
+                    }
+                    else {
+                        lstFiles.StartEditing(txtEdit, e.Item, e.SubItem);
+                    }
+                }
+                else if (e.SubItem == 5 || e.SubItem == 6 || e.SubItem == 7) {
+                    lstFiles.StartEditing(txtEdit, e.Item, e.SubItem);
+                }
+                else {
+                    //clamp season and episode values to allowed values
+                    if (rc != null && rc.Count > 0) {
+                        if (e.SubItem == 2) {
+                            numEdit.Minimum = rc.FindMinSeason();
+                            numEdit.Maximum = rc.FindMaxSeason();
+                        }
+                        else if (e.SubItem == 3) {
+                            numEdit.Minimum = rc.FindMinEpisode(Convert.ToInt32(InfoEntryManager.Instance[(int)e.Item.Tag].Season));
+                            numEdit.Maximum = rc.FindMaxEpisode(Convert.ToInt32(InfoEntryManager.Instance[(int)e.Item.Tag].Season));
+                        }
+                    }
+                    else {
+                        numEdit.Minimum = 0;
+                        numEdit.Maximum = 10000;
+                    }
+                    lstFiles.StartEditing(numEdit, e.Item, e.SubItem);
+                }
+            }
+        }
+
+        //End editing a value, apply possible changes and process them
+        private void lstFiles_SubItemEndEditing(object sender, ListViewEx.SubItemEndEditingEventArgs e) {
+            string dir = Helper.ReadProperty(Config.LastDirectory);
+            bool CreateDirectoryStructure = Helper.ReadInt(Config.CreateDirectoryStructure) == 1;
+            bool UseSeasonSubdirs = Helper.ReadInt(Config.UseSeasonSubDir) == 1;
+            int tmp = -1;
+            InfoEntry ie = InfoEntryManager.Instance.GetByListViewItem(e.Item);
+            //add lots of stuff here
+            switch (e.SubItem) {
+                //season
+                case 2:
+                    try{
+                        tmp = Int32.Parse(e.DisplayText);
+                    }
+                    catch (Exception ex){
+                        Logger.Instance.LogMessage("Cannot parse '" + e.DisplayText + "' to an integer", LogLevel.WARNING);
+                    }
+                    ie.Season = tmp;
+                    if (e.DisplayText == "") {
+                        ie.Movie = true;
+                    }
+                    else {
+                        ie.Movie = false;
+                    }
+                    //SetupRelation((int)e.Item.Tag);
+                    //foreach (InfoEntry ie in InfoEntryManager.Episodes)
+                    //{
+                    //    SetDestinationPath(ie, dir, CreateDirectoryStructure, UseSeasonSubdirs);
+                    //}
+                    break;
+                //Episode
+                case 3:
+                    try {
+                        tmp = Int32.Parse(e.DisplayText);
+                    }
+                    catch (Exception ex) {
+                        Logger.Instance.LogMessage("Cannot parse '" + e.DisplayText + "' to an integer", LogLevel.WARNING);
+                    }
+                    ie.Episode = tmp;
+                    if (e.DisplayText == "") {
+                        ie.Movie = true;
+                    }
+                    else {
+                        ie.Movie = false;
+                    }
+                    //SetupRelation((int)e.Item.Tag);                    
+                    //SetDestinationPath(ie, dir, CreateDirectoryStructure, UseSeasonSubdirs);
+                    break;
+                //name
+                case 4:
+                    //backtrack to see if entered text matches a season/episode
+                    RelationCollection rc = RelationManager.Instance.GetRelationCollection(ie.Showname);
+                    if (rc != null) {
+                        foreach (Relation rel in rc) {
+                            //if found, set season and episode in gui and sync back to data
+                            if (e.DisplayText == rel.Name) {
+                                e.Item.SubItems[2].Text = rel.Season.ToString();
+                                e.Item.SubItems[3].Text = rel.Episode.ToString();
+                            }
+                        }
+                    }
+                    ie.Name = e.DisplayText;
+                    break;
+                //Filename
+                case 5:
+                    ie.NewFileName = e.DisplayText;
+                    if (ie.NewFileName != e.DisplayText)
+                    {
+                        e.Cancel = true;
+                        Logger.Instance.LogMessage("Changed entered Text from " + e.DisplayText + " to " + ie.NewFileName + " because of invalid filename characters.", LogLevel.INFO);
+                    }
+                    break;
+                //Destination
+                case 6:
+                    try {
+                        Path.GetDirectoryName(e.DisplayText);
+                        ie.Destination = e.DisplayText;
+                        if (ie.Destination != e.DisplayText)
+                        {
+                            e.Cancel = true;
+                            Logger.Instance.LogMessage("Changed entered Text from " + e.DisplayText + " to " + ie.Destination + " because of invalid path characters.", LogLevel.INFO);
+                        }
+                    }
+                    catch (Exception) {
+                        e.Cancel = true;
+                    }
+                    break;
+                case 7:                   
+                    ie.Showname = e.DisplayText;
+                    //Cancel editing since we want to set the subitem manually in SyncItem to a different value
+                    if (ie.Showname == "")
+                    {
+                        e.Cancel = true;
+                    }
+                    break;
+                default:
+                    throw new Exception("Unreachable code");
+            }
+            SyncItem((int)e.Item.Tag, false);
+        }
+
+        //Double click = Invert process flag
+        private void lstFiles_DoubleClick(object sender, EventArgs e) {
+            if (lstFiles.SelectedIndices.Count > 0)
+            {
+                lstFiles.Items[lstFiles.SelectedIndices[0]].Checked = !lstFiles.Items[lstFiles.SelectedIndices[0]].Checked;
+            }
+        }*/
 
         //Save last focussed control so it can be restored after splitter between file and log window is moved
         private void scContainer_MouseDown(object sender, MouseEventArgs e) {
@@ -762,7 +772,7 @@ namespace Renamer
         {
             Logger logger = Logger.Instance;
             logger.removeAllLoggers();
-            logger.addLogger(new FileLogger(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "Renamer.log", true, Helper.ReadEnum<LogLevel>(Config.LogFileLevel)));
+            logger.addLogger(new FileLogger( Path.Combine(Program.configPath, "Renamer.log"), true, Helper.ReadEnum<LogLevel>(Config.LogFileLevel)));
             logger.addLogger(new MessageBoxLogger(Helper.ReadEnum<LogLevel>(Config.LogMessageBoxLevel)));
 
             //mono compatibility fixes
@@ -929,7 +939,8 @@ namespace Renamer
 
         //Cleanup, save some stuff etc
         private void Form1_FormClosing(object sender, FormClosingEventArgs e) {
-            Helper.WriteProperty(Config.LastSubProvider, cbSubs.SelectedItem.ToString());
+            if(cbSubs.SelectedItem != null)
+                Helper.WriteProperty(Config.LastSubProvider, cbSubs.SelectedItem.ToString());
 
             //Save column order and sizes
             string[] ColumnWidths = new string[lstEntries.Columns.Count];

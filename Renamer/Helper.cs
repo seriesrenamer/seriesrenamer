@@ -296,7 +296,7 @@ namespace Renamer
         /// </summary>
         /// <returns>path to the configuration file</returns>
         public static string DefaultConfigFile() {
-            return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + Settings.MainConfigFileName;
+            return Path.Combine(Program.configPath, Settings.MainConfigFileName);
         }
 
         /// <summary>
@@ -494,6 +494,52 @@ namespace Renamer
             return path.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
         }
 
+        public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs = true)
+        {
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            // If the source directory does not exist, throw an exception.
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            // If the destination directory does not exist, create it.
+            if (!Directory.Exists(destDirName))
+            {
+                Directory.CreateDirectory(destDirName);
+            }
+
+
+            // Get the file contents of the directory to copy.
+            FileInfo[] files = dir.GetFiles();
+
+            foreach (FileInfo file in files)
+            {
+                // Create the path to the new copy of the file.
+                string temppath = Path.Combine(destDirName, file.Name);
+
+                // Copy the file.
+                file.CopyTo(temppath, false);
+            }
+
+            // If copySubDirs is true, copy the subdirectories.
+            if (copySubDirs)
+            {
+
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    // Create the subdirectory.
+                    string temppath = Path.Combine(destDirName, subdir.Name);
+
+                    // Copy the subdirectories.
+                    DirectoryCopy(subdir.FullName, temppath, copySubDirs);
+                }
+            }
+        }
         /// <summary>
         /// figure out if shortstring is contained in longstring somehow
         /// </summary>
@@ -690,17 +736,7 @@ namespace Renamer
         }
         static public string GetLogfileDataPath()
         {
-            return GetUserDataPath() + Path.DirectorySeparatorChar + "Renamer.log";
+            return Path.Combine(Program.configPath, "Renamer.log");
         }
-        static public string GetUserDataPath()
-        {
-            string dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            dir = System.IO.Path.Combine(dir,"SeriesRenamer");
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-            return dir;
-        }
-
-
     }
 }

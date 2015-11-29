@@ -18,7 +18,6 @@ namespace Renamer.Logging
         private List<Color> logColors;
         private Hashtable logColorIndex;
         private Hashtable logColor;
-        private LogLevel filter;
 
         string rtf;
         string rtfInserPosString;

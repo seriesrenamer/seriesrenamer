@@ -1005,7 +1005,7 @@ namespace Renamer.Classes
         {
             ProcessingRequested = Destination != "" || NewFilename != "";
         }
-        public string ToString() {
+        public override string ToString() {
             return Filename;
         }
         #endregion

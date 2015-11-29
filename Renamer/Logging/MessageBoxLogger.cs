@@ -7,7 +7,6 @@ namespace Renamer.Logging
 {
     class MessageBoxLogger : AbstractLogger
     {
-        protected LogLevel filter;
         /// <summary>
         /// Creates a new MessageBoxLogger
         /// </summary>

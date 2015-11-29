@@ -107,7 +107,7 @@ namespace Renamer.Classes
                 return this.Relations[id];
             }
         }
-        public string ToString()
+        public override string ToString()
         {
             return Showname;
         }
