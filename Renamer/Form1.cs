@@ -697,7 +697,7 @@ namespace Renamer
             ab.AppMoreInfo += "Using:" + Environment.NewLine;
             ab.AppMoreInfo += "ObjectListView " + "http://www.codeproject.com/KB/list/ObjectListView.aspx" + Environment.NewLine;
             ab.AppMoreInfo += "About Box " + "http://www.codeproject.com/KB/vb/aboutbox.aspx" + Environment.NewLine;
-            ab.AppMoreInfo += "Unrar.dll " + "http://www.rarlab.com" + Environment.NewLine;
+            ab.AppMoreInfo += "SharpCompress " + "https://github.com/adamhathcock/sharpcompress" + Environment.NewLine;
             ab.AppMoreInfo += "SharpZipLib " + "http://www.icsharpcode.net/OpenSource/SharpZipLib/" + Environment.NewLine;
             ab.ShowDialog(this);
         }

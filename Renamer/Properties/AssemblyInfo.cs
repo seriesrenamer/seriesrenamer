@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Series Renamer")]
-[assembly: AssemblyCopyright("Copyright ©  2008-2009")]
+[assembly: AssemblyCopyright("Copyright ©  2008-2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -46,5 +46,5 @@ using System.Runtime.InteropServices;
 // Sie können alle Werte angeben oder die standardmäßigen Build- und Revisionsnummern 
 // übernehmen, indem Sie "*" eingeben:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.9.7.0")]
-[assembly: AssemblyFileVersion("0.9.7.0")]
+[assembly: AssemblyVersion("0.9.7.1")]
+[assembly: AssemblyFileVersion("0.9.7.1")]
