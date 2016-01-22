@@ -66,9 +66,13 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>DLLs\ICSharpCode.SharpZipLib.dll</HintPath>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SharpCompress, Version=0.11.3.0, Culture=neutral, PublicKeyToken=beaf6f427e128133, processorArchitecture=MSIL">
+      <HintPath>..\packages\sharpcompress.0.11.3\lib\net40\SharpCompress.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Design" />
@@ -292,6 +296,7 @@
     <None Include="Databases\Titles\IMDB.cfg" />
     <None Include="Databases\Titles\Serienjunkies.cfg" />
     <None Include="Databases\Titles\TheTVDb.cfg" />
+    <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <Compile Include="Dialogs\SelectResult.cs">
       <SubType>Form</SubType>
@@ -301,7 +306,6 @@
     </Compile>
     <Compile Include="Classes\SubtitleEdit\srtFile.cs" />
     <Compile Include="Classes\SubtitleEdit\SubtitleEditFile.cs" />
-    <Compile Include="Unrar.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -336,8 +340,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DLLs\ICSharpCode.SharpZipLib.dll" />
-    <Content Include="DLLs\unrar.dll" />
     <Content Include="sr1.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -359,7 +361,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(ProjectDir)Databases" "$(TargetDir)Databases" /S /Y /I
-xcopy "$(ProjectDir)DLLs" "$(TargetDir)" /S /Y /I</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(ProjectDir)Databases" "$(TargetDir)Databases" /S /Y /I</PostBuildEvent>
   </PropertyGroup>
 </Project>

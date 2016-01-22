@@ -4,12 +4,13 @@ using System.Text;
 using Renamer.Logging;
 using Renamer.Classes.Configuration.Keywords;
 using System.IO;
-using Schematrix;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Text.RegularExpressions;
 using Renamer.Dialogs;
 using System.Windows.Forms;
 using System.Net;
+using SharpCompress.Archive;
+using SharpCompress.Common;
 
 namespace Renamer.Classes
 {
@@ -40,37 +41,26 @@ namespace Renamer.Classes
 
 
         protected void unrar(string filename, string destination, List<string> extensions) {
-            Unrar unrar = null;
             try {
-                // Create new unrar class and attach event handlers for
-                // progress, missing volumes, and password
-                unrar = new Unrar();
-                //AttachHandlers(unrar);
-
-                // Set destination path for all files
-                unrar.DestinationPath = destination;
-
                 // Open archive for extraction
-                unrar.Open(filename, Unrar.OpenMode.Extract);
+                using (var archive = ArchiveFactory.Open(filename))
+                {
+                    foreach (var entry in archive.Entries)
+                    {
+                        // Extract each file with subtitle extension
+                        string extension = Path.GetExtension(entry.Key).Substring(1).ToLower().Replace(".", "");
 
-                // Extract each file with subtitle extension
-                while (unrar.ReadHeader()) {
-
-                    string extension = Path.GetExtension(unrar.CurrentFile.FileName).Substring(1).ToLower().Replace(".", "");
-                    if (extensions.Contains(extension)) {
-                        unrar.Extract();
-                    }
-                    else {
-                        unrar.Skip();
+                        if (!entry.IsDirectory 
+                            && extensions.Contains(extension))
+                        {
+                            entry.WriteToDirectory(destination, ExtractOptions.Overwrite);
+                        }
                     }
                 }
+
             }
             catch (Exception ex) {
                 Logger.Instance.LogMessage("Error during unpack of file: " + filename + " (" + ex.Message + ")", LogLevel.ERROR);
-            }
-            finally {
-                if (unrar != null)
-                    unrar.Close();
             }
         }
 

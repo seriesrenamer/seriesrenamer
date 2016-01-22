@@ -24,7 +24,6 @@ using System.Text.RegularExpressions;
 using System.Net;
 using System.Collections;
 using System.Diagnostics;
-using Schematrix;
 using ICSharpCode.SharpZipLib.Zip;
 using Renamer.Classes;
 using Renamer.Dialogs;
