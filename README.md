@@ -8,6 +8,10 @@ Many filenames of series have something like "S1E05″ or similar in them, with 
 
 That’s the basic concept of this program. Open up a folder, select which files you want to rename, enter a Series Name and click on "Get Titles!", see if you’re happy with the results, press “Rename!” and you’re done.
 
+**Download:**
+
+[Click here](https://github.com/seriesrenamer/seriesrenamer/releases/download/v0.9.8.1/SeriesRenamer_0.9.8.1.zip) to download version 0.9.8.1. [Release Notes](https://github.com/seriesrenamer/seriesrenamer/releases/tag/v0.9.8.1)
+
 **Features:**
 
 * Easy renaming of TV shows with just a few clicks
@@ -25,11 +29,11 @@ That’s the basic concept of this program. Open up a folder, select which files
 * Everything customizable
 
 **Supported episode name providers:**
+* TheTVDb.com
 * Episodeworld.com
 * Serienjunkies.de
 
 **Previously supported episode name providers:**
-* TheTVDb.com
 * IMDB.com
 * Epguides.com
 
